@@ -242,10 +242,10 @@ class Configuration(commands.Cog):
             embed=discord.Embed(
                 title="Basic Settings",
                 description=(
-                    "**Staff Role:** A staff role is the role that is going to be able to use most ERM commands. You'd assign this role to the people you want to be able to use ERM's core functionalities.\n\n"
-                    "**Admin Role:** An admin role is the role that can manage LOAs, RAs & other peoples' shifts but it can not use server manage and config.\n\n"
-                    "**Management Role:** A management role is the roles of your server management members. These people will be able to delete punishments, modify people's shift time, and accept LOA Requests.\n\n"
-                    "**Prefix:** This will be a prefix you are able to use instead of our slash command system. You can use this prefix to execute commands slightly faster and to take advantage of some extra features."
+                    "- **Staff Role:** A staff role is the role that is going to be able to toggle shifts, issue punishments, create LOAs, and other core functions of the service.\n"
+                    "- **Admin Role:** An admin role is the role that can manage LOAs, RAs & other peoples' shifts but it cannot use server manage and config.\n"
+                    "- **Management Role:** A management role is the roles of your server management members. These people will be able to delete punishments, modify people's shift time, and accept LOA Requests.\n"
+                    "- **Prefix:** This will be a prefix you are able to use instead of our slash command system. You can use this prefix to execute commands slightly faster and to take advantage of some extra features."
                 ),
                 color=blank_color,
             ),
@@ -514,10 +514,10 @@ class Configuration(commands.Cog):
             embed=discord.Embed(
                 title=f"{self.bot.emoji_controller.get_emoji('shift')} Shift Management",
                 description=(
-                    "**What is Shift Management?** The Shift Management module allows for staff members to log how much time they were in-game, or moderating, or on as a staff member. It allows for a comprehensive guide of who is the most active in your staff team.\n\n"
-                    "**Enabled:** When enabled, staff members will be able to run `/duty` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
-                    "**Shift Channel:** This is where all shift logs will go to. This channel will be used for all modifications to shifts, any person that may be starting or ending their shift.\n\n"
-                    "**On-Duty Role:** When someone is on shift, they will be given this role. When the staff member goes off shift, this role will be removed from them."
+                    "Shift management allows your team to clock in and out whenever they are able to patrol and complete their duties. With ERM's shift management module, you can view real-time statistics.\n\n"
+                    "- **Enabled:** When enabled, staff members will be able to run `/duty` commands to manage their shift, see how much time they have, as well as see how much time other people have. Management members will be able to administrate people's shifts, add time, remove time, and clear people's shifts.\n\n"
+                    "- **Shift Channel:** All shift-related logs will be audited and sent to this channel.\n"
+                    "- **On-Duty Role:** This role will be toggled when a user clocks in or out from their shift."
                 ),
                 color=blank_color,
             ),
@@ -551,7 +551,7 @@ class Configuration(commands.Cog):
         await msg.edit(
             embed=discord.Embed(
                 title=f'{self.bot.emoji_controller.get_emoji("success")} Success!',
-                description="You are now setup with ERM, and have finished the Setup Wizard! You should now be able to use ERM in your staff team. If you'd like to change any of these settings, use `/config`!\n\n**ERM has lots more modules than what's mentioned here! You can enable them by going into `/config`!**",
+                description="ERM has been configured for your server. If you would like to change any of the settings, run the `/config` command.\n\nERM offers a vast range of plugins, check out our [documentation](https://ermsystems-0451f869.mintlify.app/introduction) for more information.",
                 color=0x1FD373,
             ),
             view=None,
@@ -561,7 +561,7 @@ class Configuration(commands.Cog):
     @commands.hybrid_command(
         name="config",
         description="View your ERM settings",
-        aliases=["settings"],
+        aliases=["settings", "configuration"],
         extras={"category": "Configuration"},
     )
     @require_settings()
@@ -577,7 +577,7 @@ class Configuration(commands.Cog):
             ctx.author.id,
             [
                 (
-                    "Staff Roles",
+                    "s",
                     [
                         discord.utils.get(ctx.guild.roles, id=role)
                         for role in settings["staff_management"].get("role") or [0]
@@ -1013,10 +1013,10 @@ class Configuration(commands.Cog):
                 discord.Embed(
                     title="Basic Settings",
                     description=(
-                        "**Staff Role:** A staff role is the role that is going to be able to use most ERM commands. You'd assign this role to the people you want to be able to use ERM's core functionalities.\n\n"
-                        "**Admin Role:** An admin role is the role that can manage LOAs, RAs & other peoples' shifts but it can not use server manage and config.\n\n"
-                        "**Management Role:** A management role is the roles of your server management members. These people will be able to delete punishments, modify people's shift time, and accept LOA Requests.\n\n"
-                        "**Prefix:** This will be a prefix you are able to use instead of our slash command system. You can use this prefix to execute commands slightly faster and to take advantage of some extra features."
+                        "- **Staff Role:** A staff role is the role that is going to be able to toggle shifts, issue punishments, create LOAs, and other core functions of the service.\n"
+                        "- **Admin Role:** An admin role is the role that can manage LOAs, RAs & other peoples' shifts but it cannot use server manage and config.\n"
+                        "- **Management Role:** A management role is the roles of your server management members. These people will be able to delete punishments, modify people's shift time, and accept LOA Requests.\n"
+                        "- **Prefix:** This will be a prefix you are able to use instead of our slash command system. You can use this prefix to execute commands slightly faster and to take advantage of some extra features."
                     ),
                     color=blank_color,
                 ),
@@ -1224,3 +1224,5 @@ class Configuration(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Configuration(bot))
+
+
