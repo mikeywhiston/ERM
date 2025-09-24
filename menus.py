@@ -12826,7 +12826,7 @@ class ERLCPermissionSync(discord.ui.View):
         self.add_item(self.enable_button)
 
         default_values = [discord.Object(id=role_id) for role_id in mod_roles] if mod_roles else None
-        self.mod_roles_select = discord.ui.ChannelSelect(
+        self.mod_roles_select = discord.ui.RoleSelect(
             placeholder="Server Moderator Roles",
             default_values=default_values,
             row=1,
@@ -12836,7 +12836,7 @@ class ERLCPermissionSync(discord.ui.View):
         self.add_item(self.mod_roles_select)
 
         default_values = [discord.Object(id=role_id) for role_id in admin_roles] if admin_roles else None
-        self.admin_roles_select = discord.ui.ChannelSelect(
+        self.admin_roles_select = discord.ui.RoleSelect(
             placeholder="Server Administrator Roles",
             default_values=default_values,
             row=2,
