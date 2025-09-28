@@ -142,31 +142,30 @@ To connect to your application, press the "Drivers" option, and copy the connect
 </code></pre>
 
 <h3 align="center">Environment Type & Discord Bot Token</h3>
-<p align="center">Next, we will change the Environment Type to <b>Custom</b>. Your ENVIRONMENT in your <code>.env</code> file should look like so:
-<pre><code>ENVIRONMENT=CUSTOM</code></pre>
+<p align="center">Next, we will change the Environment Type to <b>PRODUCTION</b>. Your ENVIRONMENT in your <code>.env</code> file should look like so:
+<pre><code>ENVIRONMENT=PRODUCTION</code></pre>
 <br> 
 <p align="center">To get your discord Bot Token, you need to create an application in the <a href="https://discord.com/developers/applications">Discord Developer Portal</a>.
-Once you have a bot token, you need to add another line into your <code>.env</code> file. Since our environment type is <code>CUSTOM</code>, we can't use <code>PRODUCTION_BOT_TOKEN</code> or <codE>DEVELOPMENT_BOT_TOKEN</codE></p>Add a line anywhere, and type <code>CUSTOM_BOT_TOKEN=</code>. Paste your bot token after that. <br>
+Once you have a bot token, you need to add another line into your <code>.env</code> file. Since our environment type is <code>PRODUCTION</code>, we can't use  <codE>DEVELOPMENT_BOT_TOKEN</codE></p>Paste your bot token after <code>PRODUCTION_BOT_TOKEN</code>. <br>
 <br>
 So far, your <code>.env</code> file should look like this: 
 <pre><code>MONGO_URL=mongodb+srv://username:password@cluster-name.mongodb.net/?retryWrites=true&w=majority <br> 
-ENVIRONMENT=CUSTOM <br>
+ENVIRONMENT=PRODUCTION <br>
 SENTRY_URL= <br>
-PRODUCTION_BOT_TOKEN= <br>
+PRODUCTION_BOT_TOKEN=yourdiscordbottoken <br>
 DEVELOPMENT_BOT_TOKEN= <br>
-CUSTOM_BOT_TOKEN=yourdiscordbottoken <br>
 BLOXLINK_API_KEY=</code></pre>
 <br>
 
 <h3 align="center">Sentry Logging and Bloxlink API</h3>
 <p align="center"><i>The following are not <b>required</b>, but some features might not work without a bloxlink API key.</i></p>
-<p align="center">You do not need to fill out <code>PRODUCTION_BOT_TOKEN</code> or <code>DEVELOPMENT_BOT_TOKEN</code> if you have <code>ENVIRONMENT=CUSTOM</code> and <code>CUSTOM_BOT_TOKEN</code>. 
+<p align="center">You do not need to fill out <code>DEVELOPMENT_BOT_TOKEN</code> if you have <code>ENVIRONMENT=PRODUCTION</code> and <code>PRODUCTION_BOT_TOKEN</code>. 
 Unless you have a bloxlink API Key (which you can get from <a href="https://blox.link/dashboard/user/developer">here</a>), you do not need to fill it out. If you want error logging with Sentry, <a href="https://sentry.io/signup/">sign up here</a>, <b>Install Sentry</b>, select Python(vanilla) as the platform you want to monitor, press <b>configure SDK</b> (sentry-sdk has already been installed, you do not need to install it with pip again), and copy the URL in <code>dsn="yoursentrysdkurl"</code>. You need to edit <code>SENTRY_URL=</code> to <code>SENTRY_BASE_URL</code>, and then you can paste it into your <code>.env</code> file. <br>
 <br> Your <code>.env</code> file should be looking like this:
 <pre><code>MONGO_URL=mongodb+srv://username:password@cluster-name.mongodb.net/?retryWrites=true&w=majority <br> 
-ENVIRONMENT=CUSTOM <br>
+ENVIRONMENT=PRODUCTION <br>
 SENTRY_URL=yoursentrysdkurl <br>
-CUSTOM_BOT_TOKEN=yourdiscordbottoken <br>
+PRODUCTION_BOT_TOKEN=yourdiscordbottoken <br>
 BLOXLINK_API_KEY=yourbloxlinkapikey</code></pre>
 
 <h3 align="center">Custom Guild ID and Panel API URL</h3>
@@ -175,9 +174,9 @@ BLOXLINK_API_KEY=yourbloxlinkapikey</code></pre>
 PANEL_API_URL=[leave blank]</code></pre>
 <p align="center">Your <code>.env</code> file should look like this now:
 <pre><code>MONGO_URL=mongodb+srv://username:password@cluster-name.mongodb.net/?retryWrites=true&w=majority <br> 
-ENVIRONMENT=CUSTOM <br>
+ENVIRONMENT=PRODUCTION<br>
 SENTRY_URL=your://sentry.io.url/ <br>
-CUSTOM_BOT_TOKEN=yourdiscordbottoken <br>
+PRODUCTION_BOT_TOKEN=yourdiscordbottoken <br>
 CUSTOM_GUILD_ID=yourserverid <br>
 BLOXLINK_API_KEY=yourbloxlinkapikey <br>
 PANEL_API_URL= [leave blank]</code></pre>
@@ -185,7 +184,7 @@ PANEL_API_URL= [leave blank]</code></pre>
 <b>Note: Make sure your file is saved as <code>.env</code>, not <code>.env.template</code> or something like <code>.env.txt</code>.</b></p>
 
 <h2 id="windows-final-setup-running">
-<p align="center">At the time of writing, the ERM repository is missing <code>utils/advanced.py</code>. The bot will not run without this file.  Thankfully, we can replicate the contents of the file pretty easily. </p>
+<p align="center">At the time of writing, the ERM repository is missing <code>utils/advanced.py</code>. The bot will not be able to run some modules without this file.  Thankfully, we can replicate the contents of the file pretty easily. </p>
 <h3 align="center">Making missing <code>utils/advanced.py</code> file</h3>
 <p align="center"> Make a new file inside of the <code>utils</code> folder, and title it <code>advanced.py</code>. Then, copy and paste the following into it:
 <pre><code>
@@ -193,9 +192,9 @@ import discord<br>
 <br>
 class FakeMessage:<br>
     def __init__(self, content, author, channel, state):<br>
-        self.content = content<br>
+        self.content = <br>
         self.author = author  <br>
-        self.channel = channel <br>
+        self.channel =  <br>
         self.guild = author.guild if hasattr(author, 'guild') else None<br>
         self.created_at = discord.utils.utcnow()<br>
         self._state = state<br>
@@ -205,7 +204,8 @@ class FakeMessage:<br>
         self.role_mentions = []<br>
         </code></pre>
         
-<p align="center"> Once you have completed all previous steps, it is time to run your bot. This has to be done inside of the Virtual Environment we created — if you are no longer in that terminal, run the following commands:
+
+<p align="center"> Or, you can download the file from this pr. Once you have completed all previous steps, it is time to run your bot. This has to be done inside of the Virtual Environment we created — if you are no longer in that terminal, run the following commands:
 <pre><code>cd ~/path/to/ERM-main<br>
 python3 -m venv venv <br>
 source venv/bin/activate </code></pre>
@@ -313,31 +313,30 @@ To connect to your application, press the "Drivers" option, and copy the connect
 </code></pre>
 
 <h3 align="center">Environment Type & Discord Bot Token</h3>
-<p align="center">Next, we will change the Environment Type to <b>Custom</b>. Your ENVIRONMENT in your <code>.env</code> file should look like so:
-<pre><code>ENVIRONMENT=CUSTOM</code></pre>
+<p align="center">Next, we will change the Environment Type to <b>PRODUCTION</b>. Your ENVIRONMENT in your <code>.env</code> file should look like so:
+<pre><code>ENVIRONMENT=PRODUCTION</code></pre>
 <br> 
 <p align="center">To get your discord Bot Token, you need to create an application in the <a href="https://discord.com/developers/applications">Discord Developer Portal</a>.
-Once you have a bot token, you need to add another line into your <code>.env</code> file. Since our environment type is <code>CUSTOM</code>, we can't use <code>PRODUCTION_BOT_TOKEN</code> or <codE>DEVELOPMENT_BOT_TOKEN</codE></p>Add a line anywhere, and type <code>CUSTOM_BOT_TOKEN=</code>. Paste your bot token after that. <br>
+Once you have a bot token, you need to add it into your file. Since our environment type is <code>PRODUCTION</code>, we can't use <codE>DEVELOPMENT_BOT_TOKEN</codE></p> Look for the line that says <code>PRODUCTION_BOT_TOKEN</code>, AND paste your bot token after that. <br>
 <br>
 So far, your <code>.env</code> file should look like this: 
 <pre><code>MONGO_URL=mongodb+srv://username:password@cluster-name.mongodb.net/?retryWrites=true&w=majority <br> 
-ENVIRONMENT=CUSTOM <br>
+ENVIRONMENT=PRODUCTION <br>
 SENTRY_URL= <br>
-PRODUCTION_BOT_TOKEN= <br>
+PRODUCTION_BOT_TOKEN=yourdiscordbottoken<br>
 DEVELOPMENT_BOT_TOKEN= <br>
-CUSTOM_BOT_TOKEN=yourdiscordbottoken <br>
 BLOXLINK_API_KEY=</code></pre>
 <br>
 
 <h3 align="center">Sentry Logging and Bloxlink API</h3>
 <p align="center"><i>The following are not <b>required</b>, but some features might not work without a bloxlink API key.</i></p>
-<p align="center">You do not need to fill out <code>PRODUCTION_BOT_TOKEN</code> or <code>DEVELOPMENT_BOT_TOKEN</code> if you have <code>ENVIRONMENT=CUSTOM</code> and <code>CUSTOM_BOT_TOKEN</code>. 
+<p align="center">You do not need to fill out <code>DEVELOPMENT_BOT_TOKEN</code> if you have <code>ENVIRONMENT=PRODUCTION</code> and <code>PRODUCTION_BOT_TOKEN</code>. 
 Unless you have a bloxlink API Key (which you can get from <a href="https://blox.link/dashboard/user/developer">here</a>), you do not need to fill it out. If you want error logging with Sentry, <a href="https://sentry.io/signup/">sign up here</a>, <b>Install Sentry</b>, select Python(vanilla) as the platform you want to monitor, press <b>configure SDK</b> (sentry-sdk has already been installed, you do not need to install it with pip again), and copy the URL in <code>dsn="yoursentrysdkurl"</code>. You need to edit <code>SENTRY_URL=</code> to <code>SENTRY_BASE_URL</code>, and then you can paste it into your <code>.env</code> file. <br>
 <br> Your <code>.env</code> file should be looking like this:
 <pre><code>MONGO_URL=mongodb+srv://username:password@cluster-name.mongodb.net/?retryWrites=true&w=majority <br> 
-ENVIRONMENT=CUSTOM <br>
+ENVIRONMENT=PRODUCTION <br>
 SENTRY_URL=yoursentrysdkurl <br>
-CUSTOM_BOT_TOKEN=yourdiscordbottoken <br>
+PRODUCTION_BOT_TOKEN=yourdiscordbottoken <br>
 BLOXLINK_API_KEY=yourbloxlinkapikey</code></pre>
 
 <h3 align="center">Custom Guild ID and Panel API URL</h3>
@@ -346,9 +345,9 @@ BLOXLINK_API_KEY=yourbloxlinkapikey</code></pre>
 PANEL_API_URL=[leave blank]</code></pre>
 <p align="center">Your <code>.env</code> file should look like this now:
 <pre><code>MONGO_URL=mongodb+srv://username:password@cluster-name.mongodb.net/?retryWrites=true&w=majority <br> 
-ENVIRONMENT=CUSTOM <br>
+ENVIRONMENT=PRODUCTION <br>
 SENTRY_URL=your://sentry.io.url/ <br>
-CUSTOM_BOT_TOKEN=yourdiscordbottoken <br>
+PRODUCTION_BOT_TOKEN=yourdiscordbottoken <br>
 CUSTOM_GUILD_ID=yourserverid <br>
 BLOXLINK_API_KEY=yourbloxlinkapikey <br>
 PANEL_API_URL= [leave blank]</code></pre>
