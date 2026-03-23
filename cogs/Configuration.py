@@ -29,6 +29,7 @@ from menus import (
     ERMCommandLog,
     WhitelistVehiclesManagement,
     PriorityRequestConfiguration,
+    AvatarDetectionConfiguration,
 )
 from ui.MapleCounty import MapleCountyConfiguration
 from utils.paginators import CustomPage, SelectPagination
@@ -991,6 +992,64 @@ class Configuration(commands.Cog):
             settings.get("MC", {})
         )
 
+        avatar_detection_view = AvatarDetectionConfiguration(
+            bot,
+            ctx.author.id,
+            [
+                (
+                    "Avatar Detection",
+                    [
+                        ["CUSTOM_CONF", {"_FIND_BY_LABEL": True}],
+                        (
+                            "Enabled"
+                            if settings.get("ERLC", {})
+                            .get("avatar_check", {})
+                            .get("enabled") is True
+                            else "Disabled"
+                        ),
+                    ],
+                ),
+                (
+                    "Auto-Kick on Fail",
+                    [
+                        ["CUSTOM_CONF", {"_FIND_BY_LABEL": True}],
+                        (
+                            "Enabled"
+                            if settings.get("ERLC", {})
+                            .get("avatar_check", {})
+                            .get("auto_kick", True) is True
+                            else "Disabled"
+                        ),
+                    ],
+                ),
+                (
+                    "Alert Channel",
+                    [
+                        (
+                            discord.utils.get(ctx.guild.channels, id=channel)
+                            if (
+                                channel := settings.get("ERLC", {})
+                                .get("avatar_check", {})
+                                .get("channel")
+                            )
+                            else 0
+                        )
+                    ],
+                ),
+                (
+                    "Mentioned Roles",
+                    [
+                        discord.utils.get(ctx.guild.roles, id=role)
+                        for role in (
+                            settings.get("ERLC", {})
+                            .get("avatar_check", {})
+                            .get("mentioned_roles") or [0]
+                        )
+                    ],
+                ),
+            ],
+        )
+
         pages = []
 
         for index, view in enumerate(
@@ -1007,6 +1066,7 @@ class Configuration(commands.Cog):
                 erm_command_log_view,
                 priority_requests,
                 maple_county_configuration,
+                avatar_detection_view,
             ]
         ):
             corresponding_embeds = [
@@ -1127,6 +1187,19 @@ class Configuration(commands.Cog):
                     description=(
                         "**What is the Maple County Integration?**\nThe Maple County Integration allows for ERM to communicate with the Maple County APIs, and your Maple County server. In particular, these configurations allow for configuration of various Maple County-specific supported features and settings.\n\n"
                     )
+                ),
+                discord.Embed(
+                    title="Avatar Detection",
+                    color=blank_color,
+                    description=(
+                        "**What is Avatar Detection?** Avatar Detection uses AI to automatically check player avatars when they join your ER:LC server. If a player's avatar does not meet your server's standards, they will receive a private message in-game and be kicked automatically.\n\n"
+                        "**Enabled:** Toggles Avatar Detection on or off for your server. When disabled, no avatar checks will run.\n\n"
+                        "**Auto-Kick on Fail:** When enabled, players who fail the avatar check are automatically kicked after being PM'd in-game. When disabled, the player will still receive a PM warning but will not be kicked — an alert will still be sent to your alert channel so your staff can decide.\n\n"
+                        "**Alert Channel:** This is the Discord channel where an alert embed is sent every time a player is detected. Staff can mark alerts as reviewed or manually kick from here.\n\n"
+                        "**Mentioned Roles:** These roles will be pinged in the alert channel when a player is detected.\n\n"
+                        "**Set Rules:** Set custom rules for what should be rejected in your server. Leave blank to use the default ER:LC rules.\n\n"
+                        "**Set Allowed:** Set what is always allowed in your server regardless of the rules — for example if your server allows anime avatars you can add that here and those players will never be flagged."
+                    ),
                 )
             ]
             embed = corresponding_embeds[index]
