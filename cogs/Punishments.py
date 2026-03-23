@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 import typing
 
 import aiohttp
@@ -112,10 +113,10 @@ class Punishments(commands.Cog):
         flags = []
         if "--kick" in reason.lower() or (auto_punish and type.lower() == "kick"):
             flags.append("autokick")
-            reason = reason.replace("--kick", "")
+            reason = re.sub(r"--kick", "", reason, flags=re.IGNORECASE).strip()
         elif "--ban" in reason.lower() or (auto_punish and type.lower() == "ban"):
             flags.append("autoban")
-            reason = reason.replace("--ban", "")
+            reason = re.sub(r"--ban", "", reason, flags=re.IGNORECASE).strip()
 
         if self.bot.punishments_disabled is True:
             return await new_failure_embed(
