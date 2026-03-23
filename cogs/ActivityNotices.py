@@ -60,8 +60,8 @@ class ActivityCoreCommands:
     ) -> dict:
         request_type = schema["type"]
         settings = await self.bot.settings.find_by_id(guild.id)
-        management_roles = settings.get("staff_management").get("management_role")
-        loa_roles = settings.get("staff_management").get(f"{request_type.lower()}_role")
+        management_roles = settings.get("staff_management", {}).get("management_role")
+        loa_roles = settings.get("staff_management", {}).get(f"{request_type.lower()}_role")
 
         embed = discord.Embed(title=f"{request_type} Request", color=BLANK_COLOR)
         embed.set_author(name=guild.name, icon_url=guild.icon.url if guild.icon else "")
