@@ -75,6 +75,8 @@ class ShiftLogging(commands.Cog):
             member = ctx.author
 
         configItem = await bot.settings.find_by_id(ctx.guild.id)
+        if not configItem:
+            return await new_failure_embed(ctx, "Not Setup", "Your server is not setup.")
         if not configItem.get("shift_management", {}).get("enabled", False):
             return await new_failure_embed(ctx, "Not Enabled", "Shift Logging is not enabled on this server.")
 
