@@ -15,6 +15,7 @@ from utils.utils import (
     time_converter,
     get_elapsed_time,
     generalised_interaction_check_failure,
+    new_failure_embed,
 )
 
 
@@ -46,7 +47,9 @@ class ActivityMonitoring(commands.Cog):
     ):
 
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
-        if not settings.get("shift_management").get("enabled"):
+        if not settings:
+            return await new_failure_embed(ctx, "Not Setup", "Your server is not setup.")
+        if not settings.get("shift_management", {}).get("enabled"):
             return await ctx.send(
                 embed=discord.Embed(
                     title="Not Enabled",
