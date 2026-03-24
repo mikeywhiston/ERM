@@ -68,6 +68,7 @@ from datamodels.PendingOAuth2 import PendingOAuth2
 from datamodels.OAuth2Users import OAuth2Users
 from datamodels.IntegrationCommandStorage import IntegrationCommandStorage
 from datamodels.SavedLogs import SavedLogs
+from datamodels.AvatarCheckLogs import AvatarCheckLogs
 from menus import CompleteReminder, LOAMenu, RDMActions
 from utils.viewstatemanger import ViewStateManager
 from utils.bloxlink import Bloxlink
@@ -214,6 +215,7 @@ class Bot(commands.AutoShardedBot):
             self.actions = Actions(self.db, "actions")
             self.prohibited = ProhibitedUseKeys(self.db, "prohibited_keys")
             self.saved_logs = SavedLogs(self.db, "saved_logs")
+            self.avatar_check_logs = AvatarCheckLogs(self.db, "avatar_check_logs")
             self.whitelabel = Whitelabel(self.mongo["ERMProcessing"], "Instances")
 
             self.pending_oauth2 = PendingOAuth2(self.db, "pending_oauth2")
@@ -246,14 +248,6 @@ class Bot(commands.AutoShardedBot):
             BETA_EXT = ["cogs.StaffConduct"]
             EXTERNAL_EXT = ["utils.api"]
             [Extensions.append(i) for i in EXTERNAL_EXT]
-            if config("ACTIONS_ENABLED", default="TRUE").upper() != "TRUE":
-                self.actions_enabled = False
-                Extensions.remove("cogs.Actions")
-                logging.info("Actions cog is disabled (ACTIONS_ENABLED=FALSE)")
-            if config("REMINDERS_ENABLED", default="TRUE").upper() != "TRUE":
-                self.reminders_enabled = False
-                Extensions.remove("cogs.Reminders")
-                logging.info("Reminders cog is disabled (REMINDERS_ENABLED=FALSE)")
 
             # used for checking whether this is WL!
             self.environment = environment
@@ -319,11 +313,8 @@ class Bot(commands.AutoShardedBot):
 
     async def start_tasks(self):
         logging.info("Starting tasks...")
-        if self.reminders_enabled:
-            check_reminders.start(bot)
-            logging.info("Starting the Check Reminders task...")
-        else:
-            logging.warn("Reminders disabled. Not running check reminders task")
+        check_reminders.start(bot)
+        logging.info("Startng the Check Reminders task...")
         await asyncio.sleep(30)
         check_loa.start(bot)
         logging.info("Starting the Check LOA task...")
@@ -353,11 +344,8 @@ class Bot(commands.AutoShardedBot):
         sync_weather.start(bot)
         logging.info("Starting the Sync Weather task...")
         await asyncio.sleep(30)
-        if self.actions_enabled:
-            iterate_conditions.start(bot)
-            logging.info("Starting the Iterate Conditions task...")
-        else:
-            logging.info("Actions task is disabled (ACTIONS_ENABLED=FALSE)")
+        iterate_conditions.start(bot)
+        logging.info("Starting the Iterate Conditions task...")
         await asyncio.sleep(30)
         check_infractions.start(bot)
         logging.info("Starting the Check Infractions task...")
