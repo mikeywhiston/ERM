@@ -6945,6 +6945,334 @@ class defaultPunishments(discord.ui.View):
             ephemeral=True,
         )
 
+class AvatarDetectionConfiguration(AssociationConfigurationView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @discord.ui.select(
+        placeholder="Avatar Detection",
+        row=0,
+        options=[
+            discord.SelectOption(
+                label="Enabled",
+                value="enabled",
+                description="Avatar Detection is enabled.",
+            ),
+            discord.SelectOption(
+                label="Disabled",
+                value="disabled",
+                description="Avatar Detection is disabled.",
+            ),
+        ],
+        max_values=1,
+    )
+    async def enabled_select(
+        self, interaction: discord.Interaction, select: discord.ui.Select
+    ):
+        value = await self.interaction_check(interaction)
+        if not value:
+            return
+        await interaction.response.defer()
+        bot = self.bot
+        sett = await bot.settings.find_by_id(interaction.guild.id)
+        if not sett.get("ERLC"):
+            sett["ERLC"] = {}
+        if not sett["ERLC"].get("avatar_check"):
+            sett["ERLC"]["avatar_check"] = {}
+        sett["ERLC"]["avatar_check"]["enabled"] = select.values[0] == "enabled"
+        await bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot,
+            interaction.guild,
+            interaction.user,
+            f"Avatar Detection {select.values[0]}.",
+        )
+        for i in select.options:
+            i.default = False
+
+    @discord.ui.select(
+        placeholder="Auto-Kick on Fail",
+        row=1,
+        options=[
+            discord.SelectOption(
+                label="Enabled",
+                value="enabled",
+                description="Players are kicked automatically when their avatar fails.",
+            ),
+            discord.SelectOption(
+                label="Disabled",
+                value="disabled",
+                description="Players are only PM'd. Staff decide whether to kick.",
+            ),
+        ],
+        max_values=1,
+    )
+    async def auto_kick_select(
+        self, interaction: discord.Interaction, select: discord.ui.Select
+    ):
+        value = await self.interaction_check(interaction)
+        if not value:
+            return
+        await interaction.response.defer()
+        bot = self.bot
+        sett = await bot.settings.find_by_id(interaction.guild.id)
+        if not sett.get("ERLC"):
+            sett["ERLC"] = {}
+        if not sett["ERLC"].get("avatar_check"):
+            sett["ERLC"]["avatar_check"] = {}
+        sett["ERLC"]["avatar_check"]["auto_kick"] = select.values[0] == "enabled"
+        await bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot,
+            interaction.guild,
+            interaction.user,
+            f"Avatar Detection Auto-Kick {select.values[0]}.",
+        )
+        for i in select.options:
+            i.default = False
+
+    @discord.ui.select(
+        cls=discord.ui.ChannelSelect,
+        placeholder="Alert Channel",
+        row=2,
+        max_values=1,
+        min_values=0,
+        channel_types=[discord.ChannelType.text],
+    )
+    async def alert_channel_select(
+        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect
+    ):
+        value = await self.interaction_check(interaction)
+        if not value:
+            return
+        await interaction.response.defer()
+        bot = self.bot
+        sett = await bot.settings.find_by_id(interaction.guild.id)
+        if not sett.get("ERLC"):
+            sett["ERLC"] = {}
+        if not sett["ERLC"].get("avatar_check"):
+            sett["ERLC"]["avatar_check"] = {}
+        sett["ERLC"]["avatar_check"]["channel"] = (
+            int(select.values[0].id) if select.values else 0
+        )
+        await bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot,
+            interaction.guild,
+            interaction.user,
+            f"Avatar Detection Alert Channel set to <#{select.values[0].id}>."
+            if select.values
+            else "Avatar Detection Alert Channel cleared.",
+        )
+
+    @discord.ui.select(
+        cls=discord.ui.RoleSelect,
+        placeholder="Mentioned Roles",
+        row=3,
+        max_values=10,
+        min_values=0,
+    )
+    async def mentioned_roles_select(
+        self, interaction: discord.Interaction, select: discord.ui.RoleSelect
+    ):
+        value = await self.interaction_check(interaction)
+        if not value:
+            return
+        await interaction.response.defer()
+        bot = self.bot
+        sett = await bot.settings.find_by_id(interaction.guild.id)
+        if not sett.get("ERLC"):
+            sett["ERLC"] = {}
+        if not sett["ERLC"].get("avatar_check"):
+            sett["ERLC"]["avatar_check"] = {}
+        sett["ERLC"]["avatar_check"]["mentioned_roles"] = [
+            r.id for r in select.values
+        ]
+        await bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot,
+            interaction.guild,
+            interaction.user,
+            "Avatar Detection Mentioned Roles updated.",
+        )
+
+    @discord.ui.button(label="Set Rules", row=4)
+    async def set_prompt(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        value = await self.interaction_check(interaction)
+        if not value:
+            return
+
+        bot = self.bot
+        sett = await bot.settings.find_by_id(interaction.guild.id)
+        current_prompt = (
+            sett.get("ERLC", {}).get("avatar_check", {}).get("prompt", "")
+        )
+
+        modal = CustomModal(
+            "Set Avatar Rules",
+            [
+                (
+                    "prompt",
+                    discord.ui.TextInput(
+                        label="What should be rejected?",
+                        placeholder="e.g. No anime avatars. No animal avatars. Must look like a real person.",
+                        style=discord.TextStyle.paragraph,
+                        required=False,
+                        max_length=500,
+                        default=current_prompt,
+                    ),
+                )
+            ],
+        )
+        await interaction.response.send_modal(modal)
+        timeout = await modal.wait()
+        if timeout:
+            return
+
+        if not sett.get("ERLC"):
+            sett["ERLC"] = {}
+        if not sett["ERLC"].get("avatar_check"):
+            sett["ERLC"]["avatar_check"] = {}
+        sett["ERLC"]["avatar_check"]["prompt"] = modal.prompt.value.strip()
+        await bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot,
+            interaction.guild,
+            interaction.user,
+            "Avatar Detection rules updated.",
+        )
+        await modal.interaction.followup.send(
+            embed=discord.Embed(
+                title="Rules Updated",
+                description=(
+                    "Your avatar rules have been saved.\n"
+                    "Leave blank to use the default ER:LC rules."
+                ),
+                color=GREEN_COLOR,
+            ),
+            ephemeral=True,
+        )
+
+    @discord.ui.button(label="Set Allowed", row=4)
+    async def set_allowed(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        value = await self.interaction_check(interaction)
+        if not value:
+            return
+
+        bot = self.bot
+        sett = await bot.settings.find_by_id(interaction.guild.id)
+        current_allowed = (
+            sett.get("ERLC", {}).get("avatar_check", {}).get("allowed_prompt", "")
+        )
+
+        modal = CustomModal(
+            "Set What Is Allowed",
+            [
+                (
+                    "allowed_prompt",
+                    discord.ui.TextInput(
+                        label="What is allowed in your server?",
+                        placeholder="e.g. Anime avatars are allowed. Animal avatars are fine.",
+                        style=discord.TextStyle.paragraph,
+                        required=False,
+                        max_length=500,
+                        default=current_allowed,
+                    ),
+                )
+            ],
+        )
+        await interaction.response.send_modal(modal)
+        timeout = await modal.wait()
+        if timeout:
+            return
+
+        if not sett.get("ERLC"):
+            sett["ERLC"] = {}
+        if not sett["ERLC"].get("avatar_check"):
+            sett["ERLC"]["avatar_check"] = {}
+        sett["ERLC"]["avatar_check"]["allowed_prompt"] = modal.allowed_prompt.value.strip()
+        await bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot,
+            interaction.guild,
+            interaction.user,
+            "Avatar Detection allowed list updated.",
+        )
+        await modal.interaction.followup.send(
+            embed=discord.Embed(
+                title="Allowed List Updated",
+                description=(
+                    "Your allowed avatars have been saved.\n"
+                    "Anything listed here will always be allowed regardless of the rules."
+                ),
+                color=GREEN_COLOR,
+            ),
+            ephemeral=True,
+        )
+
+
+class AvatarDetectionView(discord.ui.View):
+    """Alert embed buttons shown in the Discord alert channel."""
+
+    def __init__(self, bot, username: str, guild_id: int):
+        super().__init__(timeout=None)
+        self.bot = bot
+        self.username = username
+        self.guild_id = guild_id
+
+    @discord.ui.button(label="Mark as Reviewed", style=discord.ButtonStyle.success)
+    async def mark_reviewed(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        embed = interaction.message.embeds[0]
+        embed.title = "Avatar Detection — Reviewed"
+        embed.color = GREEN_COLOR
+        for item in self.children:
+            item.disabled = True
+            if item.label == "Mark as Reviewed":
+                item.label = f"Reviewed by {interaction.user.name}"
+        await interaction.message.edit(embed=embed, view=self)
+        await interaction.response.defer()
+
+    @discord.ui.button(label="Kick Player", style=discord.ButtonStyle.danger)
+    async def kick_player(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        await interaction.response.defer(ephemeral=True)
+        try:
+            await self.bot.prc_api.run_command(
+                self.guild_id, f":kick {self.username}"
+            )
+            button.disabled = True
+            button.label = f"Kicked {self.username}"
+            await interaction.message.edit(view=self)
+            await interaction.followup.send(
+                embed=discord.Embed(
+                    title="Kicked Player",
+                    description=f"**{self.username}** has been kicked.",
+                    color=GREEN_COLOR,
+                ),
+                ephemeral=True,
+            )
+        except Exception:
+            await interaction.followup.send(
+                embed=discord.Embed(
+                    title="Kick Failed",
+                    description=(
+                        f"Could not kick **{self.username}**.\n"
+                        "They may have already left or hold a staff permission."
+                    ),
+                    color=BLANK_COLOR,
+                ),
+                ephemeral=True,
+            )
+
+
+
 class GameSecurityConfiguration(AssociationConfigurationView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -12911,4 +13239,3 @@ class ERLCPermissionSync(discord.ui.View):
         if "permission_sync" not in sett["ERLC"]:
             sett["ERLC"]["permission_sync"] = {"enabled": False, "moderator_roles": [], "administrator_roles": []}
         sett["ERLC"]["permission_sync"]["administrator_roles"] = administrator_roles
-
