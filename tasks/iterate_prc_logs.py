@@ -15,7 +15,7 @@ from utils.prc_api import JoinLeaveLog, Player
 from utils.utils import fetch_get_channel, has_whitelabel, staff_check
 from utils import prc_api
 from utils.constants import BLANK_COLOR, GREEN_COLOR, RED_COLOR
-from menus import GeminiAvatarCheckView
+from menus import AvatarDetectionView
 from utils.username_check import UsernameChecker
 
 global_aggregate = [
