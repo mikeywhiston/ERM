@@ -15,7 +15,7 @@ from utils.prc_api import JoinLeaveLog, Player
 from utils.utils import fetch_get_channel, has_whitelabel, staff_check
 from utils import prc_api
 from utils.constants import BLANK_COLOR, GREEN_COLOR, RED_COLOR
-from menus import AvatarCheckView
+from menus import GeminiAvatarCheckView
 from utils.username_check import UsernameChecker
 
 global_aggregate = [
@@ -215,7 +215,7 @@ async def process_guild(bot, items, semaphore):
             logging.warning(f"error processing guild: {e}")
 
 
-@tasks.loop(minutes=7, reconnect=True)
+@tasks.loop(minutes=1, reconnect=True)
 async def iterate_prc_logs(bot):
     if bot.environment == "PRODUCTION":
         await iterate_prc_logs_global(bot)
@@ -320,6 +320,7 @@ async def process_player_logs(bot, settings, guild_id, player_logs, last_timesta
     embeds = []
     latest_timestamp = last_timestamp
     new_join_ids = []
+    new_join_logs = []  # Full log objects for avatar check
 
     username_checker = UsernameChecker()
 
@@ -377,6 +378,7 @@ async def process_player_logs(bot, settings, guild_id, player_logs, last_timesta
             continue
         if log.type == "join":
             new_join_ids.append(log.user_id)
+            new_join_logs.append(log)  # Keep full log for avatar check
 
         latest_timestamp = max(latest_timestamp, log.timestamp)
         embed = discord.Embed(
@@ -386,141 +388,18 @@ async def process_player_logs(bot, settings, guild_id, player_logs, last_timesta
         )
         embeds.append(embed)
 
-    if new_join_ids and settings.get("ERLC", {}).get("avatar_check", {}).get("channel"):
-        enabled = settings.get("ERLC", {}).get("avatar_check", {}).get("enabled", True)
-        if not enabled:
-            return embeds, latest_timestamp
-
-        async with aiohttp.ClientSession() as session:
+    # ── Gemini avatar check ───────────────────────────────────────────────────
+    # Each call is scoped to one player + one guild — no cross-server risk.
+    avatar_cfg = settings.get("ERLC", {}).get("avatar_check", {})
+    if new_join_logs and avatar_cfg.get("enabled") and avatar_cfg.get("channel"):
+        for log in new_join_logs:
             try:
-                async with session.post(
-                        config("AVATAR_CHECK_URL"),
-                        json={"robloxIds": new_join_ids},
-                        timeout=10,
-                ) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        if data.get("success"):
-                            for user_id, result in data["data"]["results"].items():
-                                is_unrealistic = result.get("unrealistic", False)
-                                has_blacklisted_items = False
-                                blacklisted_reasons = []
-
-                                logging.info(f"Processing user {user_id}")
-                                logging.info(
-                                    f"Blacklisted items configured: {settings.get('ERLC', {}).get('avatar_check', {}).get('blacklisted_items', [])}"
-                                )
-
-                                blacklisted_items = (
-                                    settings.get("ERLC", {})
-                                    .get("avatar_check", {})
-                                    .get("blacklisted_items", [])
-                                )
-                                if blacklisted_items:
-                                    current_items = result.get("current_items", [])
-                                    logging.info(
-                                        f"Current items: {[item['id'] for item in current_items]}"
-                                    )
-
-                                    for item in current_items:
-                                        if str(item["id"]) in map(
-                                                str, blacklisted_items
-                                        ):
-                                            has_blacklisted_items = True
-                                            blacklisted_reasons.append(
-                                                f"Using a blacklisted item: {item['name']}"
-                                            )
-                                            logging.info(
-                                                f"Found blacklisted item: {item['id']} - {item['name']}"
-                                            )
-
-                                unrealistic_check = is_unrealistic and not any(
-                                    str(item)
-                                    in map(
-                                        str,
-                                        settings.get("ERLC", {}).get(
-                                            "unrealistic_items_whitelist", []
-                                        ),
-                                    )
-                                    for item in result.get("unrealistic_item_ids", [])
-                                )
-
-                                if unrealistic_check or has_blacklisted_items:
-                                    logging.info(
-                                        f"Avatar check failed - Unrealistic: {unrealistic_check}, Has blacklisted items: {has_blacklisted_items}"
-                                    )
-
-                                    reasons = (
-                                            result.get("reasons", []) + blacklisted_reasons
-                                    )
-
-                                    channel_id = settings["ERLC"]["avatar_check"][
-                                        "channel"
-                                    ]
-                                    guild = bot.get_guild(
-                                        guild_id
-                                    ) or await bot.fetch_guild(guild_id)
-                                    channel = await fetch_get_channel(guild, channel_id)
-                                    if channel:
-                                        try:
-                                            user = await bot.roblox.get_user(
-                                                int(user_id)
-                                            )
-                                            avatar = await bot.roblox.thumbnails.get_user_avatar_thumbnails(
-                                                [user],
-                                                type=roblox.thumbnails.AvatarThumbnailType.headshot,
-                                            )
-                                            avatar_url = avatar[0].image_url
-                                        except Exception as e:
-                                            logging.error(
-                                                f"Error fetching user data: {e}"
-                                            )
-                                            return embeds, latest_timestamp
-
-                                        view = AvatarCheckView(
-                                            bot,
-                                            user_id,
-                                            settings["ERLC"]["avatar_check"].get(
-                                                "message", ""
-                                            ),
-                                        )
-                                        await channel.send(
-                                            content=", ".join(
-                                                [
-                                                    f"<@&{role}>"
-                                                    for role in settings["ERLC"][
-                                                    "avatar_check"
-                                                ].get("mentioned_roles", [])
-                                                ]
-                                            ),
-                                            embed=discord.Embed(
-                                                title="Unrealistic Avatar Detected",
-                                                description="We have detected that a player in your server has an unrealistic avatar.",
-                                                color=0x2C2F33,
-                                            )
-                                            .add_field(
-                                                name="Player Information",
-                                                value=f"> **Username:** [{user.name}](https://roblox.com/users/{user_id}/profile)\n> **User ID:** {user_id}\n> **Reason:** {', '.join(reasons)}",
-                                            )
-                                            .set_thumbnail(url=avatar_url),
-                                            view=view,
-                                            allowed_mentions=discord.AllowedMentions.all(),
-                                        )
-
-                                        if settings["ERLC"]["avatar_check"].get(
-                                                "message"
-                                        ):
-                                            await bot.scheduled_pm_queue.put(
-                                                (
-                                                    guild_id,
-                                                    user.name,
-                                                    settings["ERLC"]["avatar_check"][
-                                                        "message"
-                                                    ],
-                                                )
-                                            )
+                await _run_gemini_avatar_check(bot, settings, guild_id, log)
             except Exception as e:
-                logging.error(f"Error in avatar check: {e}")
+                logging.error(
+                    f"[avatar-check] Unhandled error for {log.username} "
+                    f"in guild {guild_id}: {e}"
+                )
 
     return embeds, latest_timestamp
 
@@ -969,3 +848,203 @@ async def handle_kick_timer(bot, settings, guild_id, player_logs, command_logs):
                     )
             except Exception as e:
                 logging.error(f"Failed to log punishment for {username}: {e}")
+
+
+async def _run_gemini_avatar_check(bot, settings, guild_id: int, log) -> None:
+    """
+    Check a single player's avatar via the Gemini API.
+
+    Scoped entirely to (guild_id, log.username) — results from one guild
+    can never affect another guild, and the PRC kick uses the username so
+    the right player is always targeted.
+
+    Staff members (any PRC permission above Normal — owner, co-owner,
+    admin, moderator, helper) are silently skipped regardless of their avatar.
+    """
+    avatar_cfg = settings.get("ERLC", {}).get("avatar_check", {})
+    # AVATAR_API_URL already contains the token in the path, e.g.:
+    # https://your-project.vercel.app/api/<token>
+    # No separate secret needed in the bot.
+    api_url = config("AVATAR_API_URL").rstrip("/")
+
+    # ── Skip staff — fetch live server player list and check permission ───────
+    # We check the live list rather than a cached one so a newly-promoted
+    # staff member is always protected on their very first join.
+    STAFF_PERMISSIONS = {
+        "Server Owner",
+        "Server Co-Owner",
+        "Server Administrator",
+        "Server Moderator",
+        # Helpers show as a non-Normal permission in some server configs.
+        # We skip anyone who is not "Normal" to be safe.
+    }
+    try:
+        server_players = await bot.prc_api.get_server_players(guild_id)
+        for player in server_players:
+            if player.username.lower() == log.username.lower():
+                if player.permission != "Normal" and player.permission is not None:
+                    logging.info(
+                        f"[avatar-check] Skipping {log.username} — "
+                        f"staff permission: {player.permission}"
+                    )
+                    return
+                break  # Found the player, not staff — continue with check
+    except Exception as e:
+        # If we can't get the player list, skip the check rather than
+        # risk kicking a staff member.
+        logging.warning(
+            f"[avatar-check] Could not fetch server players for guild {guild_id}, "
+            f"skipping avatar check for {log.username}: {e}"
+        )
+        return
+
+    # ── Fetch Roblox full-body avatar thumbnail ──────────────────────────────
+    try:
+        roblox_user = await bot.roblox.get_user(int(log.user_id))
+        thumbnails  = await bot.roblox.thumbnails.get_user_avatar_thumbnails(
+            [roblox_user],
+            type=roblox.thumbnails.AvatarThumbnailType.full_body,
+        )
+        avatar_url = thumbnails[0].image_url if thumbnails else None
+    except Exception as e:
+        logging.error(f"[avatar-check] Could not fetch avatar for {log.username}: {e}")
+        return
+
+    if not avatar_url:
+        logging.warning(f"[avatar-check] No avatar URL returned for {log.username}, skipping.")
+        return
+
+    # ── Call the Vercel API ──────────────────────────────────────────────────
+    payload = {
+        "guild_id":   str(guild_id),
+        "user_id":    str(log.user_id),
+        "username":   log.username,
+        "avatar_url": avatar_url,
+        "prompt":     avatar_cfg.get("prompt", ""),  # server-configurable
+    }
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{api_url}/avatar-check",
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=20),
+            ) as resp:
+                if resp.status == 404:
+                    logging.error(
+                        "[avatar-check] API returned 404 — check AVATAR_API_URL "
+                        "in .env includes the full path with your token."
+                    )
+                    return
+                if resp.status != 200:
+                    logging.error(f"[avatar-check] API returned {resp.status} for {log.username}")
+                    return
+                data = await resp.json()
+    except asyncio.TimeoutError:
+        logging.warning(f"[avatar-check] Timed out checking {log.username} in guild {guild_id}")
+        return
+    except Exception as e:
+        logging.error(f"[avatar-check] Request error for {log.username}: {e}")
+        return
+
+    # ── Validate response is for the right player ────────────────────────────
+    # Belt-and-suspenders: confirm the API echoed back the exact identifiers
+    # we sent so a delayed/cached response can never affect the wrong user.
+    if (
+        str(data.get("guild_id"))  != str(guild_id)
+        or str(data.get("user_id")) != str(log.user_id)
+        or data.get("username")     != log.username
+    ):
+        logging.error(
+            f"[avatar-check] Response identity mismatch! "
+            f"Expected guild={guild_id} user={log.username}, "
+            f"got guild={data.get('guild_id')} user={data.get('username')}. Skipping."
+        )
+        return
+
+    passed = data.get("pass", True)
+    reason = data.get("reason", "Unrealistic avatar detected")
+
+    if passed:
+        logging.info(f"[avatar-check] {log.username} passed in guild {guild_id}")
+        return
+
+    # ── Avatar failed — PM then kick ─────────────────────────────────────────
+    logging.info(f"[avatar-check] {log.username} FAILED in guild {guild_id}: {reason}")
+
+    pm_message = avatar_cfg.get(
+        "pm_message",
+        "You are being kicked because your avatar does not meet this server's standards. "
+        "This was automatically detected. Please change your avatar and rejoin.",
+    )
+
+    # Always PM before kicking so the player knows why
+    try:
+        await bot.prc_api.run_command(
+            guild_id, f":pm {log.username} {pm_message}"
+        )
+    except Exception as e:
+        logging.warning(f"[avatar-check] PM failed for {log.username}: {e}")
+
+    if avatar_cfg.get("auto_kick", True):
+        try:
+            await asyncio.sleep(1.5)  # Brief pause so PM arrives before kick
+            await bot.prc_api.run_command(guild_id, f":kick {log.username}")
+            logging.info(f"[avatar-check] Kicked {log.username} from guild {guild_id}")
+        except Exception as e:
+            logging.error(f"[avatar-check] Kick failed for {log.username}: {e}")
+
+    # ── Post alert to the configured Discord channel ─────────────────────────
+    channel_id = avatar_cfg.get("channel")
+    if not channel_id:
+        return
+
+    try:
+        guild   = bot.get_guild(guild_id) or await bot.fetch_guild(guild_id)
+        channel = await fetch_get_channel(guild, channel_id)
+        if not channel:
+            return
+
+        mentions = " ".join(
+            f"<@&{role_id}>"
+            for role_id in avatar_cfg.get("mentioned_roles", [])
+        )
+
+        kicked_label = "Kicked" if avatar_cfg.get("auto_kick", True) else "Not kicked (auto-kick disabled)"
+
+        embed = (
+            discord.Embed(
+                title="Unrealistic Avatar Detected",
+                description=(
+                    "A player's avatar was automatically flagged and kicked "
+                    "by the avatar moderation system."
+                ),
+                color=0x2C2F33,
+            )
+            .add_field(
+                name="Player",
+                value=(
+                    f"> **Username:** [{log.username}](https://roblox.com/users/{log.user_id}/profile)\n"
+                    f"> **User ID:** `{log.user_id}`"
+                ),
+                inline=True,
+            )
+            .add_field(
+                name="Action",
+                value=f"> **Status:** {kicked_label}\n> **Reason:** {reason}",
+                inline=True,
+            )
+            .set_thumbnail(url=avatar_url)
+            .set_footer(text="Automatically detected • Avatar Moderation System")
+        )
+
+        view = GeminiAvatarCheckView(bot, log.username, guild_id)
+
+        await channel.send(
+            content=mentions or None,
+            embed=embed,
+            view=view,
+            allowed_mentions=discord.AllowedMentions.all(),
+        )
+    except Exception as e:
+        logging.error(f"[avatar-check] Failed to send alert for {log.username}: {e}")
