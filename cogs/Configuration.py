@@ -29,6 +29,7 @@ from menus import (
     ERMCommandLog,
     WhitelistVehiclesManagement,
     PriorityRequestConfiguration,
+    BanAppealsConfiguration,
 )
 from ui.MapleCounty import MapleCountyConfiguration
 from utils.paginators import CustomPage, SelectPagination
@@ -991,6 +992,66 @@ class Configuration(commands.Cog):
             settings.get("MC", {})
         )
 
+        ban_appeals_view = BanAppealsConfiguration(
+            bot,
+            ctx.author.id,
+            [
+                (
+                    "Ban Appeals",
+                    [
+                        ["CUSTOM_CONF", {"_FIND_BY_LABEL": True}],
+                        (
+                            "Enabled"
+                            if settings.get("ban_appeals", {}).get("enabled") is True
+                            else "Disabled"
+                        ),
+                    ],
+                ),
+                (
+                    "Ban Appeals Channel",
+                    [
+                        (
+                            discord.utils.get(ctx.guild.channels, id=channel)
+                            if (
+                                channel := settings.get("ban_appeals", {}).get(
+                                    "panel_channel"
+                                )
+                            )
+                            else 0
+                        )
+                    ],
+                ),
+                (
+                    "Review Channel",
+                    [
+                        (
+                            discord.utils.get(ctx.guild.channels, id=channel)
+                            if (
+                                channel := settings.get("ban_appeals", {}).get(
+                                    "review_channel"
+                                )
+                            )
+                            else 0
+                        )
+                    ],
+                ),
+                (
+                    "Ping Role",
+                    [
+                        (
+                            discord.utils.get(ctx.guild.roles, id=role)
+                            if (
+                                role := settings.get("ban_appeals", {}).get(
+                                    "ping_role"
+                                )
+                            )
+                            else 0
+                        )
+                    ],
+                ),
+            ],
+        )
+
         pages = []
 
         for index, view in enumerate(
@@ -1007,6 +1068,7 @@ class Configuration(commands.Cog):
                 erm_command_log_view,
                 priority_requests,
                 maple_county_configuration,
+                ban_appeals_view,
             ]
         ):
             corresponding_embeds = [
@@ -1127,7 +1189,18 @@ class Configuration(commands.Cog):
                     description=(
                         "**What is the Maple County Integration?**\nThe Maple County Integration allows for ERM to communicate with the Maple County APIs, and your Maple County server. In particular, these configurations allow for configuration of various Maple County-specific supported features and settings.\n\n"
                     )
-                )
+                ),
+                discord.Embed(
+                    title="Ban Appeals",
+                    color=blank_color,
+                    description=(
+                        "**What are Ban Appeals?** Ban Appeals allow banned players to submit an appeal to be unbanned from your ER:LC server. Management can configure a panel with a button that opens a customizable modal form.\n\n"
+                        "**Enabled:** This setting toggles the Ban Appeals module.\n\n"
+                        "**Panel Channel:** This is the channel where the ban appeal panel (embed + button) will be displayed for users to submit appeals.\n\n"
+                        "**Review Channel:** This is the channel where submitted appeals will appear for staff to accept or deny.\n\n"
+                        "**Ping Role:** This role will be mentioned when a new ban appeal is submitted."
+                    ),
+                ),
             ]
             embed = corresponding_embeds[index]
             page = CustomPage()
