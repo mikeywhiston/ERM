@@ -48,7 +48,7 @@ base_configuration = {
         "enabled": False,
         "panel_channel": None,
         "review_channel": None,
-        "ping_role": None,
+        "ping_roles": [],
         "embed_title": "Ban Appeal",
         "embed_description": "Click the button below to submit a ban appeal.",
         "embed_color": 0x2B2D31,
@@ -56,9 +56,9 @@ base_configuration = {
         "thumbnail_url": "",
         "image_url": "",
         "modal_questions": [
-            "What is your Roblox Username?",
-            "Why were you banned?",
-            "Why should you be unbanned?"
+            {"label": "What is your Roblox Username?", "placeholder": "Enter your exact Roblox username", "style": "short", "required": True},
+            {"label": "Why were you banned?", "placeholder": "Describe what happened", "style": "paragraph", "required": True},
+            {"label": "Why should you be unbanned?", "placeholder": "Explain why you deserve another chance", "style": "paragraph", "required": True}
         ],
     },
     "game_logging": {

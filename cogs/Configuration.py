@@ -1036,16 +1036,11 @@ class Configuration(commands.Cog):
                     ],
                 ),
                 (
-                    "Ping Role",
+                    "Ping Roles",
                     [
-                        (
-                            discord.utils.get(ctx.guild.roles, id=role)
-                            if (
-                                role := settings.get("ban_appeals", {}).get(
-                                    "ping_role"
-                                )
-                            )
-                            else 0
+                        discord.utils.get(ctx.guild.roles, id=role)
+                        for role in (
+                            settings.get("ban_appeals", {}).get("ping_roles") or [0]
                         )
                     ],
                 ),
@@ -1198,7 +1193,7 @@ class Configuration(commands.Cog):
                         "**Enabled:** This setting toggles the Ban Appeals module.\n\n"
                         "**Panel Channel:** This is the channel where the ban appeal panel (embed + button) will be displayed for users to submit appeals.\n\n"
                         "**Review Channel:** This is the channel where submitted appeals will appear for staff to accept or deny.\n\n"
-                        "**Ping Role:** This role will be mentioned when a new ban appeal is submitted."
+                        "**Ping Roles:** These roles will be mentioned when a new ban appeal is submitted."
                     ),
                 ),
             ]

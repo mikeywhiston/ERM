@@ -7152,12 +7152,12 @@ class BanAppealsConfiguration(AssociationConfigurationView):
 
     @discord.ui.select(
         cls=discord.ui.RoleSelect,
-        placeholder="Ping Role",
+        placeholder="Ping Roles",
         row=3,
-        max_values=1,
+        max_values=25,
         min_values=0,
     )
-    async def ping_role(self, interaction: discord.Interaction, select: discord.ui.RoleSelect):
+    async def ping_roles(self, interaction: discord.Interaction, select: discord.ui.RoleSelect):
         value = await self.interaction_check(interaction)
         if not value:
             return
@@ -7165,9 +7165,9 @@ class BanAppealsConfiguration(AssociationConfigurationView):
         sett = await self.bot.settings.find_by_id(interaction.guild.id)
         if not sett.get("ban_appeals"):
             sett["ban_appeals"] = {}
-        sett["ban_appeals"]["ping_role"] = int(select.values[0].id or 0)
+        sett["ban_appeals"]["ping_roles"] = [i.id for i in select.values]
         await self.bot.settings.update_by_id(sett)
-        await config_change_log(self.bot, interaction.guild, interaction.user, f"Ban Appeals Ping Role Set: <@&{select.values[0].id}>")
+        await config_change_log(self.bot, interaction.guild, interaction.user, f"Ban Appeals Ping Roles Set: {', '.join([f'<@&{i.id}>' for i in select.values])}")
 
     @discord.ui.button(label="Edit Questions", style=discord.ButtonStyle.primary, row=4)
     async def edit_questions(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -7177,39 +7177,66 @@ class BanAppealsConfiguration(AssociationConfigurationView):
 
         sett = await self.bot.settings.find_by_id(interaction.guild.id)
         ba = sett.get("ban_appeals", {})
-        current_questions = ba.get("modal_questions", [
-            "What is your Roblox Username?",
-            "Why were you banned?",
-            "Why should you be unbanned?",
-        ])
+        current_questions = ba.get("modal_questions", [])
 
-        modal = discord.ui.Modal(title="Edit Appeal Questions")
-        for i in range(5):
-            default_val = current_questions[i] if i < len(current_questions) else ""
-            modal.add_item(discord.ui.TextInput(
-                label=f"Question {i + 1}" + (" (leave blank to remove)" if i >= 1 else ""),
-                default=default_val,
-                required=(i == 0),
-                style=discord.TextStyle.short,
-                max_length=45,
-            ))
-
-        async def on_modal_submit(modal_interaction: discord.Interaction):
-            new_questions = [child.value for child in modal.children if child.value.strip()]
-            if not sett.get("ban_appeals"):
-                sett["ban_appeals"] = {}
-            sett["ban_appeals"]["modal_questions"] = new_questions
-            await self.bot.settings.update_by_id(sett)
-            await config_change_log(
-                self.bot, modal_interaction.guild, modal_interaction.user,
-                f"Ban Appeals Questions Updated: {', '.join(new_questions)}"
-            )
-            await modal_interaction.response.send_message(
-                f"Updated to {len(new_questions)} question(s).", ephemeral=True
-            )
-
-        modal.on_submit = on_modal_submit
+        # Format: "label | placeholder | short/paragraph"
+        modal = CustomModal(
+            "Edit Appeal Questions",
+            [
+                (f"q{i}", discord.ui.TextInput(
+                    label=f"Question {i + 1}" + (" (blank to remove)" if i >= 1 else ""),
+                    default=self._format_question(current_questions[i]) if i < len(current_questions) else "",
+                    required=(i == 0),
+                    style=discord.TextStyle.short,
+                    placeholder="Label | Placeholder | short/paragraph",
+                    max_length=150,
+                ))
+                for i in range(5)
+            ],
+        )
         await interaction.response.send_modal(modal)
+        timeout = await modal.wait()
+        if timeout:
+            return
+
+        new_questions = []
+        for i in range(5):
+            val = getattr(modal, f"q{i}").value.strip()
+            if not val:
+                continue
+            parts = [p.strip() for p in val.split("|")]
+            q = {"label": parts[0][:45], "placeholder": "", "style": "paragraph", "required": True}
+            if len(parts) > 1:
+                q["placeholder"] = parts[1][:100]
+            if len(parts) > 2:
+                q["style"] = "short" if parts[2].lower() == "short" else "paragraph"
+            new_questions.append(q)
+
+        if not sett.get("ban_appeals"):
+            sett["ban_appeals"] = {}
+        sett["ban_appeals"]["modal_questions"] = new_questions
+        await self.bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot, modal.interaction.guild, modal.interaction.user,
+            f"Ban Appeals Questions Updated ({len(new_questions)} questions)"
+        )
+        await modal.interaction.followup.send(
+            f"Updated to {len(new_questions)} question(s).", ephemeral=True
+        )
+
+    @staticmethod
+    def _format_question(q):
+        """Format a question dict or string back to 'label | placeholder | style' format."""
+        if isinstance(q, dict):
+            parts = [q.get("label", "")]
+            if q.get("placeholder"):
+                parts.append(q["placeholder"])
+            if q.get("style") and q["style"] != "paragraph":
+                if len(parts) == 1:
+                    parts.append("")
+                parts.append(q["style"])
+            return " | ".join(parts)
+        return q
 
     @discord.ui.button(label="Edit Panel", style=discord.ButtonStyle.primary, row=4)
     async def edit_panel(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -7220,82 +7247,81 @@ class BanAppealsConfiguration(AssociationConfigurationView):
         sett = await self.bot.settings.find_by_id(interaction.guild.id)
         ba = sett.get("ban_appeals", {})
 
-        modal = discord.ui.Modal(title="Edit Appeal Panel")
-        title_input = discord.ui.TextInput(
-            label="Panel Title",
-            default=ba.get("embed_title", "Ban Appeal"),
-            required=True,
-            style=discord.TextStyle.short,
-            max_length=256,
+        modal = CustomModal(
+            "Edit Appeal Panel",
+            [
+                ("title_input", discord.ui.TextInput(
+                    label="Panel Title",
+                    default=ba.get("embed_title", "Ban Appeal"),
+                    required=True,
+                    style=discord.TextStyle.short,
+                    max_length=256,
+                )),
+                ("description_input", discord.ui.TextInput(
+                    label="Panel Description",
+                    default=ba.get("embed_description", "Click the button below to submit a ban appeal."),
+                    required=True,
+                    style=discord.TextStyle.paragraph,
+                    max_length=4000,
+                )),
+                ("color_and_button", discord.ui.TextInput(
+                    label="Color (hex) | Button Label",
+                    default=f"#{ba.get('embed_color', 0x2B2D31):06X} | {ba.get('button_label', 'Submit Appeal')}",
+                    required=True,
+                    style=discord.TextStyle.short,
+                    placeholder="#FF0000 | Submit Appeal",
+                    max_length=100,
+                )),
+                ("thumbnail_input", discord.ui.TextInput(
+                    label="Thumbnail URL (leave blank to remove)",
+                    default=ba.get("thumbnail_url", ""),
+                    required=False,
+                    style=discord.TextStyle.short,
+                    max_length=500,
+                )),
+                ("image_input", discord.ui.TextInput(
+                    label="Image URL (leave blank to remove)",
+                    default=ba.get("image_url", ""),
+                    required=False,
+                    style=discord.TextStyle.short,
+                    max_length=500,
+                )),
+            ],
         )
-        description_input = discord.ui.TextInput(
-            label="Panel Description",
-            default=ba.get("embed_description", "Click the button below to submit a ban appeal."),
-            required=True,
-            style=discord.TextStyle.paragraph,
-            max_length=4000,
-        )
-        color_and_button = discord.ui.TextInput(
-            label="Color (hex) | Button Label",
-            default=f"#{ba.get('embed_color', 0x2B2D31):06X} | {ba.get('button_label', 'Submit Appeal')}",
-            required=True,
-            style=discord.TextStyle.short,
-            placeholder="#FF0000 | Submit Appeal",
-            max_length=100,
-        )
-        thumbnail_input = discord.ui.TextInput(
-            label="Thumbnail URL (leave blank to remove)",
-            default=ba.get("thumbnail_url", ""),
-            required=False,
-            style=discord.TextStyle.short,
-            max_length=500,
-        )
-        image_input = discord.ui.TextInput(
-            label="Image URL (leave blank to remove)",
-            default=ba.get("image_url", ""),
-            required=False,
-            style=discord.TextStyle.short,
-            max_length=500,
-        )
-        modal.add_item(title_input)
-        modal.add_item(description_input)
-        modal.add_item(color_and_button)
-        modal.add_item(thumbnail_input)
-        modal.add_item(image_input)
-
-        async def on_panel_submit(modal_interaction: discord.Interaction):
-            if not sett.get("ban_appeals"):
-                sett["ban_appeals"] = {}
-            sett["ban_appeals"]["embed_title"] = title_input.value
-            sett["ban_appeals"]["embed_description"] = description_input.value
-
-            # Parse "color | button label"
-            parts = color_and_button.value.split("|", 1)
-            color_str = parts[0].strip().lstrip("#")
-            if color_str:
-                try:
-                    sett["ban_appeals"]["embed_color"] = int(color_str, 16)
-                except ValueError:
-                    pass
-            if len(parts) > 1:
-                sett["ban_appeals"]["button_label"] = parts[1].strip()
-
-            # Thumbnail and image
-            sett["ban_appeals"]["thumbnail_url"] = thumbnail_input.value.strip()
-            sett["ban_appeals"]["image_url"] = image_input.value.strip()
-
-            await self.bot.settings.update_by_id(sett)
-            await config_change_log(
-                self.bot, modal_interaction.guild, modal_interaction.user,
-                f"Ban Appeals Panel Updated: Title: {title_input.value}"
-            )
-            await modal_interaction.response.send_message(
-                "Panel settings updated. Run `>ban_appeals panel` to send the updated panel.",
-                ephemeral=True,
-            )
-
-        modal.on_submit = on_panel_submit
         await interaction.response.send_modal(modal)
+        timeout = await modal.wait()
+        if timeout:
+            return
+
+        if not sett.get("ban_appeals"):
+            sett["ban_appeals"] = {}
+        sett["ban_appeals"]["embed_title"] = modal.title_input.value
+        sett["ban_appeals"]["embed_description"] = modal.description_input.value
+
+        # Parse "color | button label"
+        parts = modal.color_and_button.value.split("|", 1)
+        color_str = parts[0].strip().lstrip("#")
+        if color_str:
+            try:
+                sett["ban_appeals"]["embed_color"] = int(color_str, 16)
+            except ValueError:
+                pass
+        if len(parts) > 1:
+            sett["ban_appeals"]["button_label"] = parts[1].strip()
+
+        # Thumbnail and image
+        sett["ban_appeals"]["thumbnail_url"] = modal.thumbnail_input.value.strip()
+        sett["ban_appeals"]["image_url"] = modal.image_input.value.strip()
+
+        await self.bot.settings.update_by_id(sett)
+        await config_change_log(
+            self.bot, modal.interaction.guild, modal.interaction.user,
+            f"Ban Appeals Panel Updated: Title: {modal.title_input.value}"
+        )
+        await modal.interaction.followup.send(
+            "Panel settings updated. Run `>appeals panel` to send the updated panel.",
+            ephemeral=True,
+        )
 
 
 class RDMActions(discord.ui.View):

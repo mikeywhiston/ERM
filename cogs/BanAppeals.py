@@ -10,11 +10,21 @@ class BanAppealModal(discord.ui.Modal):
         super().__init__(title="Ban Appeal")
         self.bot = bot
         for q in questions[:5]:
-            self.add_item(discord.ui.TextInput(
-                label=q[:45],
-                style=discord.TextStyle.paragraph,
-                required=True,
-            ))
+            if isinstance(q, dict):
+                style = discord.TextStyle.short if q.get("style") == "short" else discord.TextStyle.paragraph
+                self.add_item(discord.ui.TextInput(
+                    label=q.get("label", "Question")[:45],
+                    placeholder=q.get("placeholder", "")[:100],
+                    style=style,
+                    required=q.get("required", True),
+                ))
+            else:
+                # Backwards compatibility with plain string questions
+                self.add_item(discord.ui.TextInput(
+                    label=q[:45],
+                    style=discord.TextStyle.paragraph,
+                    required=True,
+                ))
 
     async def on_submit(self, interaction: discord.Interaction):
         answers = [child.value for child in self.children]
@@ -22,18 +32,21 @@ class BanAppealModal(discord.ui.Modal):
         sett = await self.bot.settings.find_by_id(interaction.guild.id)
         ban_appeals = sett.get("ban_appeals", {})
         review_channel_id = ban_appeals.get("review_channel")
-        ping_role_id = ban_appeals.get("ping_role")
+        ping_role_ids = ban_appeals.get("ping_roles", [])
 
         if not review_channel_id:
             return await interaction.response.send_message(
-                "Ban appeals are not fully configured.", ephemeral=True
+                "No review channel is currently set. Ban Appeals not fully configured.", ephemeral=True
             )
 
         review_channel = interaction.guild.get_channel(review_channel_id)
         if not review_channel:
-            return await interaction.response.send_message(
-                "Review channel not found.", ephemeral=True
-            )
+            try:
+                review_channel = await interaction.guild.fetch_channel(review_channel_id)
+            except discord.HTTPException:
+                return await interaction.response.send_message(
+                    "Review channel not found.", ephemeral=True
+                )
 
         questions = ban_appeals.get("modal_questions", [])
 
@@ -88,12 +101,13 @@ class BanAppealModal(discord.ui.Modal):
         for i, answer in enumerate(answers):
             if i == 0:
                 continue  # Skip username, already shown above
-            label = questions[i] if i < len(questions) else f"Question {i+1}"
+            q = questions[i] if i < len(questions) else None
+            label = q.get("label", f"Question {i+1}") if isinstance(q, dict) else (q or f"Question {i+1}")
             embed.add_field(name=label, value=answer, inline=False)
 
         embed.set_footer(text=f"Appeal from User ID: {interaction.user.id}")
 
-        ping_content = f"<@&{ping_role_id}>" if ping_role_id else None
+        ping_content = " ".join(f"<@&{rid}>" for rid in ping_role_ids) if ping_role_ids else None
         await review_channel.send(
             content=ping_content,
             embed=embed,
@@ -134,16 +148,13 @@ class AppealReviewView(discord.ui.View):
         roblox_username = self.roblox_username
 
         if not roblox_id or roblox_username == "Unknown":
-            # Try to parse from embed fields
             for field in embed.fields:
                 if field.name == "Roblox Account":
-                    # Try to extract ID from the value like "username (`12345`)"
                     if "`" in field.value:
                         try:
                             roblox_id = int(field.value.split("`")[1])
                         except (ValueError, IndexError):
                             pass
-                    # Extract username from value
                     if "[" in field.value:
                         roblox_username = field.value.split("[")[1].split("]")[0]
                     break
@@ -157,7 +168,7 @@ class AppealReviewView(discord.ui.View):
             except Exception:
                 pass
 
-        # Try to get appellant_id from footer if we lost it (after restart)
+        # Get appellant_id from footer if needed (after restart)
         appellant_id = self.appellant_id
         if not appellant_id:
             try:
@@ -167,66 +178,15 @@ class AppealReviewView(discord.ui.View):
             except (ValueError, IndexError):
                 pass
 
-        # Attempt unban via PRC API
-        unban_success = False
-        unban_attempted = False
-
-        try:
-            await self.bot.prc_api.get_server_status(interaction.guild.id)
-            # Server is linked, try to unban
-            if roblox_id:
-                unban_attempted = True
-                status = await self.bot.prc_api.unban_user(interaction.guild.id, roblox_id)
-                if status == 200:
-                    unban_success = True
-        except Exception:
-            pass
-
-        # Update embed
-        embed.color = GREEN_COLOR
-
-        if unban_attempted and unban_success:
-            status_value = (
-                f"**Accepted** by {interaction.user.mention}\n"
-                f"Player `{roblox_username}` has been automatically unbanned."
-            )
-        elif unban_attempted and not unban_success:
-            status_value = (
-                f"**Accepted** by {interaction.user.mention}\n"
-                f"⚠️ Automatic unban failed. Please unban `{roblox_username}` manually."
-            )
-        elif not roblox_id:
-            status_value = (
-                f"**Accepted** by {interaction.user.mention}\n"
-                f"⚠️ Could not resolve Roblox account. Please unban `{roblox_username}` manually."
-            )
-        else:
-            status_value = (
-                f"**Accepted** by {interaction.user.mention}\n"
-                f"⚠️ No ER:LC server linked. Please unban `{roblox_username}` manually."
-            )
-
-        embed.add_field(name="Result", value=status_value, inline=False)
-        await interaction.message.edit(embed=embed, view=None)
-        await interaction.followup.send("Appeal accepted.", ephemeral=True)
-
-        # DM the appellant
-        if appellant_id:
-            try:
-                user = await self.bot.fetch_user(appellant_id)
-                dm_embed = discord.Embed(
-                    title="Ban Appeal Accepted",
-                    description=f"Your ban appeal in **{interaction.guild.name}** has been accepted.",
-                    color=GREEN_COLOR,
-                    timestamp=discord.utils.utcnow(),
-                )
-                if unban_success:
-                    dm_embed.description += "\nYou have been automatically unbanned."
-                else:
-                    dm_embed.description += "\nPlease wait for staff to manually process your unban."
-                await user.send(embed=dm_embed)
-            except discord.HTTPException:
-                pass
+        self.bot.dispatch(
+            "appeal_accept",
+            interaction.guild,
+            interaction,
+            appellant_id,
+            roblox_username,
+            roblox_id,
+            embed,
+        )
 
     @discord.ui.button(label="Deny", style=discord.ButtonStyle.red, custom_id="ban_appeal:deny")
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -310,7 +270,7 @@ class BanAppeals(commands.Cog):
         self.bot.add_view(AppealPanelView(bot))
 
     @commands.hybrid_group(
-        name="ban_appeals",
+        name="appeals",
         description="Ban appeal management.",
         extras={"category": "Ban Appeals"},
     )
