@@ -44,6 +44,23 @@ base_configuration = {
         "channel": None,
         "role": [],
     },
+    "ban_appeals" : {
+        "enabled": False,
+        "panel_channel": None,
+        "review_channel": None,
+        "ping_role": None,
+        "embed_title": "Ban Appeal",
+        "embed_description": "Click the button below to submit a ban appeal.",
+        "embed_color": 0x2B2D31,
+        "button_label": "Submit Appeal",
+        "thumbnail_url": "",
+        "image_url": "",
+        "modal_questions": [
+            "What is your Roblox Username?",
+            "Why were you banned?",
+            "Why should you be unbanned?"
+        ],
+    },
     "game_logging": {
         "message": {"enabled": False, "channel": None},
         "sts": {"enabled": False, "channel": None},
