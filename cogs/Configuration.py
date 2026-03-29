@@ -1040,7 +1040,7 @@ class Configuration(commands.Cog):
                     [
                         discord.utils.get(ctx.guild.roles, id=role)
                         for role in (
-                            settings.get("ban_appeals", {}).get("ping_roles") or [0]
+                            settings.get("ban_appeals", {}).get("ping_roles", [0])
                         )
                     ],
                 ),
