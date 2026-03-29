@@ -953,7 +953,7 @@ class ShiftLogging(commands.Cog):
             pipeline[0]["$match"]["Type"] = shift_type["name"]
 
         all_staff = {}
-        async for doc in bot.shift_management.shifts.db.aggregate(pipeline):
+        async for doc in await bot.shift_management.shifts.db.aggregate(pipeline):
             total_seconds = doc["total_seconds"]
 
             # Calculate total break time for the shift
@@ -984,7 +984,7 @@ class ShiftLogging(commands.Cog):
                 {"$match": {"ModeratorID": {"$in": mod_ids}, "Guild": ctx.guild.id}},
                 {"$group": {"_id": "$ModeratorID", "mod_count": {"$sum": 1}}},
             ]
-            async for doc in bot.punishments.db.aggregate(mod_pipeline):
+            async for doc in await bot.punishments.db.aggregate(mod_pipeline):
                 if doc["_id"] in all_staff:
                     all_staff[doc["_id"]]["moderations"] = doc["mod_count"]
 

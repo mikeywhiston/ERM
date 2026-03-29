@@ -61,7 +61,7 @@ async def iterate_prc_logs_global(bot):
         tasks = []
 
 
-        async for items in bot.settings.db.aggregate(pipeline):
+        async for items in await bot.settings.db.aggregate(pipeline):
             tasks.append(process_guild(bot, items, semaphore))
             processed += 1
             if processed % 10 == 0:
