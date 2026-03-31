@@ -8,7 +8,7 @@ from erm import is_staff, management_predicate, is_management
 from utils.constants import BLANK_COLOR
 from utils.paginators import SelectPagination, CustomPage
 from utils.utils import require_settings, get_roblox_by_username
-from utils.autocompletes import user_autocomplete, infraction_type_autocomplete
+from utils.autocompletes import infraction_type_autocomplete_special
 
 
 class Infractions(commands.Cog):
@@ -23,6 +23,47 @@ class Infractions(commands.Cog):
 
         manager_roles = settings["infractions"].get("manager_roles", [])
         return any(role.id in manager_roles for role in ctx.author.roles)
+
+    class InfractionsModal(discord.ui.Modal):
+        def __init__(self, bot, guild, options):
+            super().__init__(title = "Create Infraction")
+
+            # User Object
+            self.users = discord.ui.Label(
+                text = "Users",
+                description="Select the user/s to infract.",
+                component=discord.ui.UserSelect(placeholder="Select a user", max_values=25, required=True)
+            )
+
+            # Infraction types
+            self.type = discord.ui.Label(
+                text = "Infraction Type",
+                description="Select the infraction type",
+                component=discord.ui.Select(
+                    placeholder="Select an infraction type",
+                    max_values=1,
+                    options = options
+                )
+            )
+
+            # Reason
+            self.reason = discord.ui.Label(
+                text = "Reason",
+                description="Input a reason for this infraction",
+                component=discord.ui.TextInput(placeholder="Input a reason", style=discord.TextStyle.paragraph)
+            )
+
+            # Notes
+            self.notes = discord.ui.Label(
+                text = "Notes",
+                description="Enter some notes. This is optional",
+                component=discord.ui.TextInput(style=discord.TextStyle.paragraph, placeholder="Enter some notes", required=False)
+            )
+            self.add_item(self.users).add_item(self.type).add_item(self.reason).add_item(self.notes)
+        async def on_submit(self, interaction: discord.Interaction):
+            await interaction.response.defer()
+
+
 
     @commands.hybrid_group(name="infractions")
     @is_staff()
@@ -234,17 +275,12 @@ class Infractions(commands.Cog):
             await ctx.send(embed=embeds[0])
 
     @commands.guild_only()
-    @infractions.command(name="issue", description="Issue an infraction to a user")
+    @commands.hybrid_command(name="infract", description="Issue an infraction to a user", extras={"ignoreDefer": True})
     @is_staff()
     @require_settings()
-    @app_commands.autocomplete(type=infraction_type_autocomplete)
-    @app_commands.describe(
-        type="The type of infraction to give",
-        user="The user to issue an infraction to",
-        reason="What is your reason for giving this infraction?",
-    )
+
     async def infractions_issue(
-        self, ctx, user: discord.Member, type: str, *, reason: str
+        self, ctx: commands.Context, 
     ):
         """Issue an infraction to a user"""
         has_manager_role = await self.check_manager_role(ctx)
@@ -275,10 +311,21 @@ class Infractions(commands.Cog):
                     color=BLANK_COLOR,
                 )
             )
+        if not ctx.interaction:
+            return await ctx.send(
+                embed = discord.Embed(
+                    title = "Prefix commands",
+                    description="Prefix commands are not supported for this command",
+                    color=BLANK_COLOR
+                )
+            )
 
-        target_id = user.id
-        target_name = user.name
+        options = await infraction_type_autocomplete_special(ctx.guild.id, self.bot)
 
+        modal = self.InfractionsModal(self.bot, ctx.interaction.guild.id, options)
+        await ctx.interaction.response.send_modal(modal)
+        await modal.wait()
+        type = modal.type.component.values[0]
         infraction_config = next(
             (
                 inf
@@ -287,107 +334,87 @@ class Infractions(commands.Cog):
             ),
             None,
         )
-
-        if not infraction_config:
-            return await ctx.send(
-                embed=discord.Embed(
-                    title="Invalid Type",
-                    description="This infraction type does not exist.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
-
         will_escalate = False
         existing_count = 0
         original_type = type
         current_type = type
-
-        if infraction_config.get("escalation"):
-            while True:
-                threshold = infraction_config["escalation"].get("threshold", 0)
-                next_infraction = infraction_config["escalation"].get("next_infraction")
-
-                if not threshold or not next_infraction:
-                    break
-
-                existing_count = await self.bot.db.infractions.count_documents(
-                    {
-                        "user_id": target_id,
-                        "guild_id": ctx.guild.id,
-                        "type": current_type,
-                        "revoked": {"$ne": True},
-                    }
-                )
-
-                if (existing_count + 1) >= threshold:
-                    next_config = next(
-                        (
-                            inf
-                            for inf in settings["infractions"]["infractions"]
-                            if inf["name"] == next_infraction
-                        ),
-                        None,
-                    )
-                    if not next_config:
-                        break
-
-                    current_type = next_infraction
-                    will_escalate = True
-                    infraction_config = next_config
-                else:
-                    break
-
-        if will_escalate:
-            type = current_type
-            reason = (
-                f"{reason}\n\nEscalated from {original_type} after reaching threshold"
-            )
-
-        # Create infraction document
-        infraction_doc = {
-            "user_id": target_id,
-            "username": target_name,
-            "guild_id": ctx.guild.id,
-            "type": type,
-            "original_type": original_type if will_escalate else None,
-            "reason": reason,
-            "timestamp": datetime.datetime.now(tz=pytz.UTC).timestamp(),
-            "issuer_id": ctx.author.id,
-            "issuer_username": ctx.author.name,
-            "escalated": will_escalate,
-            "escalation_count": existing_count + 1 if will_escalate else None,
-        }
-
-        result = await self.bot.db.infractions.insert_one(infraction_doc)
-        infraction_doc["_id"] = result.inserted_id
-
-        self.bot.dispatch("infraction_create", infraction_doc)
-
-        target_name = str(target_id)
-        try:
-            member = ctx.guild.get_member(target_id)
-            if member:
-                target_name = member.name
-            else:
-                user = self.bot.get_user(target_id)
-                if user:
-                    target_name = user.name
-                else:
-                    roblox_user = await get_roblox_by_username(
-                        str(target_id), self.bot, ctx
-                    )
-                    if roblox_user and not roblox_user.get("errors"):
-                        target_name = roblox_user["name"]
-        except:
-            pass
-
-        await ctx.send(
-            embed=discord.Embed(
+        
+        embed2 = discord.Embed(
                 title=f"{self.bot.emoji_controller.get_emoji('success')} Infraction Issued",
                 description="Successfully issued an infraction!",
                 color=discord.Color.green(),
-            ).add_field(
+            )
+
+        for user in modal.users.component.values:
+            target_name = user.name
+            target_id = user.id
+            reason = modal.reason.component.value
+            notes = modal.notes.component.value
+            will_escalate = False
+            existing_count = 0
+            current_type = original_type
+            # Create infraction document
+            
+            if infraction_config.get("escalation"):
+                while True:
+                    threshold = infraction_config.get("escalation", {}).get("threshold", 0)
+                    next_infraction = infraction_config.get("escalation", {}).get("next_infraction")
+
+                    if not threshold or not next_infraction:
+                        break
+
+                    existing_count = await self.bot.db.infractions.count_documents(
+                        {
+                            "user_id": target_id,
+                            "guild_id": ctx.guild.id,
+                            "type": current_type,
+                            "revoked": {"$ne": True},
+                        }
+                    )
+
+                    if (existing_count + 1) >= threshold:
+                        next_config = next(
+                            (
+                                inf
+                                for inf in settings["infractions"]["infractions"]
+                                if inf["name"] == next_infraction
+                            ),
+                            None,
+                        )
+                        if not next_config:
+                            break
+
+                        current_type = next_infraction
+                        will_escalate = True
+                        infraction_config = next_config
+                    else:
+                        break
+
+            if will_escalate:
+                type = current_type
+                reason = (
+                    f"{reason}\n\nEscalated from {original_type} after reaching threshold"
+                )
+
+
+            infraction_doc = {
+                "user_id": user.id,
+                "username": user.name,
+                "guild_id": ctx.guild.id,
+                "type": type,
+                "original_type": None,
+                "reason": reason,
+                "notes": notes,
+                "timestamp": datetime.datetime.now(tz=pytz.UTC).timestamp(),
+                "issuer_id": ctx.author.id,
+                "issuer_username": ctx.author.name,
+                "escalated": will_escalate,
+                "escalation_count": existing_count + 1 if will_escalate else None,
+            }
+
+            result = await self.bot.db.infractions.insert_one(infraction_doc)
+            infraction_doc["_id"] = result.inserted_id
+            embed2.add_field(
                 name="Details",
                 value=(
                     f"> **User:** {target_name}\n"
@@ -403,8 +430,43 @@ class Infractions(commands.Cog):
                     )
                 ),
                 inline=False,
-            ),
-            ephemeral=True,
+            )
+            self.bot.dispatch("infraction_create", infraction_doc)
+
+            target_name = str(target_id)
+            try:
+                member = ctx.guild.get_member(target_id)
+                if member:
+                    target_name = member.name
+                else:
+                    user = self.bot.get_user(target_id)
+                    if user:
+                        target_name = user.name
+                    else:
+                        roblox_user = await get_roblox_by_username(
+                            str(target_id), self.bot, ctx
+                        )
+                        if roblox_user and not roblox_user.get("errors"):
+                            target_name = roblox_user["name"]
+            except:
+                pass
+            embed = discord.Embed(title = "You've been infracted", description=(
+                    f"You were infracted in {ctx.guild.name}. Please refer below for more information.\n"
+                    f"> **Type:** {type}\n"
+                    f"> **Reason:** {reason}\n"
+                    f"> **Notes:** {notes}\n"
+                    f"> **Issued By:** {ctx.author.mention}\n"
+                    f"> **Date:** <t:{int(infraction_doc['timestamp'])}:F>\n"
+            ))
+            try:
+                await user.send(embed=embed)
+            except Exception:
+                pass
+
+
+        await ctx.interaction.followup.send(
+            embed=embed2
+
         )
 
     @infractions.command(name="revoke", description="Revoke an infraction using its ID")

@@ -60,7 +60,8 @@ class OAuth2(commands.Cog):
             await msg.edit(**verification_message)
 
         attempts = 0
-        while await asyncio.sleep(3):
+        while True:
+            await asyncio.sleep(3)
             if attempts > 60:
                 break
             if not linked_account:

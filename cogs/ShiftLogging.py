@@ -42,7 +42,10 @@ class ShiftLogging(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_group(
-        name="duty"
+        name="duty",
+        aliases=[
+            "shifts"
+        ]
     ) # hey, maybe dont delete this next time noagonzales.
     async def duty(self, ctx):
         pass
@@ -950,7 +953,7 @@ class ShiftLogging(commands.Cog):
             pipeline[0]["$match"]["Type"] = shift_type["name"]
 
         all_staff = {}
-        async for doc in bot.shift_management.shifts.db.aggregate(pipeline):
+        async for doc in await bot.shift_management.shifts.db.aggregate(pipeline):
             total_seconds = doc["total_seconds"]
 
             # Calculate total break time for the shift
@@ -981,7 +984,7 @@ class ShiftLogging(commands.Cog):
                 {"$match": {"ModeratorID": {"$in": mod_ids}, "Guild": ctx.guild.id}},
                 {"$group": {"_id": "$ModeratorID", "mod_count": {"$sum": 1}}},
             ]
-            async for doc in bot.punishments.db.aggregate(mod_pipeline):
+            async for doc in await bot.punishments.db.aggregate(mod_pipeline):
                 if doc["_id"] in all_staff:
                     all_staff[doc["_id"]]["moderations"] = doc["mod_count"]
 
@@ -1336,7 +1339,7 @@ class ShiftLogging(commands.Cog):
     )
     @require_settings()
     @app_commands.autocomplete(type=shift_type_autocomplete)
-    @is_management()
+    @is_admin()
     async def duty_shifts(
         self, ctx: commands.Context, user: discord.User, type: str = "Default"
     ):

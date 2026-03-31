@@ -1,6 +1,6 @@
 import collections
 import logging
-
+from pymongo.asynchronous.database import AsyncDatabase
 """
 A helper file for using mongo db
 Class document aims to make using mongo calls easy, saves
@@ -10,7 +10,7 @@ on init and the document to create an instance on and boom
 
 
 class Document:
-    def __init__(self, connection, document_name):
+    def __init__(self, connection: AsyncDatabase, document_name):
         """
         Our init function, sets up the conenction to the specified document
         Params:
@@ -63,9 +63,6 @@ class Document:
         Params:
          -  id () : The id to search for and delete
         """
-        if not await self.find_by_id(id):
-            return
-
         await self.db.delete_many({"_id": id})
 
     async def insert(self, dict):
@@ -94,10 +91,9 @@ class Document:
         Params:
          - dict (Dictionary) : The dict to insert
         """
-        if await self.__get_raw(dict["_id"]) is not None:
-            await self.update_by_id(dict)
-        else:
-            await self.db.insert_one(dict)
+        update_data = dict.copy()
+        update_data.pop("_id", None)
+        await self.db.update_one({"_id": dict["_id"]}, {"$set": update_data}, upsert=True)
 
     async def update_by_id(self, dict):
         """
@@ -116,12 +112,10 @@ class Document:
         if "_id" not in dict:
             raise KeyError("_id not found in supplied dict.")
 
-        if not await self.find_by_id(dict["_id"]):
-            return
-
         id = dict["_id"]
-        dict.pop("_id")
-        await self.db.update_one({"_id": id}, {"$set": dict})
+        update_data = dict.copy()
+        update_data.pop("_id", None)
+        await self.db.update_one({"_id": id}, {"$set": update_data})
 
     async def unset(self, dict):
         """
@@ -140,12 +134,10 @@ class Document:
         if "_id" not in dict:
             raise KeyError("_id not found in supplied dict.")
 
-        if not await self.find_by_id(dict["_id"]):
-            return
-
         id = dict["_id"]
-        dict.pop("_id")
-        await self.db.update_one({"_id": id}, {"$unset": dict})
+        update_data = dict.copy()
+        update_data.pop("_id", None)
+        await self.db.update_one({"_id": id}, {"$unset": update_data})
 
     async def increment(self, id, amount, field):
         """
@@ -155,9 +147,6 @@ class Document:
         - amount (int) : Amount to increment by
         - field () : field to increment
         """
-        if not await self.find_by_id(id):
-            return
-
         await self.db.update_one({"_id": id}, {"$inc": {field: amount}})
 
     async def get_all(self):

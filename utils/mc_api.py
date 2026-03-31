@@ -113,7 +113,6 @@ class MCApiClient:
         if status_code == 200:
             new_list = []
             for item in response_json:
-                # print(item)
                 new_list.append(
                     Player(
                         username=item["Player"].split(":")[0],
