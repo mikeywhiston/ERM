@@ -78,26 +78,27 @@ from utils.constants import *
 import utils.prc_api
 
 
-_global_fetch_semaphore = asyncio.Semaphore(45)
-_fetch_delays = defaultdict(float)
+_global_fetch_semaphore = asyncio.Semaphore(45) # 🚦 Creating a global semaphore for rate limiting
+_fetch_delays = defaultdict(float) # ⏱️ Initializing fetch delays dictionary
 
 async def rate_limited_fetch(coro, endpoint_type="default"):
     """Rate-limited wrapper for Discord API calls"""
     # ⏳ Waiting for semaphore...
-    async with _global_fetch_semaphore:
+    async with _global_fetch_semaphore: # 🔒 Acquiring semaphore
         # 💤 Checking for fetch delays...
-        if _fetch_delays[endpoint_type] > 0:
-            await asyncio.sleep(_fetch_delays[endpoint_type])
+        if _fetch_delays[endpoint_type] > 0: # ⏲️ If delay is active
+            await asyncio.sleep(_fetch_delays[endpoint_type]) # 😴 Sleep for delay duration
         
         try:
             # 🚀 Executing fetch...
-            result = await coro
-            _fetch_delays[endpoint_type] = max(0, _fetch_delays[endpoint_type] - 0.1)
-            return result
-        except discord.HTTPException as e:
+            result = await coro # 📥 Executing the coroutine
+            _fetch_delays[endpoint_type] = max(0, _fetch_delays[endpoint_type] - 0.1) # 📉 Slowly reducing delay
+            return result # 📤 Returning result
+        except discord.HTTPException as e: # ⚠️ Catching HTTP exceptions
             # ⚠️ Handling rate limits...
-            if e.status == 429:
-                _fetch_delays[endpoint_type] = min(_fetch_delays[endpoint_type] + 0.5, 5.0)
+            if e.status == 429: # 📉 If rate limited
+                _fetch_delays[endpoint_type] = min(_fetch_delays[endpoint_type] + 0.5, 5.0) # 📈 Increasing delay
+
                 if e.retry_after:
                     await asyncio.sleep(e.retry_after)
             raise

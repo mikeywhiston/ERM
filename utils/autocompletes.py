@@ -1,52 +1,52 @@
-import typing
+import typing # 📝 Type hinting
 
-import aiohttp
-import discord
-import roblox
-from discord import app_commands
-from discord.ext import commands
-from discord.ext.commands import Context
-import utils.prc_api
-from erm import Bot
+import aiohttp # 🌐 Asynchronous HTTP
+import discord # 🎮 Discord library
+import roblox # 🧱 Roblox integration
+from discord import app_commands # 🛡️ App commands
+from discord.ext import commands # 🛡️ Commands extension
+from discord.ext.commands import Context # 📑 Context model
+import utils.prc_api # 🎮 API components
+from erm import Bot # 🤖 Bot model
 
 
 # 🚜 Autocomplete for shift types
 async def shift_type_autocomplete(
-    interaction: discord.Interaction, _: str
-) -> typing.List[app_commands.Choice[str]]:
-    bot = interaction.client
+    interaction: discord.Interaction, _: str # 📥 Input interaction
+) -> typing.List[app_commands.Choice[str]]: # 📤 Return choices
+    bot = interaction.client # 🤖 Bot instance
 
-    data = await bot.settings.find_by_id(interaction.guild.id)
-    if not data:
-        return [app_commands.Choice(name="Default", value="Default")]
-    shift_types_settings = data.get("shift_types", {})
-    types = shift_types_settings.get("types", [])
+    data = await bot.settings.find_by_id(interaction.guild.id) # 🔍 Fetch guild settings
+    if not data: # ❓ Missing settings
+        return [app_commands.Choice(name="Default", value="Default")] # 📤 Return default
+    shift_types_settings = data.get("shift_types", {}) # 📁 Get shift settings
+    types = shift_types_settings.get("types", []) # 🗒️ List shift types
 
-    if types is not None and len(types or []) != 0:
+    if types is not None and len(types or []) != 0: # ✅ Types found
         return [
-            app_commands.Choice(name=shift_type["name"], value=shift_type["name"])
+            app_commands.Choice(name=shift_type["name"], value=shift_type["name"]) # 🏷️ Map to choice
             for shift_type in types
         ]
-    else:
-        return [app_commands.Choice(name="Default", value="Default")]
+    else: # 🚫 No specific types
+        return [app_commands.Choice(name="Default", value="Default")] # 📤 Return default
 
 
 # 🎮 Autocomplete for ERLC players
 async def erlc_players_autocomplete(
-   interaction: discord.Interaction, incomplete: str
-) -> typing.List[app_commands.Choice[str]]:
-    bot: Bot = (await Context.from_interaction(interaction)).bot
-    defaults = []
-    try:
-        data = await bot.prc_api.get_server_players(interaction.guild.id)
-    except utils.prc_api.ResponseFailure:
-        return defaults
+   interaction: discord.Interaction, incomplete: str # 📥 Current input
+) -> typing.List[app_commands.Choice[str]]: # 📤 Return choices
+    bot: Bot = (await Context.from_interaction(interaction)).bot # 🤖 Get bot from context
+    defaults = [] # 📁 Choices storage
+    try: # 🛡️ Error shield
+        data = await bot.prc_api.get_server_players(interaction.guild.id) # 📡 Fetch online players
+    except utils.prc_api.ResponseFailure: # ⚠️ API failure
+        return defaults # 📤 Return empty
 
-    for player in data:
-        if len(incomplete) > 2:
-            if incomplete.lower() in player.username.lower():
+    for player in data: # 🔁 Iterate players
+        if len(incomplete) > 2: # ❓ Minimum filter length
+            if incomplete.lower() in player.username.lower(): # 🔍 Name match
                 defaults.append(
-                    discord.app_commands.Choice(
+                    discord.app_commands.Choice( # 🏷️ Add as choice
                         name=player.username, value=player.username
                     )
                 )
@@ -54,33 +54,33 @@ async def erlc_players_autocomplete(
             else:
                 continue
         defaults.append(
-            discord.app_commands.Choice(name=player.username, value=player.username)
+            discord.app_commands.Choice(name=player.username, value=player.username) # 🏷️ Add to list
         )
 
-    return defaults[:25]
+    return defaults[:25] # 📤 Return top 25 matches
 
 
 # 👥 Autocomplete for ERLC groups
 async def erlc_group_autocomplete(
-    interaction: discord.Interaction, incomplete: str
-) -> typing.List[app_commands.Choice[str]]:
-    bot: Bot = (await Context.from_interaction(interaction)).bot
-    defaults = [
-        discord.app_commands.Choice(name="Staff", value="staff"),
-        discord.app_commands.Choice(name="Moderators", value="moderators"),
-        discord.app_commands.Choice(name="Admins", value="admins"),
-        discord.app_commands.Choice(name="Players", value="players"),
+    interaction: discord.Interaction, incomplete: str # 📥 Current input
+) -> typing.List[app_commands.Choice[str]]: # 📤 Return choices
+    bot: Bot = (await Context.from_interaction(interaction)).bot # 🤖 Get bot from context
+    defaults = [ # 📁 Static groups
+        discord.app_commands.Choice(name="Staff", value="staff"), # 🎖️ Staff
+        discord.app_commands.Choice(name="Moderators", value="moderators"), # 🛡️ Mods
+        discord.app_commands.Choice(name="Admins", value="admins"), # 👔 Admins
+        discord.app_commands.Choice(name="Players", value="players"), # 👥 Players
     ]
-    try:
-        data = await bot.prc_api.get_server_players(interaction.guild.id)
-    except utils.prc_api.ResponseFailure:
-        return defaults
+    try: # 🛡️ Error shield
+        data = await bot.prc_api.get_server_players(interaction.guild.id) # 📡 Fetch online players
+    except utils.prc_api.ResponseFailure: # ⚠️ API failure
+        return defaults # 📤 Return static only
 
-    for player in data:
-        if len(incomplete) > 2:
-            if incomplete.lower() in player.username.lower():
+    for player in data: # 🔁 Iterate players
+        if len(incomplete) > 2: # ❓ Minimum filter length
+            if incomplete.lower() in player.username.lower(): # 🔍 Name match
                 defaults.append(
-                    discord.app_commands.Choice(
+                    discord.app_commands.Choice( # 🏷️ Add as choice
                         name=player.username, value=player.username
                     )
                 )
@@ -88,10 +88,10 @@ async def erlc_group_autocomplete(
             else:
                 continue
         defaults.append(
-            discord.app_commands.Choice(name=player.username, value=player.username)
+            discord.app_commands.Choice(name=player.username, value=player.username) # 🏷️ Add to list
         )
 
-    return defaults[:25]
+    return defaults[:25] # 📤 Return top 25 choices
 
 
 # 🚜 Autocomplete for all shift types including 'All'

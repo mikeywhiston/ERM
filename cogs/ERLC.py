@@ -1,103 +1,105 @@
-import asyncio
-import datetime
-import json
-import re
-import discord
-import roblox
-from discord.ext import commands
-from utils.autocompletes import erlc_group_autocomplete, erlc_players_autocomplete
-from roblox.thumbnails import AvatarThumbnailType 
+import asyncio # 🕒 Asyncio operations
+import datetime # 📅 Date/time
+import json # 📄 JSON handling
+import re # 🔍 Regex
+import discord # 🟦 Discord API
+import roblox # 👤 Roblox API
+from discord.ext import commands # 📦 Command framework
+from utils.autocompletes import erlc_group_autocomplete, erlc_players_autocomplete # 🔍 Autocompletes
+from roblox.thumbnails import AvatarThumbnailType  # 🖼️ Avatar types
 
-import logging
-from typing import List
-from erm import admin_check, is_staff, is_management, management_predicate
-from utils.paginators import CustomPage, SelectPagination
-from menus import CustomModal, ReloadView, RefreshConfirmation, RiskyUsersMenu, CustomExecutionButton
-import copy
-from utils.constants import *
-from utils.prc_api import (
-    Player,
-    ServerStatus,
-    KillLog,
-    JoinLeaveLog,
-    CommandLog,
-    ResponseFailure,
+import logging # 📝 Logging
+from typing import List # 📋 Type hinting
+from erm import admin_check, is_staff, is_management, management_predicate # 🛡️ Permissions
+from utils.paginators import CustomPage, SelectPagination # 📏 Paginators
+from menus import CustomModal, ReloadView, RefreshConfirmation, RiskyUsersMenu, CustomExecutionButton # 📑 Menus
+import copy # 📋 Copy utils
+from utils.constants import * # 🎨 Constants
+from utils.prc_api import ( # 🚁 PRC API
+    Player, # 👤 Player model
+    ServerStatus, # 📊 Status model
+    KillLog, # ⚔️ Kill model
+    JoinLeaveLog, # 🚪 Session model
+    CommandLog, # ⌨️ Cmd model
+    ResponseFailure, # ❌ Failure model
 )
-import utils.prc_api as prc_api
-from utils.utils import get_discord_by_roblox, get_roblox_by_username, log_command_usage, secure_logging, staff_check
-from discord import app_commands
-import typing
+import utils.prc_api as prc_api # 🚀 Alias
+from utils.utils import get_discord_by_roblox, get_roblox_by_username, log_command_usage, secure_logging, staff_check # 🛠️ Logic utils
+from discord import app_commands # 🏷️ Slash commands
+import typing # 📋 Typing
 
 
 class ERLC(commands.Cog):
     def __init__(self, bot: commands.Bot):
         # 🚓 Initialize the ERLC cog...
-        self.bot = bot
+        self.bot = bot # 🤖 Bot instance
 
     @staticmethod
     def is_server_linked():
         # 🔗 Check if server is linked...
         async def predicate(ctx: commands.Context):
-            guild_id = ctx.guild.id
-            command_group = ctx.command.full_parent_name
+            guild_id = ctx.guild.id # 🆔 Guild ID
+            command_group = ctx.command.full_parent_name # 📂 Parent name
 
-            try:
-                if command_group == "erlc":
-                    await ctx.bot.prc_api.get_server_status(guild_id)
-                elif command_group == "mc":
-                    await ctx.bot.mc_api.get_server_status(guild_id)
-            except prc_api.ResponseFailure as exc:
-                error = prc_api.ServerLinkNotFound(platform=command_group)
-                try:
-                    error.code = exc.json_data.get("code") or exc.status_code
-                except json.JSONDecodeError:
-                    pass
-                raise error
-            return True
+            try: # 🔍 Try linking
+                if command_group == "erlc": # 🚁 ERLC check
+                    await ctx.bot.prc_api.get_server_status(guild_id) # 📡 Get PRC status
+                elif command_group == "mc": # 🍁 MC check
+                    await ctx.bot.mc_api.get_server_status(guild_id) # 📡 Get MC status
+            except prc_api.ResponseFailure as exc: # ❌ API Fail
+                error = prc_api.ServerLinkNotFound(platform=command_group) # ⚠️ Custom error
+                try: # 🔍 Extract code
+                    error.code = exc.json_data.get("code") or exc.status_code # 🆔 Fail code
+                except json.JSONDecodeError: # ❌ Parse error
+                    pass # ⏭️ Skip
+                raise error # 📤 Elevate
+            return True # ✅ Linked
 
-        return commands.check(predicate)
+        return commands.check(predicate) # 🛡️ Bot check
 
     async def secure_logging(
         self,
-        guild_id,
-        author_id,
-        interpret_type: typing.Literal["Message", "Hint", "Command"],
-        command_string: str,
-        attempted: bool = False,
+        guild_id, # 🆔 Guild
+        author_id, # 👤 Author
+        interpret_type: typing.Literal["Message", "Hint", "Command"], # 🏷️ Type
+        command_string: str, # 📝 Instruction
+        attempted: bool = False, # ❓ Success
     ):
         # 🛡️ Log server actions securely...
         await secure_logging(
-            self.bot, guild_id, author_id, interpret_type, command_string, attempted
+            self.bot, guild_id, author_id, interpret_type, command_string, attempted # 📝 Save log
         )
 
-    @commands.hybrid_group(name="erlc")
+    @commands.hybrid_group(name="erlc") # 🚁 ERLC group
     async def server(self, ctx: commands.Context):
         # 🏢 Base ERLC group command...
-        pass
+        pass # 🛑 Root group
 
-    @commands.hybrid_group(name="mc")  # hmmmm...
+    @commands.hybrid_group(name="mc")  # hmmmm... # 🍁 MC group
     async def mc(self, ctx: commands.Context):
         # 🍁 Base Maple County group command...
-        pass
+        pass # 🛑 Root group
 
-    @mc.command(name="link", description="Link your Maple County server with ERM!")
-    @is_management()
-    async def mc_link(self, ctx: commands.Context, *, server_name: str):
+    @mc.command(name="link", description="Link your Maple County server with ERM!") # 🔗 Link MC
+    @is_management() # 🛡️ Management only
+    async def mc_link(self, ctx: commands.Context, *, server_name: str): # 🏷️ Input
         # 🔗 Link Maple County server...
         # get the linked roblox user
-        roblox_id = 0
+        roblox_id = 0 # 🆔 Placeholder
         oauth2_user = (
-            await self.bot.oauth2_users.db.find_one({"discord_id": ctx.author.id}) or {}
+            await self.bot.oauth2_users.db.find_one({"discord_id": ctx.author.id}) or {} # 🔍 Fetch user
         )
-        if not oauth2_user.get("roblox_id"):
+        if not oauth2_user.get("roblox_id"): # ❓ No primary link
             # go to fallback
-            roblox_user = await self.bot.bloxlink.find_roblox(ctx.author.id)
-            if not roblox_user.get("robloxID"):
+            roblox_user = await self.bot.bloxlink.find_roblox(ctx.author.id) # 🔍 Bloxlink fallback
+            if not roblox_user.get("robloxID"): # ❌ Fully missing
                 return await ctx.send(
                     embed=discord.Embed(
-                        title="Not Linked",
-                        description="You are not linked to any ROBLOX account.",
-                        color=BLANK_COLOR,
+                        title="Not Linked", # 📭 Missing link
+                        description="You are not linked to any ROBLOX account.", # 📝 Msg
+                        color=BLANK_COLOR, # 🎨 Color
+                    )
+                )
                     )
                 )
             roblox_id = roblox_user["robloxID"]

@@ -1,103 +1,103 @@
-import datetime
+import datetime # 📅 Date/Time
 
-import discord
-import pytz
-from bson import ObjectId
-from discord import app_commands
-from discord.ext import commands
+import discord # 🤖 Discord
+import pytz # 🌍 Timezones
+from bson import ObjectId # 🆔 MongoDB IDs
+from discord import app_commands # 🛠️ Slash commands
+from discord.ext import commands # 📦 Cog extensions
 
-from erm import is_staff, admin_predicate, management_predicate, staff_predicate
-from menus import CustomModalView, UserSelect
-from utils.constants import BLANK_COLOR, GREEN_COLOR
-from utils.timestamp import td_format
-from utils.utils import invis_embed, require_settings, time_converter
+from erm import is_staff, admin_predicate, management_predicate, staff_predicate # 🕵️ Permissions
+from menus import CustomModalView, UserSelect # 🔘 UI Components
+from utils.constants import BLANK_COLOR, GREEN_COLOR # 🎨 Colors
+from utils.timestamp import td_format # ⏱️ Formatting
+from utils.utils import invis_embed, require_settings, time_converter # 🛠️ Utils
 
 
-class GameLogging(commands.Cog):
+class GameLogging(commands.Cog): # 🎮 Cog for logging game events
     # ⚙️ Cog initialization
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): # 🤖 Constructor
+        self.bot = bot # 💾 Storage
 
     # 🔍 Check for missing settings
-    def check_missing(self, settings, section):
-        if not settings:
-            return False
+    def check_missing(self, settings, section): # 🕵️ Settings validator
+        if not settings: # ❌ Missing root
+            return False # 👎 Fail
 
-        if not settings.get("game_logging"):
-            return False
+        if not settings.get("game_logging"): # ❌ Missing module
+            return False # 👎 Fail
 
-        if not settings.get("game_logging").get(section):
-            return False
+        if not settings.get("game_logging").get(section): # ❌ Missing section
+            return False # 👎 Fail
 
-        if not settings.get("game_logging").get(section).get("enabled"):
-            return False
-        if not settings.get("game_logging").get(section).get("channel"):
-            return False
+        if not settings.get("game_logging").get(section).get("enabled"): # ❌ Disabled
+            return False # 👎 Fail
+        if not settings.get("game_logging").get(section).get("channel"): # ❌ Missing channel
+            return False # 👎 Fail
 
-        return True
+        return True # 👍 Success
 
-    @commands.guild_only()
-    @commands.hybrid_group(
-        name="staff",
-        description="Request more staff to be in-game!",
-        extras={"category": "Game Logging"},
+    @commands.guild_only() # 🏠 Server only
+    @commands.hybrid_group( # 👨‍👩‍👧‍👦 Hybrid group
+        name="staff", # 🏷️ staff name
+        description="Request more staff to be in-game!", # 📝 Desc
+        extras={"category": "Game Logging"}, # 🗄️ Category
     )
     # 👮 Staff command group
-    async def staff(self, ctx: commands.Context):
-        pass
+    async def staff(self, ctx: commands.Context): # 👮 Staff base
+        pass # ⏭️ Skip
 
-    @staff.command(
-        name="request",
-        description="Send a Staff Request to get more staff in-game!",
-        extras={"category": "Game Logging"},
+    @staff.command( # 🆕 Request command
+        name="request", # 🏷️ request name
+        description="Send a Staff Request to get more staff in-game!", # 📝 Desc
+        extras={"category": "Game Logging"}, # 🗄️ Category
     )
-    @app_commands.describe(reason="Reason for your Staff Request!")
-    @require_settings()
+    @app_commands.describe(reason="Reason for your Staff Request!") # 📝 Reason desc
+    @require_settings() # ⚙️ Config req
     # 📧 Send staff request
-    async def staff_request(self, ctx: commands.Context, *, reason: str):
-        settings = await self.bot.settings.find_by_id(ctx.guild.id)
-        game_logging = settings.get("game_logging", {})
-        if game_logging == {}:
-            return await ctx.send(
+    async def staff_request(self, ctx: commands.Context, *, reason: str): # 📧 Request logic
+        settings = await self.bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch settings
+        game_logging = settings.get("game_logging", {}) # 🗄️ Module data
+        if game_logging == {}: # ❓ Unconfigured
+            return await ctx.send( # 📣 Error notice
                 embed=discord.Embed(
-                    title="Not Configured",
-                    description="Game Logging is not configured within this server.",
-                    color=BLANK_COLOR,
+                    title="Not Configured", # 🔴 Title
+                    description="Game Logging is not configured within this server.", # 📝 Message
+                    color=BLANK_COLOR, # ⚪ Color
                 )
             )
 
-        staff_requests = game_logging.get("staff_requests", {})
-        if staff_requests == {}:
-            return await ctx.send(
+        staff_requests = game_logging.get("staff_requests", {}) # 🗄️ Section data
+        if staff_requests == {}: # ❓ Unconfigured
+            return await ctx.send( # 📣 Error notice
                 embed=discord.Embed(
-                    title="Not Configured",
-                    description="Staff Requests is not configured within this server.",
-                    color=BLANK_COLOR,
+                    title="Not Configured", # 🔴 Title
+                    description="Staff Requests is not configured within this server.", # 📝 Message
+                    color=BLANK_COLOR, # ⚪ Color
                 )
             )
-        enabled = staff_requests.get("enabled", False)
-        if not enabled:
-            return await ctx.send(
+        enabled = staff_requests.get("enabled", False) # ✅ Enabled check
+        if not enabled: # ❌ Disabled
+            return await ctx.send( # 📣 Error notice
                 embed=discord.Embed(
-                    title="Not Enabled",
-                    description="Staff Requests are not enabled within this server.",
-                    color=BLANK_COLOR,
+                    title="Not Enabled", # 🔴 Title
+                    description="Staff Requests are not enabled within this server.", # 📝 Message
+                    color=BLANK_COLOR, # ⚪ Color
                 )
             )
 
-        permission_level = staff_requests.get("permission_level", 4)
-        has_permission = True
-        if permission_level == 3:
-            if not await admin_predicate(ctx):
-                has_permission = False
-            else:
-                has_permission = True
-        if permission_level == 2:
-            if not await management_predicate(ctx):
-                has_permission = False
-            else:
-                has_permission = True
-        if permission_level == 1:
+        permission_level = staff_requests.get("permission_level", 4) # 🛡️ Required rank
+        has_permission = True # 🚦 Permission flag
+        if permission_level == 3: # 👑 Admin check
+            if not await admin_predicate(ctx): # ❌ Failed
+                has_permission = False # 🔴 Blocker
+            else: # ✅ Passed
+                has_permission = True # 🟢 Allowed
+        if permission_level == 2: # 👮 Management check
+            if not await management_predicate(ctx): # ❌ Failed
+                has_permission = False # 🔴 Blocker
+            else: # ✅ Passed
+                has_permission = True # 🟢 Allowed
+        if permission_level == 1: # 👨‍✈️ Staff check (low)
             if not await staff_predicate(ctx):
                 has_permission = False
             else:

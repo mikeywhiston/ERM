@@ -1,103 +1,103 @@
-import datetime
+import datetime # 📅 Date and time management
 
-import discord
-import pytz
-from discord import app_commands
-from discord.ext import commands
-import typing
-from menus import CustomExecutionButton
-from utils.constants import BLANK_COLOR, GREEN_COLOR, RED_COLOR
-from erm import is_management
-from utils.paginators import SelectPagination, CustomPage
-from utils.timestamp import td_format
+import discord # 🤖 Discord API wrapper
+import pytz # 🌍 Timezone handling
+from discord import app_commands # 🛠️ Application commands
+from discord.ext import commands # 📦 Command extensions
+import typing # 📑 Type hinting
+from menus import CustomExecutionButton # 🔘 Custom buttons
+from utils.constants import BLANK_COLOR, GREEN_COLOR, RED_COLOR # 🎨 Color constants
+from erm import is_management # 👮 Management check
+from utils.paginators import SelectPagination, CustomPage # 📄 Pagination tools
+from utils.timestamp import td_format # ⏱️ Time formatting
 from utils.utils import (
-    require_settings,
-    time_converter,
-    get_elapsed_time,
-    generalised_interaction_check_failure,
+    require_settings, # ⚙️ Settings requirement
+    time_converter, # 🔄 Time conversion
+    get_elapsed_time, # 🕒 Calculating elapsed time
+    generalised_interaction_check_failure, # ❌ Error handling for interactions
 )
 
 
-class ActivityMonitoring(commands.Cog):
+class ActivityMonitoring(commands.Cog): # 📈 Cog for monitoring activity
     # ⚙️ Cog initialization
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
+    def __init__(self, bot: commands.Bot): # 🤖 Constructor
+        self.bot = bot # 💾 Store bot instance
 
-    @commands.hybrid_group(
-        name="activity",
-        description="Monitor activity across an entire Staff Team effectively.",
-        extras={"category": "Activity Management"},
+    @commands.hybrid_group( # 👨‍👩‍👧‍👦 Define a hybrid group
+        name="activity", # 🏷️ Group name
+        description="Monitor activity across an entire Staff Team effectively.", # 📝 Description
+        extras={"category": "Activity Management"}, # 🗄️ Metadata category
     )
     # 📊 Activity command group
-    async def activity(self, ctx: commands.Context):
-        pass
+    async def activity(self, ctx: commands.Context): # 📁 Main activity command
+        pass # ⏭️ Placeholder
 
-    @commands.guild_only()
-    @activity.command(
-        name="show",
-        description="Show newest activity monitoring report across a time period.",
-        extras={"category": "Activity Management"},
+    @commands.guild_only() # 🏠 Server only
+    @activity.command( # 🆕 Subcommand
+        name="show", # 🏷️ Subcommand name
+        description="Show newest activity monitoring report across a time period.", # 📝 Description
+        extras={"category": "Activity Management"}, # 🗄️ Metadata category
     )
-    @is_management()
-    @require_settings()
+    @is_management() # 👮 Management only
+    @require_settings() # ⚙️ Requires server settings
     # 📉 Show activity report
-    async def activity_show(
+    async def activity_show( # 📊 Show activity data
         self,
-        ctx: commands.Context,
-        duration: str,
-        selected_role: typing.Optional[discord.Role],
+        ctx: commands.Context, # 💬 Command context
+        duration: str, # ⏱️ Time period
+        selected_role: typing.Optional[discord.Role], # 🎭 Optional role filter
     ):
 
-        settings = await self.bot.settings.find_by_id(ctx.guild.id)
-        if not settings.get("shift_management").get("enabled"):
-            return await ctx.send(
+        settings = await self.bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch guild settings
+        if not settings.get("shift_management").get("enabled"): # 🚫 Check if shifts enabled
+            return await ctx.send( # 📣 Send error message
                 embed=discord.Embed(
-                    title="Not Enabled",
-                    description="Shift Logging is not enabled on this server.",
-                    color=BLANK_COLOR,
+                    title="Not Enabled", # ❌ Error title
+                    description="Shift Logging is not enabled on this server.", # 📝 Error description
+                    color=BLANK_COLOR, # ⚪ Color
                 )
             )
 
         try:
-            actual_conversion = time_converter(duration)
-        except ValueError:
-            return await ctx.send(
+            actual_conversion = time_converter(duration) # 🔄 Convert duration string
+        except ValueError: # ⚠️ Invalid format
+            return await ctx.send( # 📣 Send error message
                 embed=discord.Embed(
-                    title="Invalid Time",
-                    description="This time format is not accepted by ERM. Please seek the documentation for details",
-                    color=BLANK_COLOR,
+                    title="Invalid Time", # ❌ Error title
+                    description="This time format is not accepted by ERM. Please seek the documentation for details", # 📝 Error description
+                    color=BLANK_COLOR, # ⚪ Color
                 )
             )
 
-        timestamp_pre = (
+        timestamp_pre = ( # 🕒 Calculate start timestamp
             datetime.datetime.now(tz=pytz.UTC).timestamp() - actual_conversion
         )
-        timestamp_now = datetime.datetime.now(tz=pytz.UTC).timestamp()
+        timestamp_now = datetime.datetime.now(tz=pytz.UTC).timestamp() # 🕒 Current timestamp
 
-        all_staff = {}
-        specified_quota_roles = settings.get("shift_management", {}).get(
+        all_staff = {} # 👥 Staff data storage
+        specified_quota_roles = settings.get("shift_management", {}).get( # 🎭 Get quota roles
             "role_quotas", []
         )
 
-        async for shift_document in self.bot.shift_management.shifts.db.find(
+        async for shift_document in self.bot.shift_management.shifts.db.find( # 🔍 Query shift DB
             {
-                "Guild": ctx.guild.id,
-                "StartEpoch": {"$gt": timestamp_pre},
-                "EndEpoch": {"$lt": timestamp_now},
+                "Guild": ctx.guild.id, # 🆔 Guild filter
+                "StartEpoch": {"$gt": timestamp_pre}, # 📅 Since start time
+                "EndEpoch": {"$lt": timestamp_now}, # 📅 Until now
             }
         ):
 
-            shift_time = get_elapsed_time(shift_document)
-            if shift_time > 100_000_000:
-                continue
-            if shift_document["UserID"] not in all_staff.keys():
+            shift_time = get_elapsed_time(shift_document) # ⏱️ Get duration
+            if shift_time > 100_000_000: # 🚫 Sanity check
+                continue # ⏭️ Skip invalid
+            if shift_document["UserID"] not in all_staff.keys(): # 🆕 New staff member
                 try:
-                    member = await ctx.guild.fetch_member(shift_document["UserID"])
-                except discord.NotFound:
-                    continue
-                if not member:
-                    continue
-                roles = member.roles
+                    member = await ctx.guild.fetch_member(shift_document["UserID"]) # 👤 Fetch member
+                except discord.NotFound: # ❌ Member left
+                    continue # ⏭️ Skip
+                if not member: # 🚫 No member found
+                    continue # ⏭️ Skip
+                roles = member.roles # 🎭 Get roles
                 if selected_role is not None:
                     if selected_role not in roles:
                         continue

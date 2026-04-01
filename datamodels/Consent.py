@@ -1,8 +1,8 @@
-from discord.ext import commands
-import discord
-from utils.mongo import Document
+from discord.ext import commands  # 🛠️ Import command extensions
+import discord  # 🤖 Import Discord library
+from utils.mongo import Document  # 🗄️ Import MongoDB Document base class
 
 
-class Consent(Document):
+class Consent(Document):  # ✅ Data model for user consent
     # ✅ Data model for user consent
-    pass
+    pass  # ⏭️ No additional fields defined here

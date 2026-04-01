@@ -1,102 +1,102 @@
-import asyncio
-import typing
-import aiohttp
-from datamodels.ServerKeys import ServerKey
-from utils.prc_api import ResponseFailure, ServerStatus, Player, CommandLog, BanItem
+import asyncio # ⏱️ Asynchronous operations
+import typing # 📝 Type hinting
+import aiohttp # 🌐 Asynchronous HTTP client
+from datamodels.ServerKeys import ServerKey # 🔑 Server key model
+from utils.prc_api import ResponseFailure, ServerStatus, Player, CommandLog, BanItem # 🛡️ API data/error models
 
 
 class MCApiClient:
     # 🍁 Client for interacting with the Maple County API
-    def __init__(self, bot, base_url: str, api_key: str):
-        self.bot = bot
-        self.session = aiohttp.ClientSession()
-        self.api_key = api_key
-        self.base_url = base_url
+    def __init__(self, bot, base_url: str, api_key: str): # 🏗️ Initialize client
+        self.bot = bot # 🤖 Bot instance
+        self.session = aiohttp.ClientSession() # 🚪 Start HTTP session
+        self.api_key = api_key # 🔑 Static API key
+        self.base_url = base_url # 🔗 API base URL
 
-        bot.external_http_sessions.append(self.session)
+        bot.external_http_sessions.append(self.session) # 🔗 Track session for cleanup
 
     # 🔑 Get server key for a specific guild
-    async def get_server_key(self, guild_id: int) -> ServerKey:
-        return await self.bot.mc_keys.get_server_key(guild_id)
+    async def get_server_key(self, guild_id: int) -> ServerKey: # 🔍 Fetch key from bot storage
+        return await self.bot.mc_keys.get_server_key(guild_id) # 📥 Return key model
 
     # 📡 Send internal API request to Maple County
     async def _send_api_request(
         self,
-        method: typing.Literal["GET", "POST"],
-        endpoint: str,
-        guild_id: int,
-        data: dict | None = None,
-        key: str | None = None,
+        method: typing.Literal["GET", "POST"], # 📥 HTTP method
+        endpoint: str, # 📍 API endpoint
+        guild_id: int, # 🏰 Target guild
+        data: dict | None = None, # 📤 Request payload
+        key: str | None = None, # 🔑 Optional override key
     ):
-        if not key:
-            internal_server_object = await self.get_server_key(guild_id)
+        if not key: # ❓ No override key provided
+            internal_server_object = await self.get_server_key(guild_id) # 🔍 Fetch from DB
             internal_server_key = (
                 internal_server_object if internal_server_object is not None else None
             )
-            if internal_server_key is None:
-                return 401, {}
+            if internal_server_key is None: # 🚫 No key found
+                return 401, {} # 🔇 Return unauthorized
             else:
-                internal_server_key = internal_server_key.key
+                internal_server_key = internal_server_key.key # 🆔 Get actual key string
         else:
-            internal_server_key = key
+            internal_server_key = key # 🆔 Use provided key
 
-        async with self.session.request(
+        async with self.session.request( # 📡 Dispatch request
             method,
-            url=f"{self.base_url}{endpoint}",
+            url=f"{self.base_url}{endpoint}", # 🔗 Construct URL
             headers={
-                "X-Static-Token": self.api_key,
-                "Authorization": internal_server_key,
-                "User-Agent": "ERM Bot (version 4)",
+                "X-Static-Token": self.api_key, # 🛡️ Static auth header
+                "Authorization": internal_server_key, # 🔑 Dynamic auth header
+                "User-Agent": "ERM Bot (version 4)", # 🤖 Bot UA
             },
-            json=data or {},
+            json=data or {}, # 📤 Send JSON body
         ) as response:
-            if response.status == 429:
-                retry_after = int((await response.json()).get("retry_after", 5))
-                await asyncio.sleep(retry_after)
-                return await self._send_api_request(
+            if response.status == 429: # 🛑 Rate limited
+                retry_after = int((await response.json()).get("retry_after", 5)) # ⏳ Extract wait time
+                await asyncio.sleep(retry_after) # 💤 Wait
+                return await self._send_api_request( # 🔄 Retry request
                     method=method,
                     endpoint=endpoint,
                     guild_id=guild_id,
                     data=data,
                     key=key,
                 )
-            if response.status == 502:
-                return await self._send_api_request(
+            if response.status == 502: # ⚠️ Bad Gateway
+                return await self._send_api_request( # 🔄 Immediate retry
                     method=method,
                     endpoint=endpoint,
                     guild_id=guild_id,
                     data=data,
                     key=key,
                 )
-            return response.status, (
+            return response.status, ( # 📤 Return status and JSON
                 await response.json() if response.content_type != "text/html" else {}
             )
 
     # 🌐 Get server status information
-    async def get_server_status(self, guild_id: int):
-        status_code, response_json = await self._send_api_request(
+    async def get_server_status(self, guild_id: int): # 🔍 Fetch server details
+        status_code, response_json = await self._send_api_request( # 📡 Call API
             "GET", "/Server", guild_id
         )
-        if status_code == 200:
-            return ServerStatus(
-                name=response_json["Name"],
-                owner_id=response_json["OwnerId"],
-                co_owner_ids=response_json["CoOwnerIds"],
-                current_players=response_json["CurrentPlayers"],
-                max_players=response_json["MaxPlayers"],
-                join_key=response_json["JoinKey"],
+        if status_code == 200: # ✅ Success
+            return ServerStatus( # 📦 Map to model
+                name=response_json["Name"], # 🏷️ Server name
+                owner_id=response_json["OwnerId"], # 👑 Owner ID
+                co_owner_ids=response_json["CoOwnerIds"], # 🤝 Co-owner IDs
+                current_players=response_json["CurrentPlayers"], # 👥 Player count
+                max_players=response_json["MaxPlayers"], # 📶 Capacity
+                join_key=response_json["JoinKey"], # 🔑 Secret join key
                 # account_verified_request=response_json['AccVerifiedReq'] == 'Enabled',
                 # team_balance=response_json['TeamBalance']
             )
-        else:
-            raise ResponseFailure(status_code=status_code, json_data=response_json)
+        else: # ❌ Failure
+            raise ResponseFailure(status_code=status_code, json_data=response_json) # 💥 Raise error
 
     # 🧪 Send test request to verify server key
-    async def send_test_request(self, server_key: str) -> int | ServerStatus:
-        code, response_json = await self._send_api_request(
+    async def send_test_request(self, server_key: str) -> int | ServerStatus: # 🧪 Validation
+        code, response_json = await self._send_api_request( # 📡 Test call
             "GET", "/Server", 0, None, server_key
         )
-        return (
+        return ( # 📤 Return code
             code
             if code != 200
             else ServerStatus(

@@ -1,19 +1,19 @@
-import asyncio
-from utils.prc_api import Player, ResponseFailure
-from discord.ext import commands
+import asyncio # ⏱️ Asynchronous operations
+from utils.prc_api import Player, ResponseFailure # 🎮 API data models
+from discord.ext import commands # 🛡️ Discord extensions
 
 # 🔄 Run a coroutine in the current event loop
-def run_coroutine_in_loop(coro):
-    loop = asyncio.get_running_loop()
-    fut = loop.create_future()
+def run_coroutine_in_loop(coro): # 👷 Execution wrapper
+    loop = asyncio.get_running_loop() # 🎡 Get active loop
+    fut = loop.create_future() # 🔮 Create placeholder
 
-    def wrapper():
-        asyncio.ensure_future(coro).add_done_callback(
-            lambda task: fut.set_result(task.result())
+    def wrapper(): # 📦 Inner runner
+        asyncio.ensure_future(coro).add_done_callback( # 🚀 Launch coroutine
+            lambda task: fut.set_result(task.result()) # ✅ Set result on completion
         )
 
-    loop.call_soon(wrapper)
-    return fut
+    loop.call_soon(wrapper) # ⏲️ Schedule execution
+    return fut # 📤 Return future object
 
 
 """
@@ -43,13 +43,13 @@ NOTABLE DESIGN LIMITATIONS
 
 
 # 🔢 Get the number of arguments for a function
-def function_argument_count(func):
-    return func.__code__.co_argcount
+def function_argument_count(func): # 🧮 Meta-analysis
+    return func.__code__.co_argcount # 📤 Return arg count
 
 
 # 📛 Get the names of the arguments for a function
-def argument_names(func):
-    return func.__code__.co_varnames
+def argument_names(func): # 🏷️ Variable discovery
+    return func.__code__.co_varnames # 📤 Return names
 
 
 """
@@ -59,31 +59,31 @@ PREDETERMINED FUTURE FUNCTIONS
 
 
 # 📥 Fetch ERLC server queue status
-async def get_queue(api_client, guild_id):
-    try:
-        queue = await api_client.get_server_queue(guild_id)
+async def get_queue(api_client, guild_id): # 📡 Query queue
+    try: # 🛡️ Error shield
+        queue = await api_client.get_server_queue(guild_id) # 🔍 Fetch queue data
     except:  # this can end up not being implemented in MC API client; so just hope and pray ig
-        queue = []
+        queue = [] # 📁 Default empty
 
 
 # 🕰️ Fetch online shifts for a guild
 # 📡 Fetch online shifts for a guild
-async def online_shifts(bot, guild_id):
-    return [
+async def online_shifts(bot, guild_id): # 👕 Active staff query
+    return [ # 📤 Return list generator
         i
-        async for i in bot.shift_management.shifts.db.find(
-            {"Guild": guild_id, "EndEpoch": 0}
+        async for i in bot.shift_management.shifts.db.find( # 🗄️ Search DB
+            {"Guild": guild_id, "EndEpoch": 0} # ⏳ Filter for active ones
         )
     ]
 
 
 # 🚗 Fetch spawned vehicles in ERLC server
-async def get_vehicles(api_client, guild_id):
-    try:
-        vehicles = await api_client.get_server_vehicles(guild_id)
+async def get_vehicles(api_client, guild_id): # 🚘 Vehicle tracking
+    try: # 🛡️ Error shield
+        vehicles = await api_client.get_server_vehicles(guild_id) # 🔍 Fetch from API
     except:  # this can end up not being implemented in MC API client; so just hope and pray ig
-        vehicles = []
-    return vehicles
+        vehicles = [] # 📁 Default empty
+    return vehicles # 📤 Return findings
 
 
 """
@@ -93,8 +93,8 @@ CUSTOM FUNCTIONS
 
 
 # 📊 Count ERLC players
-def count_erlc_players(players: list[Player]):
-    return len(players)
+def count_erlc_players(players: list[Player]): # 👥 Player Tally
+    return len(players) # 📤 Return total count
 
 
 # 🛡️ Count ERLC moderators

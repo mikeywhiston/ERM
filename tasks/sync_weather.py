@@ -1,14 +1,14 @@
-import asyncio
-import logging
-from discord.ext import tasks
-import aiohttp
-from decouple import config
+import asyncio # 🔄 Import asyncio
+import logging # 📝 Import logging
+from discord.ext import tasks # 🚀 Import tasks
+import aiohttp # 🌐 Import aiohttp
+from decouple import config # ⚙️ Import config
 
-from utils.prc_api import ResponseFailure
+from utils.prc_api import ResponseFailure # 🔌 Import error class
 
 # Open-Meteo WMO weather code -> ERLC :weather command value
 # https://open-meteo.com/en/docs (WMO Weather interpretation codes)
-WMO_TO_ERLC = {
+WMO_TO_ERLC = { # 🌈 Weather mapping table
     0:  "Clear",        # Clear sky
     1:  "Clear",        # Mainly clear
     2:  "Clouds",       # Partly cloudy
@@ -36,46 +36,46 @@ WMO_TO_ERLC = {
 }
 
 # Open-Meteo hour (0-23) -> ERLC :time command value
-def hour_to_erlc_time(hour: int) -> str:
+def hour_to_erlc_time(hour: int) -> str: # 🕒 Convert hour to game time
     # 🕒 Converting hour to ERLC time...
-    if 5 <= hour < 7:
+    if 5 <= hour < 7: # 🌅 Morning
         return "Morning"
-    elif 7 <= hour < 12:
+    elif 7 <= hour < 12: # ☀️ Noon
         return "Noon"
-    elif 12 <= hour < 17:
+    elif 12 <= hour < 17: # 🌤️ Afternoon
         return "Afternoon"
-    elif 17 <= hour < 20:
+    elif 17 <= hour < 20: # 🌇 Evening
         return "Evening"
-    else:
+    else: # 🌙 Night
         return "Night"
 
 
-async def geocode_location(session: aiohttp.ClientSession, location: str) -> tuple[float, float, str] | None:
+async def geocode_location(session: aiohttp.ClientSession, location: str) -> tuple[float, float, str] | None: # 📍 Get coords for name
     # 📍 Geocoding location...
     """Convert a location name to lat/lon + timezone using Open-Meteo geocoding API."""
     try:
-        async with session.get(
+        async with session.get( # 🌐 Call geocoding API
             "https://geocoding-api.open-meteo.com/v1/search",
             params={"name": location, "count": 1, "language": "en", "format": "json"},
         ) as resp:
-            if resp.status != 200:
+            if resp.status != 200: # 🔴 Check for API error
                 return None
-            data = await resp.json()
+            data = await resp.json() # 🗞️ Parse response
             results = data.get("results")
-            if not results:
+            if not results: # ❓ Skip if no results
                 return None
-            r = results[0]
+            r = results[0] # ✅ Use first result
             return r["latitude"], r["longitude"], r.get("timezone", "UTC")
-    except Exception as e:
+    except Exception as e: # ⚠️ Handle unexpected errors
         logging.error(f"Geocoding failed for location '{location}': {e}")
         return None
 
 
-async def fetch_weather(session: aiohttp.ClientSession, lat: float, lon: float, timezone: str) -> dict | None:
+async def fetch_weather(session: aiohttp.ClientSession, lat: float, lon: float, timezone: str) -> dict | None: # 🌤️ Get weather data
     # 🌤️ Fetching weather data...
     """Fetch current weather code and local hour from Open-Meteo."""
     try:
-        async with session.get(
+        async with session.get( # 🌐 Call weather API
             "https://api.open-meteo.com/v1/forecast",
             params={
                 "latitude": lat,
@@ -86,16 +86,16 @@ async def fetch_weather(session: aiohttp.ClientSession, lat: float, lon: float, 
                 "forecast_days": 1,
             },
         ) as resp:
-            if resp.status != 200:
+            if resp.status != 200: # 🔴 Check for API error
                 return None
-            data = await resp.json()
+            data = await resp.json() # 🗞️ Parse response
 
             current = data.get("current", {})
-            weather_code = current.get("weather_code", 0)
+            weather_code = current.get("weather_code", 0) # 🌈 Get WMO code
 
             # Derive local hour from the current_time string e.g. "2024-03-01T14:00"
-            current_time_str = data.get("current_time") or current.get("time", "")
-            if "T" in current_time_str:
+            current_time_str = data.get("current_time") or current.get("time", "") # 🕒 Get time string
+            if "T" in current_time_str: # ✂️ Extract hour from ISO string
                 hour = int(current_time_str.split("T")[1].split(":")[0])
             else:
                 hour = 12  # fallback to noon

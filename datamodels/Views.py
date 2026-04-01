@@ -1,8 +1,8 @@
-from discord.ext import commands
-import discord
-from utils.mongo import Document
+from discord.ext import commands  # 🛠️ Command extensions
+import discord  # 🤖 Discord library
+from utils.mongo import Document  # 🗄️ Database base class
 
 
-class Views(Document):
+class Views(Document):  # 👁️ Track view analytics
     # 👁️ Data model for tracking view analytics
-    pass
+    pass  # ⏭️ End of class

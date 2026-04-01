@@ -1,71 +1,71 @@
-import asyncio
-import datetime
-import typing
+import asyncio # ⏱️ Asynchronous operations
+import datetime # 📅 Time tracking
+import typing # 📝 Type hinting
 
-import discord
-import roblox
-from discord.ext import commands
-import aiohttp
-from decouple import config
-from bson import ObjectId
-from utils.basedataclass import BaseDataClass
-from datamodels.ServerKeys import ServerKey
+import discord # 🎮 Discord library
+import roblox # 🧱 Roblox integration
+from discord.ext import commands # 🛡️ Discord extensions
+import aiohttp # 🌐 HTTP client
+from decouple import config # ⚙️ Environment config
+from bson import ObjectId # 🆔 MongoDB IDs
+from utils.basedataclass import BaseDataClass # 🏗️ Base model
+from datamodels.ServerKeys import ServerKey # 🔑 Server key model
 
 
 class ResponseFailure(Exception):
-    detail: str | None
-    status_code: int
-    json_data: dict
+    detail: str | None # 💬 Error detail
+    status_code: int # 🔢 HTTP status code
+    json_data: dict # 📦 Raw response data
 
     # ❗ Exception for failed API responses
-    def __init__(self, *args, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+    def __init__(self, *args, **kwargs): # 🏗️ Initialize exception
+        for key, value in kwargs.items(): # 🔁 Map arguments
+            setattr(self, key, value) # 🏷️ Set attributes
 
     # 📝 String representation of ResponseFailure
-    def __repr__(self):
-        return f"{self.status_code}: {self.json_data}"
+    def __repr__(self): # 📄 Object representation
+        return f"{self.status_code}: {self.json_data}" # 📤 Return status and data
 
 
 class BanItem(BaseDataClass):
-    username: str
-    user_id: int
+    username: str # 👤 Banned username
+    user_id: int # 🆔 Roblox user ID
 
 
 class CommandLog(BaseDataClass):
-    username: str
-    user_id: int
-    timestamp: int
-    is_automated: bool
-    command: str
+    username: str # 👤 Executor username
+    user_id: int # 🆔 Roblox user ID
+    timestamp: int # ⏰ Action time
+    is_automated: bool # 🤖 Bot action flag
+    command: str # 💬 Executed command
 
 
 class JoinLeaveLog(BaseDataClass):
-    type: typing.Literal["join", "leave"]
-    timestamp: int
-    username: str
-    user_id: int
+    type: typing.Literal["join", "leave"] # 🚪 Event type
+    timestamp: int # ⏰ Event time
+    username: str # 👤 Player username
+    user_id: int # 🆔 Roblox user ID
 
     # ⚖️ Compare logs by timestamp
-    def __lt__(self, other):
-        return self.timestamp < other.timestamp
+    def __lt__(self, other): # 📉 Comparison logic
+        return self.timestamp < other.timestamp # 📤 Check if earlier
 
 
 class KillLog(BaseDataClass):
-    killer_username: str
-    killer_user_id: int
-    timestamp: int
-    killed_username: str
-    killed_user_id: int
+    killer_username: str # 🗡️ Perpetrator name
+    killer_user_id: int # 🆔 Perpetrator ID
+    timestamp: int # ⏰ Incident time
+    killed_username: str # 💀 Victim name
+    killed_user_id: int # 🆔 Victim ID
 
     # ⚖️ Compare kill logs by timestamp
-    def __lt__(self, other):
-        return self.timestamp < other.timestamp
+    def __lt__(self, other): # 📉 Comparison logic
+        return self.timestamp < other.timestamp # 📤 Check if earlier
 
 
 class Player(BaseDataClass):
-    username: str
-    id: int
+    username: str # 👤 Current username
+    id: int # 🆔 Roblox user ID
     permission: typing.Optional[
         typing.Literal[
             "Server Administrator",
@@ -74,30 +74,30 @@ class Player(BaseDataClass):
             "Server Owner",
             "Server Co-Owner",
         ]
-    ] = None  # This doesn't return when we query for queue, so we type for optional.
-    callsign: str | None = None
-    team: str | None = None
+    ] = None # 🛡️ Server permissions
+    callsign: str | None = None # 📞 Radio callsign
+    team: str | None = None # 🧑‍🤝‍🧑 Assigned team
 
 
 class ModCall(BaseDataClass):
-    caller: str
-    moderator: str | None = None
-    timestamp: int
+    caller: str # 👤 Requesting player
+    moderator: str | None = None # 🛡️ Responding moderator
+    timestamp: int # ⏰ Call time
 
 
 class ServerStatus(BaseDataClass):
-    name: str
-    owner_id: int
-    co_owner_ids: list[int]
-    current_players: int
-    max_players: int
-    join_key: str
-    account_verified_request: bool
-    team_balance: bool
+    name: str # 🏷️ Server name
+    owner_id: int # 👑 Owner ID
+    co_owner_ids: list[int] # 🤝 Co-owners
+    current_players: int # 👥 Online count
+    max_players: int # 📶 Capacity
+    join_key: str # 🔑 Secret join key
+    account_verified_request: bool # ✅ Verification required
+    team_balance: bool # ⚖️ Auto-team balancing
 
 
 class ActiveVehicle(BaseDataClass):
-    username: str
+    username: str # 👤 Owner username
     texture: str
     vehicle: str
 

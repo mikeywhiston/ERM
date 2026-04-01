@@ -6,9 +6,9 @@
 
 class ViewStateManager(dict):
     # 📦 Manager for setup view states
-    def __getitem__(self, key):
-        return super().__getitem__(key)
+    def __getitem__(self, key): # 📥 Retrieve item from state
+        return super().__getitem__(key) # 📤 Return stored value
 
     # 📥 Set a view state item
-    def __setitem__(self, key, value) -> None:
-        return super().__setitem__(key, value)
+    def __setitem__(self, key, value) -> None: # 📝 Store item in state
+        return super().__setitem__(key, value) # ✅ Complete storage

@@ -1,11 +1,11 @@
-import discord
-from discord import app_commands
-from discord.ext import commands
+import discord # 🤖 Discord
+from discord import app_commands # 🛠️ Slash commands
+from discord.ext import commands # 📦 Cog extensions
 
-from erm import is_management, is_admin
-from utils.constants import BLANK_COLOR, GREEN_COLOR
-from utils.utils import generator
-from menus import (
+from erm import is_management, is_admin # 🕵️ Permissions
+from utils.constants import BLANK_COLOR, GREEN_COLOR # 🎨 Colors
+from utils.utils import generator # 🛠️ Generator tool
+from menus import ( # 🔘 Components
     ChannelSelect,
     CustomModalView,
     CustomSelectMenu,
@@ -18,8 +18,8 @@ from menus import (
     CounterButton,
     ViewVotersButton,
 )
-from utils.autocompletes import command_autocomplete
-from utils.utils import (
+from utils.autocompletes import command_autocomplete # ⌨️ Autocomplete
+from utils.utils import ( # 🛠️ Utils
     interpret_content,
     interpret_embed,
     invis_embed,
@@ -28,76 +28,76 @@ from utils.utils import (
 )
 
 
-class CustomCommands(commands.Cog):
+class CustomCommands(commands.Cog): # 📜 Cog for custom commands
     # ⚙️ Cog initialization
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): # 🤖 Constructor
+        self.bot = bot # 💾 Storage
 
-    @commands.hybrid_group(name="custom")
-    @is_admin()
+    @commands.hybrid_group(name="custom") # 👨‍👩‍👧‍👦 Hybrid group
+    @is_admin() # 🛡️ Admin only
     # 🛠️ Custom command group
-    async def custom(self, ctx):
-        pass
+    async def custom(self, ctx): # 🛠️ Custom base
+        pass # ⏭️ Skip
 
-    @commands.guild_only()
-    @custom.command(
-        name="manage",
-        description="Manage your custom commands.",
-        extras={"category": "Custom Commands"},
+    @commands.guild_only() # 🏠 Server only
+    @custom.command( # 🆕 manage command
+        name="manage", # 🏷️ manage name
+        description="Manage your custom commands.", # 📝 Desc
+        extras={"category": "Custom Commands"}, # 🗄️ Category
     )
-    @is_admin()
+    @is_admin() # 🛡️ Admin only
     # ⚙️ Manage custom commands
-    async def custom_manage(self, ctx):
-        bot = self.bot
-        Data = await bot.custom_commands.find_by_id(ctx.guild.id)
-        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Custom Manage")
-        if Data is None:
-            Data = {"_id": ctx.guild.id, "commands": []}
+    async def custom_manage(self, ctx): # ⚙️ Management logic
+        bot = self.bot # 🤖 Instance
+        Data = await bot.custom_commands.find_by_id(ctx.guild.id) # 🔍 Fetch data
+        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Custom Manage") # 📝 Log
+        if Data is None: # ❓ No data
+            Data = {"_id": ctx.guild.id, "commands": []} # 🆕 Init blank
 
-        embeds = []
-        current_embed = (
-            discord.Embed(title="Custom Commands", color=BLANK_COLOR)
-            .set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
-            .set_thumbnail(url=ctx.guild.icon)
+        embeds = [] # 📃 Embed list
+        current_embed = ( # 🏙️ Header embed
+            discord.Embed(title="Custom Commands", color=BLANK_COLOR) # 🏗️ Create
+            .set_author(name=ctx.guild.name, icon_url=ctx.guild.icon) # 👤 Author
+            .set_thumbnail(url=ctx.guild.icon) # 🖼️ Thumbnail
         )
 
-        for item in Data["commands"]:
-            if len(current_embed.fields) >= 10:
-                embeds.append(current_embed)
-                current_embed = discord.Embed(
-                    title="Custom Commands (cont.)", color=BLANK_COLOR
+        for item in Data["commands"]: # 🔄 Loop commands
+            if len(current_embed.fields) >= 10: # 🚫 Field limit
+                embeds.append(current_embed) # 📥 Add current
+                current_embed = discord.Embed( # 🏙️ Next page
+                    title="Custom Commands (cont.)", color=BLANK_COLOR # 🏗️ Create cont
                 )
 
-            current_embed.add_field(
-                name=f"{item['name']}",
-                value=f"> **Name:** {item['name']}\n"
+            current_embed.add_field( # 📝 Add command item
+                name=f"{item['name']}", # 🏷️ Name
+                value=f"> **Name:** {item['name']}\n" # 📋 Details
                 f"> **Command ID:** `{item['id']}`\n"
                 f"> **Creator:** {'<@{}>'.format(item.get('author') if item.get('author') is not None else '1')}\n"
                 f"> **Default Channel:** {'<#{}>'.format(item.get('channel')) if item.get('channel') is not None else 'None selected'}",
-                inline=False,
+                inline=False, # 📏 Full width
             )
 
-        if len(current_embed.fields) == 0:
-            current_embed.add_field(
-                name="No Custom Commands",
-                value=f"> No Custom Commands were found to be associated with this server.",
+        if len(current_embed.fields) == 0: # ❓ Empty list
+            current_embed.add_field( # 📝 Add placeholder
+                name="No Custom Commands", # ❌ Title
+                value=f"> No Custom Commands were found to be associated with this server.", # 📝 Desc
             )
 
-        embeds.append(current_embed)
+        embeds.append(current_embed) # 📥 Finalize
 
-        view = CustomCommandOptionSelect(ctx.author.id)
+        view = CustomCommandOptionSelect(ctx.author.id) # 🔘 Actions view
 
-        new_msg = await ctx.reply(
-            embeds=embeds,
-            view=view,
+        new_msg = await ctx.reply( # 📣 Send reply
+            embeds=embeds, # 🏙️ Content
+            view=view, # 🔘 Actions
         )
 
-        timeout = await view.wait()
-        if timeout:
-            return
+        timeout = await view.wait() # ⏱️ Wait
+        if timeout: # 🚫 Expired
+            return # ⏭️ Skip
 
-        if view.value == "create":
-            name = view.modal.name.value
+        if view.value == "create": # 🆕 Choice: Create
+            name = view.modal.name.value # 🏷️ Input name
             data = {
                 "name": name,
                 "id": next(generator),

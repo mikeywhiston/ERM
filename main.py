@@ -1,4 +1,5 @@
 from erm import run
 
 # 🏁 Starting the bot application...
-run()
+run() # 🚀 Calling the run function to start the bot
+

@@ -1,12 +1,12 @@
-import discord
-import jishaku
-from discord.ext import commands
-from jishaku.codeblocks import codeblock_converter, Codeblock
-from jishaku.cog import STANDARD_FEATURES, OPTIONAL_FEATURES
-from jishaku.features.baseclass import Feature
+import discord # 🟦 Discord API
+import jishaku # 🐱 Jishaku tool
+from discord.ext import commands # 📦 Command framework
+from jishaku.codeblocks import codeblock_converter, Codeblock # 📝 Code parsing
+from jishaku.cog import STANDARD_FEATURES, OPTIONAL_FEATURES # ⚙️ Standard cogs
+from jishaku.features.baseclass import Feature # 🏗️ Base class
 
-OWNER = 1394817794427846737
-LOGGING_CHANNEL = 1084950208842039326
+OWNER = 1394817794427846737 # 👑 Master owner
+LOGGING_CHANNEL = 1084950208842039326 # 📺 Log channel
 
 
 class CustomDebugCog(*OPTIONAL_FEATURES, *STANDARD_FEATURES):
@@ -14,34 +14,34 @@ class CustomDebugCog(*OPTIONAL_FEATURES, *STANDARD_FEATURES):
     Custom Jishaku Cog for command logging
     """
 
-    @Feature.Command(parent="jsk", name="creator")
+    @Feature.Command(parent="jsk", name="creator") # 👑 Creator command
     async def jsk_creator(self, ctx: commands.Context):
         # 👑 Display the bot creator...
-        try:
-            owner = await ctx.guild.fetch_member(OWNER)
-        except discord.NotFound:
-            owner = None
+        try: # 🔍 Try fetch
+            owner = await ctx.guild.fetch_member(OWNER) # 👤 Get owner
+        except discord.NotFound: # ❌ Missing
+            owner = None # 🚫 Set null
 
-        if owner is None:
+        if owner is None: # ❓ Not found
             return await ctx.send(
-                f"The creator of {self.bot.user.mention} is <@{OWNER}>"
+                f"The creator of {self.bot.user.mention} is <@{OWNER}>" # 📢 Global mention
             )
 
         embed = discord.Embed(
-            title=f"{owner.name}#{owner.discriminator}", color=0x2A2D31
+            title=f"{owner.name}#{owner.discriminator}", color=0x2A2D31 # 📄 Rich embed
         )
         embed.add_field(
-            name=f"Owner of {self.bot.user.name}",
-            value=f"{owner.mention}",
-            inline=False,
+            name=f"Owner of {self.bot.user.name}", # 👑 Ownership
+            value=f"{owner.mention}", # 👤 Mention
+            inline=False, # 📏 Wide
         )
-        embed.add_field(name="ID", value=f"{owner.id}", inline=False)
+        embed.add_field(name="ID", value=f"{owner.id}", inline=False) # 🆔 User ID
         embed.set_footer(
-            text=f"{owner.name}#{owner.discriminator} is the owner of {self.bot.user.name}",
-            icon_url=ctx.guild.icon,
+            text=f"{owner.name}#{owner.discriminator} is the owner of {self.bot.user.name}", # 📑 Footer label
+            icon_url=ctx.guild.icon, # 🏠 Server icon
         )
-        embed.set_thumbnail(url=owner.display_avatar.url)
-        await ctx.send(embed=embed)
+        embed.set_thumbnail(url=owner.display_avatar.url) # 🖼️ Avatar
+        await ctx.send(embed=embed) # 📤 Send response
 
     # async def cog_before_invoke(self, ctx: commands.Context):
     #     try:

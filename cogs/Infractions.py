@@ -1,103 +1,103 @@
-import datetime
-import discord
-import pytz
-from discord.ext import commands
-from discord import app_commands
+import datetime # 📅 Date/time utils
+import discord # 🟦 Discord API
+import pytz # 🌍 Timezones
+from discord.ext import commands # 📦 Command framework
+from discord import app_commands # 🏷️ Slash commands
 
-from erm import is_staff, management_predicate, is_management
-from utils.constants import BLANK_COLOR
-from utils.paginators import SelectPagination, CustomPage
-from utils.utils import require_settings, get_roblox_by_username
-from utils.autocompletes import user_autocomplete, infraction_type_autocomplete
+from erm import is_staff, management_predicate, is_management # 🛡️ Permissions
+from utils.constants import BLANK_COLOR # 🎨 UI color
+from utils.paginators import SelectPagination, CustomPage # 📏 Pagination helper
+from utils.utils import require_settings, get_roblox_by_username # 🛠️ Utility functions
+from utils.autocompletes import user_autocomplete, infraction_type_autocomplete # 🔍 Autocompletes
 
 
 class Infractions(commands.Cog):
     def __init__(self, bot):
         # 🛡️ Initialize the Infractions cog...
-        self.bot = bot
+        self.bot = bot # 🤖 Bot instance
 
     async def check_manager_role(self, ctx):
         # 🔍 Check for manager role...
         """Helper method to check if user has manager role from settings"""
-        settings = await self.bot.settings.find_by_id(ctx.guild.id)
-        if not settings or "infractions" not in settings:
-            return False
+        settings = await self.bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch settings
+        if not settings or "infractions" not in settings: # ❓ Missing config
+            return False # 🚫 No access
 
-        manager_roles = settings["infractions"].get("manager_roles", [])
-        return any(role.id in manager_roles for role in ctx.author.roles)
+        manager_roles = settings["infractions"].get("manager_roles", []) # 🔑 Role list
+        return any(role.id in manager_roles for role in ctx.author.roles) # 🛡️ Check inclusion
 
-    @commands.hybrid_group(name="infractions")
-    @is_# 🚦 Base infractions group command...
+    @commands.hybrid_group(name="infractions") # 🚦 Infractions group
+    @is_staff() # 🛡️ Staff only
+    async def infractions_group(self, ctx: commands.Context):
+        # 🚦 Base infractions group command...
         """Base command for infractions"""
-        if ctx.invoked_subcommand is None:
+        if ctx.invoked_subcommand is None: # ❓ No target
             return await ctx.send(
                 embed=discord.Embed(
-                    title="Invalid Subcommand",
-                    description="Please specify a valid subcommand.",
-                    color=BLANK_COLOR,
+                    title="Invalid Subcommand", # ❌ Missing subcmd
+                    description="Please specify a valid subcommand.", # 📝 Msg
+                    color=BLANK_COLOR, # 🎨 Color
                 )
             )
 
-    @commands.guild_only()
+    @commands.guild_only() # 🏠 Server only
     @commands.hybrid_command(
-        name="myinfractions",
-        description="View your infractions",
-        extras={"category": "Infractions"},
+        name="myinfractions", # 👁️ Self lookup
+        description="View your infractions", # 📝 Description
+        extras={"category": "Infractions"}, # 🏷️ Category
     )
-    @is_staff()
-    @require_settings()
+    @is_staff() # 🛡️ Staff only
+    @require_settings() # ⚙️ Config required
     async def myinfractions(self, ctx):
         # 👁️ View your own infractions...
-    @require_settings()
-    async def myinfractions(self, ctx):
         """View your infractions"""
-        settings = await self.bot.settings.find_by_id(ctx.guild.id)
-        if not settings:
+        settings = await self.bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch settings
+        if not settings: # ❓ Not setup
             return await ctx.send(
                 embed=discord.Embed(
-                    title="Not Setup",
-                    description="Your server is not setup.",
-                    color=BLANK_COLOR,
+                    title="Not Setup", # 📭 Setup missing
+                    description="Your server is not setup.", # 📝 Msg
+                    color=BLANK_COLOR, # 🎨 Color
                 )
             )
 
-        if not settings.get("infractions"):
+        if not settings.get("infractions"): # ❓ Submodule off
             return await ctx.send(
                 embed=discord.Embed(
-                    title="Not Enabled",
-                    description="Infractions are not enabled on this server.",
-                    color=BLANK_COLOR,
+                    title="Not Enabled", # 📭 Feature disabled
+                    description="Infractions are not enabled on this server.", # 📝 Msg
+                    color=BLANK_COLOR, # 🎨 Color
                 )
             )
 
-        infractions = []
-        async for infraction in self.bot.db.infractions.find(
-            {"guild_id": ctx.guild.id, "user_id": ctx.author.id}
-        ).sort("timestamp", -1):
-            infractions.append(infraction)
+        infractions = [] # 📋 Infraction list
+        async for infraction in self.bot.db.infractions.find( # 🔍 Search DB
+            {"guild_id": ctx.guild.id, "user_id": ctx.author.id} # 🆔 Filter
+        ).sort("timestamp", -1): # ⏳ Sort new -> old
+            infractions.append(infraction) # 📥 Add item
 
-        if len(infractions) == 0:
+        if len(infractions) == 0: # ❓ Empty check
             return await ctx.send(
                 embed=discord.Embed(
-                    title="No Infractions",
-                    description="You have no infractions.",
-                    color=BLANK_COLOR,
+                    title="No Infractions", # ✅ Clean record
+                    description="You have no infractions.", # 📝 Msg
+                    color=BLANK_COLOR, # 🎨 Color
                 ),
-                ephemeral=True,
+                ephemeral=True, # 🔒 Private
             )
 # 🖼️ Set up embed for infractions...
             
         def setup_embed() -> discord.Embed:
-            embed = discord.Embed(title="Your Infractions", color=BLANK_COLOR)
-            embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
-            return embed
+            embed = discord.Embed(title="Your Infractions", color=BLANK_COLOR) # 📄 Page embed
+            embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon) # 🏠 Server author
+            return embed # 📤 Ready
 
-        embeds = []
-        for infraction in infractions:
-            if len(embeds) == 0 or len(embeds[-1].fields) >= 4:
-                embeds.append(setup_embed())
+        embeds = [] # 📄 Embed list
+        for infraction in infractions: # 🔄 Process items
+            if len(embeds) == 0 or len(embeds[-1].fields) >= 4: # 📏 Scale check
+                embeds.append(setup_embed()) # 🆕 New page
 
-            embed = embeds[-1]
+            embed = embeds[-1] # 📄 Current page
             issuer = "System"
             if infraction.get("issuer_id"):
                 issuer = f"<@{infraction['issuer_id']}>"

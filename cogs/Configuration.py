@@ -1,14 +1,14 @@
-from copy import copy
-from pprint import pformat
+from copy import copy # 📋 Copy objects
+from pprint import pformat # 📄 Pretty print
 
-import discord
-from discord import HTTPException
-from discord.ext import commands
-from copy import deepcopy
+import discord # 🤖 Discord
+from discord import HTTPException # ❌ Discord errors
+from discord.ext import commands # 📦 Cog extensions
+from copy import deepcopy # 📜 Deep copying
 
-from erm import check_privacy, generator, is_management
-from utils.constants import blank_color, BLANK_COLOR
-from menus import (
+from erm import check_privacy, generator, is_management # 🕵️ Core features
+from utils.constants import blank_color, BLANK_COLOR # 🎨 Colors
+from menus import ( # 🔘 UI Components
     ChannelSelect,
     CustomSelectMenu,
     ERLCIntegrationConfiguration,
@@ -30,73 +30,73 @@ from menus import (
     WhitelistVehiclesManagement,
     PriorityRequestConfiguration,
 )
-from ui.MapleCounty import MapleCountyConfiguration
-from utils.paginators import CustomPage, SelectPagination
-from utils.utils import require_settings, generator, log_command_usage
+from ui.MapleCounty import MapleCountyConfiguration # 🗺️ Specific UI
+from utils.paginators import CustomPage, SelectPagination # 📄 Paging
+from utils.utils import require_settings, generator, log_command_usage # 🛠️ Utils
 
 
-class Configuration(commands.Cog):
+class Configuration(commands.Cog): # ⚙️ Cog for setup
     # ⚙️ Cog initialization
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): # 🤖 Constructor
+        self.bot = bot # 💾 Store bot
 
-    @commands.guild_only()
-    @commands.hybrid_command(
-        name="setup",
-        description="Begin using ERM!",
-        extras={"category": "Configuration"},
+    @commands.guild_only() # 🏠 Server only
+    @commands.hybrid_command( # 🆕 Hybrid setup
+        name="setup", # 🏷️ Setup name
+        description="Begin using ERM!", # 📝 Desc
+        extras={"category": "Configuration"}, # 🗄️ Category
     )
-    @is_management()
+    @is_management() # 👮 Management only
     # 🚀 Setup the bot
-    async def _setup(self, ctx: commands.Context):
-        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Setup")
-        bot = self.bot
-        from utils.constants import base_configuration
+    async def _setup(self, ctx: commands.Context): # 🚀 Start setup
+        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Setup") # 📝 Log
+        bot = self.bot # 🤖 Instance
+        from utils.constants import base_configuration # 📄 Defaults
 
-        current_settings = None
+        current_settings = None # 🔍 Settings holder
         # del base_configuration['_id']
-        modifications = {
-            "_id": ctx.guild.id,
-            **deepcopy(base_configuration),
+        modifications = { # 🆕 New setup data
+            "_id": ctx.guild.id, # 🆔 Server ID
+            **deepcopy(base_configuration), # 📋 New base copy
         }  # we create a deep copy because we don't want to modify the base configuration
-        msg = None
+        msg = None # 💬 Msg holder
 
-        current_settings = await bot.settings.find_by_id(ctx.guild.id)
-        if current_settings:
-            msg = await ctx.send(
+        current_settings = await bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch existing
+        if current_settings: # ⚠️ Setup exists
+            msg = await ctx.send( # 📣 Ask redo
                 embed=discord.Embed(
-                    title="Already Setup",
-                    description="You've already setup ERM in this server! Are you sure you would like to go through the setup process again?",
-                    color=blank_color,
+                    title="Already Setup", # 🔴 Title
+                    description="You've already setup ERM in this server! Are you sure you would like to go through the setup process again?", # ❓ Question
+                    color=blank_color, # ⚪ Color
                 ),
-                view=(confirmation_view := YesNoColourMenu(ctx.author.id)),
+                view=(confirmation_view := YesNoColourMenu(ctx.author.id)), # 🔘 Confirmation
             )
-            timeout = await confirmation_view.wait()
-            if confirmation_view.value is False:
-                return await msg.edit(
+            timeout = await confirmation_view.wait() # ⏱️ Wait
+            if confirmation_view.value is False: # ❌ Cancelled
+                return await msg.edit( # 📣 Cancel msg
                     embed=discord.Embed(
-                        title="Successfully Cancelled",
-                        description="Cancelled the setup process for this server. All settings have been kept.",
-                        color=blank_color,
+                        title="Successfully Cancelled", # ✅ Title
+                        description="Cancelled the setup process for this server. All settings have been kept.", # 📝 Desc
+                        color=blank_color, # ⚪ Color
                     ),
-                    view=None,
+                    view=None, # 🗑️ Remove UI
                 )
 
-        if msg is None:
-            msg = await ctx.send(
+        if msg is None: # ✨ First setup
+            msg = await ctx.send( # 📣 Opening
                 embed=discord.Embed(
-                    title="Let's get started!",
-                    description="To setup ERM, press the arrow button below!",
-                    color=blank_color,
+                    title="Let's get started!", # 🚀 Title
+                    description="To setup ERM, press the arrow button below!", # 📝 Instructions
+                    color=blank_color, # ⚪ Color
                 ),
-                view=(next_view := NextView(bot, ctx.author.id)),
+                view=(next_view := NextView(bot, ctx.author.id)), # 🔘 Next button
             )
-        else:
-            await msg.edit(
+        else: # 🔄 Setup confirmed redo
+            await msg.edit( # 📣 Redeploy msg
                 embed=discord.Embed(
-                    title="Let's get started!",
-                    description="To setup ERM, press the arrow button below!",
-                    color=blank_color,
+                    title="Let's get started!", # 🚀 Title
+                    description="To setup ERM, press the arrow button below!", # 📝 Instructions
+                    color=blank_color, # ⚪ Color
                 ),
                 view=(next_view := NextView(bot, ctx.author.id)),
             )

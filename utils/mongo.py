@@ -1,5 +1,5 @@
-import collections
-import logging
+import collections # 🗄️ Standard collections
+import logging # 📝 Logging module
 
 """
 A helper file for using mongo db
@@ -11,48 +11,48 @@ on init and the document to create an instance on and boom
 
 class Document:
     # 🗄️ Helper class for MongoDB document operations
-    def __init__(self, connection, document_name):
+    def __init__(self, connection, document_name): # 🏗️ Initialize document helper
         """
         Our init function, sets up the conenction to the specified document
         Params:
          - connection (Mongo Connection) : Our database connection
          - documentName (str) : The document this instance should be
         """
-        self.db = connection[document_name]
-        self.logger = logging.getLogger(__name__)
+        self.db = connection[document_name] # 🔗 Set document handle
+        self.logger = logging.getLogger(__name__) # 📝 Set logger
 
     # <-- Pointer Methods -->
     # ⬆️ Wrapper for update_by_id
-    async def update(self, dict):
+    async def update(self, dict): # 🔄 Update pointer
         """
         For simpler calls, points to self.update_by_id
         """
-        await self.update_by_id(dict)
+        await self.update_by_id(dict) # 🚀 Call actual update
 
     # 🔍 Wrapper for find_by_id
-    async def get_by_id(self, id):
+    async def get_by_id(self, id): # 🔍 Get pointer
         """
         This is essentially find_by_id so point to that
         """
-        return await self.find_by_id(id)
+        return await self.find_by_id(id) # 📥 Return found data
 
     # 🔎 Wrapper for find_by_id
-    async def find(self, id):
+    async def find(self, id): # 🔎 Find pointer
         """
         For simpler calls, points to self.find_by_id
         """
-        return await self.find_by_id(id)
+        return await self.find_by_id(id) # 📥 Return found data
 
     # 🗑️ Wrapper for delete_by_id
-    async def delete(self, id):
+    async def delete(self, id): # 🗑️ Delete pointer
         """
         For simpler calls, points to self.delete_by_id
         """
-        await self.delete_by_id(id)
+        await self.delete_by_id(id) # 💣 Execute deletion
 
     # <-- Actual Methods -->
     # 🆔 Find a document by its ID
-    async def find_by_id(self, id):
+    async def find_by_id(self, id): # 📍 Targeted search
         """
         Returns the data found under `id`
         Params:
@@ -61,39 +61,39 @@ class Document:
          - None if nothing is found
          - If somethings found, return that
         """
-        return await self.db.find_one({"_id": id})
+        return await self.db.find_one({"_id": id}) # 📥 Return single document
 
     # ❌ Delete a document by its ID
-    async def delete_by_id(self, id):
+    async def delete_by_id(self, id): # 📍 Targeted deletion
         """
         Deletes all items found with _id: `id`
         Params:
          -  id () : The id to search for and delete
         """
-        if not await self.find_by_id(id):
-            return
+        if not await self.find_by_id(id): # ❓ Document exists
+            return # 🚫 Skip if missing
 
-        await self.db.delete_many({"_id": id})
+        await self.db.delete_many({"_id": id}) # 💣 Remove document(s)
 
     # ➕ Insert a new document
-    async def insert(self, dict):
+    async def insert(self, dict): # 📥 Store new data
         """
         insert something into the db
         Params:
         - dict (Dictionary) : The Dictionary to insert
         """
         # Check if it's actually a Dictionary
-        if not isinstance(dict, collections.abc.Mapping):
-            raise TypeError("Expected Dictionary.")
+        if not isinstance(dict, collections.abc.Mapping): # 🛡️ Validation
+            raise TypeError("Expected Dictionary.") # 💥 Wrong type
 
         # Always use your own _id
-        if "_id" not in dict:
-            raise KeyError("_id not found in supplied dict.")
+        if "_id" not in dict: # 🛡️ Required field check
+            raise KeyError("_id not found in supplied dict.") # 💥 ID missing
 
-        await self.db.insert_one(dict)
+        await self.db.insert_one(dict) # 📥 Perform insertion
 
     # 🔄 Update or insert a document
-    async def upsert(self, dict):
+    async def upsert(self, dict): # 🔄 Smart update
         """
         Makes a new item in the document, if it already exists
         it will update that item instead

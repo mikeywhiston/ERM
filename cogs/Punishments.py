@@ -1,28 +1,28 @@
-import datetime
-import json
-import typing
+import datetime # 📅 Dates
+import json # 📜 JSON processing
+import typing # 📑 Types
 
-import aiohttp
-import discord
-import pytz
-import reactionmenu
-import roblox
-from decouple import config
-from discord import app_commands
-from discord.ext import commands
-from reactionmenu import ViewButton, ViewMenu
-from reactionmenu.abc import _PageController
-import pytz
-from datamodels.Settings import Settings
-from datamodels.Warnings import WarningItem
-from erm import (
+import aiohttp # 🌐 HTTP requests
+import discord # 🤖 Discord
+import pytz # 🌍 Timezones
+import reactionmenu # 🔘 Component menus
+import roblox # 🧱 Roblox API
+from decouple import config # ⚙️ Config env
+from discord import app_commands # 🛠️ Slash commands
+from discord.ext import commands # 📦 Cog extensions
+from reactionmenu import ViewButton, ViewMenu # 🔘 UI elements
+from reactionmenu.abc import _PageController # 📄 Pagination base
+import pytz # 🌍 Global timezones
+from datamodels.Settings import Settings # ⚙️ Settings model
+from datamodels.Warnings import WarningItem # ⚠️ Warning model
+from erm import ( # 💼 Core checks
     admin_predicate,
     generator,
     is_management,
     is_staff,
     management_predicate,
 )
-from menus import (
+from menus import ( # 🔘 User Interface
     ChannelSelect,
     CustomisePunishmentType,
     CustomModalView,
@@ -39,11 +39,11 @@ from menus import (
     PunishmentModifier,
     CustomModal,
 )
-from utils.AI import AI
-from utils.autocompletes import punishment_autocomplete, user_autocomplete
-from utils.constants import BLANK_COLOR, GREEN_COLOR
-from utils.paginators import SelectPagination, CustomPage
-from utils.utils import (
+from utils.AI import AI # 🧠 AI tools
+from utils.autocompletes import punishment_autocomplete, user_autocomplete # ⌨️ Input aids
+from utils.constants import BLANK_COLOR, GREEN_COLOR # 🎨 Colors
+from utils.paginators import SelectPagination, CustomPage # 📄 Paging
+from utils.utils import ( # 🛠️ Utilities
     admin_check,
     failure_embed,
     removesuffix,
@@ -53,51 +53,51 @@ from utils.utils import (
     new_failure_embed,
     time_converter,
 )
-from utils.timestamp import td_format
+from utils.timestamp import td_format # ⏱️ Formatting
 
 
-class Punishments(commands.Cog):
+class Punishments(commands.Cog): # 🔨 Cog for punishments
     # ⚙️ Cog initialization
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): # 🤖 Constructor
+        self.bot = bot # 💾 Storage
 
-    @commands.guild_only()
-    @commands.hybrid_command(
-        name="punish",
-        aliases=["p"],
-        description="Punish a user",
-        extras={"category": "Punishments"},
-        usage="punish <user> <type> <reason>",
+    @commands.guild_only() # 🏠 Server only
+    @commands.hybrid_command( # 🆕 Hybrid command
+        name="punish", # 🏷️ Punish name
+        aliases=["p"], # 🔀 Shortcut
+        description="Punish a user", # 📝 Description
+        extras={"category": "Punishments"}, # 🗄️ Category
+        usage="punish <user> <type> <reason>", # 📋 Usage
     )
-    @is_staff()
-    @require_settings()
-    @app_commands.autocomplete(type=punishment_autocomplete)
-    @app_commands.autocomplete(user=user_autocomplete)
-    @app_commands.describe(type="The type of punishment to give.")
+    @is_staff() # 👮 Staff only
+    @require_settings() # ⚙️ Settings req
+    @app_commands.autocomplete(type=punishment_autocomplete) # ⌨️ Type hints
+    @app_commands.autocomplete(user=user_autocomplete) # ⌨️ User hints
+    @app_commands.describe(type="The type of punishment to give.") # 📝 Type desc
     @app_commands.describe(
-        user="What's their username? You can mention a Discord user, or provide a ROBLOX username."
+        user="What's their username? You can mention a Discord user, or provide a ROBLOX username." # 📝 User desc
     )
-    @app_commands.describe(reason="What is your reason for punishing this user?")
+    @app_commands.describe(reason="What is your reason for punishing this user?") # 📝 Reason desc
     # 🔨 Punish a user
-    async def punish(self, ctx, user: str, type: str, *, reason: str):
-        if type.lower() == "warn":
-            type = "Warning"
+    async def punish(self, ctx, user: str, type: str, *, reason: str): # 🔨 Punish logic
+        if type.lower() == "warn": # ⚖️ Warn shortcut
+            type = "Warning" # 🎯 Remap
 
-        settings = await self.bot.settings.find_by_id(ctx.guild.id) or {}
-        if not settings:
-            return await ctx.send(
+        settings = await self.bot.settings.find_by_id(ctx.guild.id) or {} # 🔍 Find guild config
+        if not settings: # ❌ Missing settings
+            return await ctx.send( # 📣 Error msg
                 embed=discord.Embed(
-                    title="Not Setup",
-                    description="Your server is not setup.",
-                    color=BLANK_COLOR,
+                    title="Not Setup", # 🔴 Title
+                    description="Your server is not setup.", # 📝 Message
+                    color=BLANK_COLOR, # ⚪ Color
                 )
             )
 
-        if not (settings.get("punishments") or {}).get("enabled", False):
-            return await ctx.send(
+        if not (settings.get("punishments") or {}).get("enabled", False): # 🚫 Check enabled
+            return await ctx.send( # 📣 Error msg
                 embed=discord.Embed(
-                    title="Not Enabled",
-                    description="Your server has punishments disabled.",
+                    title="Not Enabled", # 🔴 Title
+                    description="Your server has punishments disabled.", # 📝 Message
                     color=BLANK_COLOR,
                 )
             )

@@ -1,103 +1,103 @@
-import discord
-from discord.ext import commands
-import asyncio
-import datetime
-import pytz
-from erm import is_management, is_staff, is_admin
-from utils.advanced import FakeMessage
-from utils.constants import BLANK_COLOR, GREEN_COLOR
-from menus import ManageActions, CounterButton, ViewVotersButton
-from discord import app_commands
-from utils.autocompletes import action_autocomplete
-from utils.paginators import CustomPage, SelectPagination
-from utils.utils import get_prefix, interpret_content, interpret_embed, log_command_usage
+import discord # 🟦 Discord API
+from discord.ext import commands # 📦 Command framework
+import asyncio # 🕒 Async operations
+import datetime # 📅 Date/time
+import pytz # 🌍 Timezones
+from erm import is_management, is_staff, is_admin # 🛡️ Permissions
+from utils.advanced import FakeMessage # 🎭 Fake msg simulation
+from utils.constants import BLANK_COLOR, GREEN_COLOR # 🎨 UI colors
+from menus import ManageActions, CounterButton, ViewVotersButton # 📑 UI components
+from discord import app_commands # 🏷️ Slash commands
+from utils.autocompletes import action_autocomplete # 🔍 Autocomplete
+from utils.paginators import CustomPage, SelectPagination # 📏 Pagination
+from utils.utils import get_prefix, interpret_content, interpret_embed, log_command_usage # 🛠️ Utility functions
 
 
 class Actions(commands.Cog):
     def __init__(self, bot: commands.Bot):
         # 🏗️ Initialize the Actions cog...
-        self.bot: commands.Bot = bot
+        self.bot: commands.Bot = bot # 🤖 Bot instance
 
     @commands.hybrid_group(
-        name="actions", description="Manage your ERM Actions easily."
+        name="actions", description="Manage your ERM Actions easily." # 📂 Group command
     )
     async def actions(self, ctx: commands.Context):
         # 📂 Base actions group command...
-        pass
+        pass # 🛑 Root group
 
-    @actions.command(name="manage", description="Manage your ERM Actions easily.")
-    @is_admin()
+    @actions.command(name="manage", description="Manage your ERM Actions easily.") # ⚙️ Manage subcmd
+    @is_admin() # 🛡️ Admin only
     async def actions_manage(self, ctx: commands.Context):
         # 🛠️ Manage server-wide actions...
-        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Actions Manage")
-        actions = [i async for i in self.bot.db.actions.find({"Guild": ctx.guild.id})]
+        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Actions Manage") # 📝 Log
+        actions = [i async for i in self.bot.db.actions.find({"Guild": ctx.guild.id})] # 🔍 Fetch actions
 
-        embeds = []
-        current_embed = discord.Embed(title="Actions", color=BLANK_COLOR).set_author(
-            name=ctx.guild.name, icon_url=ctx.guild.icon
+        embeds = [] # 📑 Embed list
+        current_embed = discord.Embed(title="Actions", color=BLANK_COLOR).set_author( # 📄 Initial embed
+            name=ctx.guild.name, icon_url=ctx.guild.icon # 🏠 Server icon
         )
 
-        for item in actions:
-            if len(current_embed.fields) >= 5:
-                embeds.append(current_embed)
-                current_embed = discord.Embed(
-                    title="Actions (cont.)", color=BLANK_COLOR
+        for item in actions: # 🔄 Iterate actions
+            if len(current_embed.fields) >= 5: # 📏 Field limit
+                embeds.append(current_embed) # 📥 Save current
+                current_embed = discord.Embed( # 🆕 Start new
+                    title="Actions (cont.)", color=BLANK_COLOR # 📄 Overflow title
                 )
 
             current_embed.add_field(
-                name=item["ActionName"],
+                name=item["ActionName"], # 🏷️ Name
                 value=(
-                    f"> **Name:** {item['ActionName']}\n"
-                    f"> **ID:** `{item['ActionID']}`\n"
-                    f"> **Triggered:** {item['Triggers']}"
+                    f"> **Name:** {item['ActionName']}\n" # 📝 Name
+                    f"> **ID:** `{item['ActionID']}`\n" # 🆔 ID
+                    f"> **Triggered:** {item['Triggers']}" # 📈 Usage
                 ),
-                inline=False,
+                inline=False, # 📏 Wide
             )
 
-        if len(current_embed.fields) == 0:
+        if len(current_embed.fields) == 0: # ❓ Empty check
             current_embed.add_field(
-                name="No Actions",
-                value="> There are no actions in this server.",
-                inline=False,
+                name="No Actions", # 📭 None found
+                value="> There are no actions in this server.", # 📝 Text
+                inline=False, # 📏 Wide
             )
 
-        embeds.append(current_embed)
+        embeds.append(current_embed) # 📥 Add final
 
-        view = ManageActions(self.bot, ctx.author.id)
-        if len(embeds) > 9:
-            paginator = SelectPagination(
+        view = ManageActions(self.bot, ctx.author.id) # 🔘 Management UI
+        if len(embeds) > 9: # 📏 Large list
+            paginator = SelectPagination( # 📏 Create paginator
                 self.bot, ctx.author.id, [CustomPage(
-                    embeds=embeds[i],
-                    view=view,
-                    identifier=i
-                ) for i in range(len(embeds))], timeout=60
+                    embeds=embeds[i], # 📄 Page embed
+                    view=view, # 🔘 UI
+                    identifier=i # 🆔 Index
+                ) for i in range(len(embeds))], timeout=60 # ⌛ Timeout
             )
-            await ctx.send(embeds=embeds[0].embeds, view=paginator.get_current_view())
-        else:
-            await ctx.send(embeds=embeds, view=view)
-        timeout = await view.wait()
-        if timeout:
-            return
+            await ctx.send(embeds=embeds[0].embeds, view=paginator.get_current_view()) # 📤 Send paginated
+        else: # 📏 Small list
+            await ctx.send(embeds=embeds, view=view) # 📤 Send directly
+        timeout = await view.wait() # ⏳ Interaction
+        if timeout: # ⌛ Timed out
+            return # ↩️ Exit
 
-    @actions.command(name="execute", description="Execute an ERM Action in your server")
-    @is_staff()
-    @app_commands.autocomplete(action=action_autocomplete)
+    @actions.command(name="execute", description="Execute an ERM Action in your server") # 🚀 Execute subcmd
+    @is_staff() # 🛡️ Staff only
+    @app_commands.autocomplete(action=action_autocomplete) # 🔍 Autocomplete
     async def action_execute(self, ctx: commands.Context, *, action: str):
         # 🚀 Manually execute an action...
-        verbose = False
-        dnr = False
-        if "--verbose" in action:
-            action = action.replace(" --verbose", "")
-            verbose = True
+        verbose = False # 📢 Verbosity flag
+        dnr = False # 🛡️ Do not run flag
+        if "--verbose" in action: # 🔍 Check flag
+            action = action.replace(" --verbose", "") # 🧹 Clean input
+            verbose = True # ✅ Set verbose
         try:
-            dnr = getattr(ctx, "dnr")  # prevent privilege bypassing! no black hats
-        except Exception as _:
-            dnr = False
+            dnr = getattr(ctx, "dnr")  # prevent privilege bypassing! no black hats # 🛡️ Security check
+        except Exception as _: # ❌ Error
+            dnr = False # 🚫 Default false
 
-        ctx.verbose = verbose
+        ctx.verbose = verbose # 📢 Attach flag
 
         actions = [
-            i async for i in self.bot.actions.db.find({"Guild": ctx.guild.id})
+            i async for i in self.bot.actions.db.find({"Guild": ctx.guild.id}) # 🔍 Fetch guild actions
         ] or []
         action_obj = None
         for item in actions:

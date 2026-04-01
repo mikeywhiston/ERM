@@ -1,16 +1,16 @@
-import datetime
-from io import BytesIO
-import logging
-import typing
+import datetime # 📅 Dates
+from io import BytesIO # 💾 Binary stream
+import logging # 📝 Error logging
+import typing # 📑 Types
 
-import discord
-import pytz
-from decouple import config
-from discord import app_commands
-from discord.ext import commands
+import discord # 🤖 Discord
+import pytz # 🌍 Timezones
+from decouple import config # ⚙️ Config env
+from discord import app_commands # 🛠️ Slash commands
+from discord.ext import commands # 📦 Cog extensions
 
-from datamodels.ShiftManagement import ShiftItem
-from erm import (
+from datamodels.ShiftManagement import ShiftItem # 📊 Shift model
+from erm import ( # 💼 Core features
     credentials_dict,
     is_management,
     is_staff,
@@ -18,18 +18,18 @@ from erm import (
     management_predicate,
     scope,
 )
-from menus import (
+from menus import ( # 🔘 User Interface
     CustomExecutionButton,
     CustomSelectMenu,
     RequestGoogleSpreadsheet,
     ShiftMenu,
     AdministratedShiftMenu,
 )
-from utils.autocompletes import shift_type_autocomplete, all_shift_type_autocomplete
-from utils.constants import BLANK_COLOR, GREEN_COLOR, ORANGE_COLOR, RED_COLOR
-from utils.paginators import SelectPagination, CustomPage
-from utils.timestamp import td_format
-from utils.utils import (
+from utils.autocompletes import shift_type_autocomplete, all_shift_type_autocomplete # ⌨️ Autocomplete
+from utils.constants import BLANK_COLOR, GREEN_COLOR, ORANGE_COLOR, RED_COLOR # 🎨 Colors
+from utils.paginators import SelectPagination, CustomPage # 📄 Paging
+from utils.timestamp import td_format # ⏱️ Timestamps
+from utils.utils import ( # 🛠️ Utilities
     get_elapsed_time,
     new_failure_embed,
     require_settings,
@@ -37,64 +37,64 @@ from utils.utils import (
 )
 
 
-class ShiftLogging(commands.Cog):
+class ShiftLogging(commands.Cog): # 🕒 Cog for logging shifts
     # ⚙️ Cog initialization
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): # 🤖 Constructor
+        self.bot = bot # 💾 Storage
 
-    @commands.hybrid_group(
-        name="duty"
-    ) # hey, maybe dont delete this next time noagonzales.
+    @commands.hybrid_group( # 👨‍👩‍👧‍👦 Group command
+        name="duty" # 🏷️ Duty name
+    ) # ⚠️ Comment fix
     # 🕒 Duty command group
-    async def duty(self, ctx):
-        pass
+    async def duty(self, ctx): # 📁 Main duty command
+        pass # ⏭️ Skip
     
 
-    @commands.guild_only()
-    @duty.command(
-        name="time",
-        description="Allows you to check your shift time, as well as past data.",
-        extras={"category": "Shift Management"},
-        with_app_command=True,
+    @commands.guild_only() # 🏠 Server only
+    @duty.command( # 🆕 Subcommand
+        name="time", # 🏷️ Time name
+        description="Allows you to check your shift time, as well as past data.", # 📝 Desc
+        extras={"category": "Shift Management"}, # 🗄️ Category
+        with_app_command=True, # ✅ Slash enabled
     )
-    @is_staff()
-    @require_settings()
-    @app_commands.describe(member = "The staff member to view shifts for.", shift_type="The type of shift to view.")
-    @app_commands.autocomplete(shift_type=shift_type_autocomplete)
+    @is_staff() # 👮 Staff only
+    @require_settings() # ⚙️ Reqs settings
+    @app_commands.describe(member = "The staff member to view shifts for.", shift_type="The type of shift to view.") # 📋 Params
+    @app_commands.autocomplete(shift_type=shift_type_autocomplete) # ⌨️ Type autocomplete
     # ⏱️ View duty time
-    async def duty_time(self, ctx, member: typing.Optional[discord.Member] = None, shift_type: str = "Default"):
-        if isinstance(member, str) and not shift_type:
-            shift_type = member
-            member = None
-        if self.bot.shift_management_disabled:
-            return await new_failure_embed(
+    async def duty_time(self, ctx, member: typing.Optional[discord.Member] = None, shift_type: str = "Default"): # 📊 Show time
+        if isinstance(member, str) and not shift_type: # 🔄 Type fix
+            shift_type = member # 🎯 Swap
+            member = None # 🗑️ Reset
+        if self.bot.shift_management_disabled: # 🛠️ Maintenance Check
+            return await new_failure_embed( # 📣 Error msg
                 ctx,
-                "Maintenance",
-                "This command is currently disabled as ERM is currently undergoing maintenance updates. This command will be turned off briefly to ensure that no data is lost during the maintenance.",
+                "Maintenance", # ❌ Title
+                "This command is currently disabled as ERM is currently undergoing maintenance updates. This command will be turned off briefly to ensure that no data is lost during the maintenance.", # 📝 Message
             )
 
-        bot = self.bot
-        if not member:
-            member = ctx.author
+        bot = self.bot # 🤖 Bot instance
+        if not member: # 👤 Self check
+            member = ctx.author # 🎯 Default to sender
 
-        configItem = await bot.settings.find_by_id(ctx.guild.id)
-        if not configItem.get("shift_management", {}).get("enabled", False):
-            return await new_failure_embed(ctx, "Not Enabled", "Shift Logging is not enabled on this server.")
+        configItem = await bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch config
+        if not configItem.get("shift_management", {}).get("enabled", False): # 🚫 Check enabled
+            return await new_failure_embed(ctx, "Not Enabled", "Shift Logging is not enabled on this server.") # 📣 Fail
 
-        shift_types = configItem.get("shift_types", {}).get("types", [])
-        selected_shift_type = None
-        shift_type_value = (shift_type or "").lower()
+        shift_types = configItem.get("shift_types", {}).get("types", []) # 📊 Get types
+        selected_shift_type = None # 🎯 Selected type
+        shift_type_value = (shift_type or "").lower() # 🔡 Normalized input
 
-        msg = None
+        msg = None # 💬 Message holder
 
-        if shift_types and len(shift_types) > 1:
-            if shift_type_value != "all" and shift_type_value not in [st["name"].lower() for st in shift_types]:
-                view = CustomSelectMenu(
-                    ctx.author.id,
+        if shift_types and len(shift_types) > 1: # 🔀 Multiple types
+            if shift_type_value != "all" and shift_type_value not in [st["name"].lower() for st in shift_types]: # 🔍 Valid check
+                view = CustomSelectMenu( # 🔘 Show menu
+                    ctx.author.id, # 🆔 User check
                     [
-                        discord.SelectOption(label=st["name"], value=st["name"]) for st in shift_types
+                        discord.SelectOption(label=st["name"], value=st["name"]) for st in shift_types # ✨ Options
                     ] + [
-                        discord.SelectOption(label="All", value="all", description="All shift types")
+                        discord.SelectOption(label="All", value="all", description="All shift types") # 🌟 All option
                     ],
                 )
                 msg = await ctx.reply(

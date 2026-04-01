@@ -1,103 +1,103 @@
-import datetime
-import discord
-import pytz
-from discord.ext import commands
-from erm import is_management
+import datetime # 📅 Date/time utils
+import discord # 🟦 Discord API
+import pytz # 🌍 Timezone support
+from discord.ext import commands # 📦 Command framework
+from erm import is_management # 🛡️ Permissions
 from menus import (
-    YesNoMenu,
-    AcknowledgeMenu,
-    YesNoExpandedMenu,
-    CustomModalView,
-    CustomSelectMenu,
-    MultiSelectMenu,
-    RoleSelect,
-    ExpandedRoleSelect,
-    MessageCustomisation,
-    EmbedCustomisation,
-    ChannelSelect,
+    YesNoMenu, # 🎨 Choice menu
+    AcknowledgeMenu, # ✅ Confirmation UI
+    YesNoExpandedMenu, # 📊 Detail menu
+    CustomModalView, # 📝 Modal input
+    CustomSelectMenu, # 📑 Dropdown menu
+    MultiSelectMenu, # 📋 Multiple choice
+    RoleSelect, # 🎭 Role picker
+    ExpandedRoleSelect, # 🎭 Detail picker
+    MessageCustomisation, # ✉️ Msg editor
+    EmbedCustomisation, # 📄 Embed editor
+    ChannelSelect, # 📺 Channel picker
 )
 
-successEmoji = "<:ERMCheck:1111089850720976906>"
-pendingEmoji = "<:ERMPending:1111097561588183121>"
-errorEmoji = "<:ERMClose:1111101633389146223>"
-embedColour = 0xED4348
+successEmoji = "<:ERMCheck:1111089850720976906>" # ✅ Check
+pendingEmoji = "<:ERMPending:1111097561588183121>" # ⏳ Wait
+errorEmoji = "<:ERMClose:1111101633389146223>" # ❌ Cross
+embedColour = 0xED4348 # 🎨 Red
 
 
 class StaffConduct(commands.Cog):
     def __init__(self, bot):
         # 🛡️ Initialize the Staff Conduct cog...
-        self.bot = bot
+        self.bot = bot # 🤖 Bot instance
 
     async def check_settings(self, ctx: commands.Context):
         # 🔍 Verify staff conduct settings...
         error_text = "<:ERMClose:1111101633389146223> **{},** this server isn't setup with ERM! Please run `/setup` to setup the bot before trying to manage infractions".format(
             ctx.author.name
-        )
-        guild_settings = await self.bot.settings.find_by_id(ctx.guild.id)
+        ) # ❌ Setup required
+        guild_settings = await self.bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch settings
         # print(guild_settings)
         # print(guild_settings.get('staff_conduct'))
-        if not guild_settings:
-            await ctx.reply(error_text)
-            return -1
+        if not guild_settings: # ❓ Missing doc
+            await ctx.reply(error_text) # 📤 Notify
+            return -1 # ↩️ Exit
 
-        if guild_settings.get("staff_conduct") is not None:
-            return 1
-        else:
-            return 0
+        if guild_settings.get("staff_conduct") is not None: # ✅ Module setup
+            return 1 # 👍 OK
+        else: # ❓ Mod missing
+            return 0 # 🆕 First time
 
     @commands.hybrid_group(
-        name="infraction",
-        description="Manage infractions with ease!",
-        extras={"category": "Staff Conduct"},
+        name="infraction", # 🚦 Infraction root
+        description="Manage infractions with ease!", # 📝 Description
+        extras={"category": "Staff Conduct"}, # 🏷️ Category
     )
-    @is_management()
+    @is_management() # 🛡️ Management only
     async def infraction(self, ctx: commands.Context):
         # 🚦 Base infraction group command...
-        pass
+        pass # 🛑 Root group
 
     @infraction.command(
-        name="manage",
-        description="Manage staff infractions, staff conduct, and custom integrations!",
-        extras={"category": "Staff Conduct"},
+        name="manage", # ⚙️ Manage subcmd
+        description="Manage staff infractions, staff conduct, and custom integrations!", # 📝 Description
+        extras={"category": "Staff Conduct"}, # 🏷️ Category
     )
-    @is_management()
+    @is_management() # 🛡️ Management only
     async def manage(self, ctx: commands.Context):
         # ⚙️ Manage staff conduct system...
-        bot = self.bot
-        guild_settings = await bot.settings.find_by_id(ctx.guild.id)
-        result = await self.check_settings(ctx)
-        if result == -1:
-            return
-        first_time_setup = bool(not result)
+        bot = self.bot # 🤖 Bot ref
+        guild_settings = await bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch settings
+        result = await self.check_settings(ctx) # 🔍 Check state
+        if result == -1: # 🛑 Error
+            return # ↩️ Exit
+        first_time_setup = bool(not result) # ✨ New install flag
 
-        if first_time_setup:
-            view = YesNoExpandedMenu(ctx.author.id)
+        if first_time_setup: # 🌟 Start wizard
+            view = YesNoExpandedMenu(ctx.author.id) # 🔘 Confirm view
             message = await ctx.reply(
-                f"{pendingEmoji} **{ctx.author.name},** it looks like your server hasn't setup **Staff Conduct**! Do you want to run the **First-time Setup** wizard?",
-                view=view,
+                f"{pendingEmoji} **{ctx.author.name},** it looks like your server hasn't setup **Staff Conduct**! Do you want to run the **First-time Setup** wizard?", # ❓ Prompt
+                view=view, # 🔘 View
             )
-            timeout = await view.wait()
-            if timeout:
-                return
-            if not view.value:
+            timeout = await view.wait() # ⏳ Interaction
+            if timeout: # ⌛ Timed out
+                return # ↩️ Exit
+            if not view.value: # ❌ User declined
                 await message.edit(
-                    content=f"{errorEmoji} **{ctx.author.name},** I have cancelled the setup wizard for **Staff Conduct.**",
-                    view=None,
+                    content=f"{errorEmoji} **{ctx.author.name},** I have cancelled the setup wizard for **Staff Conduct.**", # 📢 Close
+                    view=None, # 🧹 Remove view
                 )
-                return
+                return # ↩️ Exit
 
             embed = discord.Embed(
-                title="<:ERMAlert:1113237478892130324> Information", color=embedColour
+                title="<:ERMAlert:1113237478892130324> Information", color=embedColour # 📄 Welcome embed
             )
             embed.set_thumbnail(
-                url="https://cdn.discordapp.com/emojis/1113210855891423302.webp?size=96&quality=lossless"
+                url="https://cdn.discordapp.com/emojis/1113210855891423302.webp?size=96&quality=lossless" # 🖼️ Icon
             )
             embed.add_field(
-                name="<:ERMList:1111099396990435428> What is Staff Conduct?",
-                value=">>> Staff Conduct is a module within ERM which allows for infractions on your Staff team. Not only does it allow for manual punishments and infractions to others to be expanded and customised, it also allows for automatic punishments for those that don't meet activity requirements, integrating with other ERM modules.",
-                inline=False,
+                name="<:ERMList:1111099396990435428> What is Staff Conduct?", # ❓ QA
+                value=">>> Staff Conduct is a module within ERM which allows for infractions on your Staff team. Not only does it allow for manual punishments and infractions to others to be expanded and customised, it also allows for automatic punishments for those that don't meet activity requirements, integrating with other ERM modules.", # 📖 Explanation
+                inline=False, # 📏 Width
             )
-            embed.add_field(
+            embed.add_field( # 📝 Added info
                 name="<:ERMList:1111099396990435428> How does this module work?",
                 value=">>> For manual punishment assignment, you make your own Infraction Types, as dictated throughout this setup wizard. You can then infract staff members by using `/infract`, which will assign that Infraction Type to the staff individual. You will be able to see all infractions that individual has received, as well as any notes or changes that have been made over the course of their staff career.",
                 inline=False,

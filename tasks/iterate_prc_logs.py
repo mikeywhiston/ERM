@@ -1,24 +1,24 @@
-import re
-from typing import List
-import discord
-from discord.ext import commands, tasks
-import time
-import logging
-import asyncio
-import aiohttp
-import pytz
-import roblox
-import datetime
-from decouple import config
+import re # 🔍 Import re
+from typing import List # 📑 Import List
+import discord # 📦 Import discord
+from discord.ext import commands, tasks # 🚀 Import commands, tasks
+import time # ⏱️ Import time
+import logging # 📝 Import logging
+import asyncio # 🔄 Import asyncio
+import aiohttp # 🌐 Import aiohttp
+import pytz # 🌍 Import pytz
+import roblox # 🧱 Import roblox
+import datetime # 📅 Import datetime
+from decouple import config # ⚙️ Import config
 
-from utils.prc_api import JoinLeaveLog, Player
-from utils.utils import fetch_get_channel, has_whitelabel, staff_check
-from utils import prc_api
-from utils.constants import BLANK_COLOR, GREEN_COLOR, RED_COLOR
-from menus import AvatarCheckView
-from utils.username_check import UsernameChecker
+from utils.prc_api import JoinLeaveLog, Player # 👤 Import API models
+from utils.utils import fetch_get_channel, has_whitelabel, staff_check # 🛠️ Import utils
+from utils import prc_api # 🔌 Import prc_api
+from utils.constants import BLANK_COLOR, GREEN_COLOR, RED_COLOR # 🎨 Import colors
+from menus import AvatarCheckView # 🖼️ Import AvatarCheckView
+from utils.username_check import UsernameChecker # 🆔 Import UsernameChecker
 
-global_aggregate = [
+global_aggregate = [ # 📊 DB Query for log-enabled guilds
     {
         "$match": {
             "ERLC": {"$exists": True},
@@ -40,64 +40,61 @@ global_aggregate = [
             "as": "server_key",
         }
     },
-    {"$match": {"server_key": {"$ne": []}}},
+    {"$match": {"server_key": {"$ne": []}}}, # 🔑 Ensure API key exists
 ]
 
-count_aggregate = global_aggregate + [{"$count": "total"}]
+count_aggregate = global_aggregate + [{"$count": "total"}] # 🔢 Count query
 
 
-async def iterate_prc_logs_global(bot):
-    # 🌐 Processing PRC logs globally...
+async def iterate_prc_logs_global(bot): # 🌐 Processing PRC logs globally...
     try:
-        server_count = await bot.settings.db.aggregate(count_aggregate).to_list(1)
-        server_count = server_count[0]["total"] if server_count else 0
+        server_count = await bot.settings.db.aggregate(count_aggregate).to_list(1) # 🔢 Get total servers
+        server_count = server_count[0]["total"] if server_count else 0 # 🏷️ Default to 0
 
-        logging.warning(f"[ITERATE] Starting iteration for {server_count} servers")
-        processed = 0
-        start_time = time.time()
+        logging.warning(f"[ITERATE] Starting iteration for {server_count} servers") # 📝 Log start
+        processed = 0 # 📈 Counter
+        start_time = time.time() # ⏱️ Benchmark start
 
-        pipeline = global_aggregate
+        pipeline = global_aggregate # 🖇️ Use global pipeline
 
-        semaphore = asyncio.Semaphore(10)
-        tasks = []
+        semaphore = asyncio.Semaphore(10) # 🚦 Concurrency limiter
+        tasks = [] # 📑 Task list
 
 
-        async for items in bot.settings.db.aggregate(pipeline):
-            tasks.append(process_guild(bot, items, semaphore))
+        async for items in bot.settings.db.aggregate(pipeline): # 🔁 Loop through matching guilds
+            tasks.append(process_guild(bot, items, semaphore)) # 📥 Add to task queue
             processed += 1
-            if processed % 10 == 0:
+            if processed % 10 == 0: # 📝 Periodic progress log
                 logging.warning(f"[ITERATE] Queued {processed}/{server_count} servers")
 
-        await asyncio.gather(*tasks, return_exceptions=True)
-        end_time = time.time()
+        await asyncio.gather(*tasks, return_exceptions=True) # ⚡ Run all tasks
+        end_time = time.time() # ⏱️ Benchmark end
         logging.warning(
             f"[ITERATE] Completed task! Processed {processed} servers in {end_time - start_time:.2f} seconds"
         )
 
-    except Exception as e:
+    except Exception as e: # 🔴 Critical error handling
         logging.error(f"[ITERATE] Error in iteration: {str(e)}", exc_info=True)
 
 
 
-async def iterate_prc_logs_custom(bot):
-    # 🛠️ Processing custom PRC logs...
-    guild_id = config("CUSTOM_GUILD_ID")
-    if not guild_id:
+async def iterate_prc_logs_custom(bot): # 🛠️ Processing custom PRC logs...
+    guild_id = config("CUSTOM_GUILD_ID") # 🆔 Get custom ID
+    if not guild_id: # 🚫 Error if missing
         logging.error("No custom guild ID provided for custom environment")
         return
 
-    try:
+    try: # 🚀 Process specific guild
         await unprimitive_guild_process({"_id": int(guild_id)}, bot)
-    except Exception as e:
+    except Exception as e: # 🔴 Log individual failure
         logging.error(f"error processing guild: {e}")
 
-asyn# ⚙️ Processing guild data...
-    c def unprimitive_guild_process(items, bot):
-    guild = bot.get_guild(items["_id"]) or await bot.fetch_guild(
+async def unprimitive_guild_process(items, bot): # ⚙️ Processing guild data...
+    guild = bot.get_guild(items["_id"]) or await bot.fetch_guild( # 🏰 Get guild
         items["_id"]
     )
-    settings = await bot.settings.find_by_id(guild.id)
-    erlc_settings = settings.get("ERLC", {})
+    settings = await bot.settings.find_by_id(guild.id) # ⚙️ Get settings
+    erlc_settings = settings.get("ERLC", {}) # 🛰️ Get ERLC sub-settings
 
     if await has_whitelabel(bot, guild.id) and not config("CUSTOM_GUILD_ID") == str(guild.id):
         logging.warning("Not handling {} due to whitelabel instance existing")

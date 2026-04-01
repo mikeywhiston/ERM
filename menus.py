@@ -98,14 +98,15 @@ class Setup(discord.ui.View):
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
         # ⏱️ Handling 'Shift Management' button press...
-        if interaction.user.id != self.user_id:
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+        if interaction.user.id != self.user_id: # 🔐 Checking user authorization
+            await interaction.response.defer(ephemeral=True, thinking=True) # ⏳ Deferring response
+            return await generalised_interaction_check_failure(interaction.followup) # ⚠️ Failing check
 
         # 📄 Finalizing selection...
-        await interaction.response.defer()
-        self.value = "shift management"
-        self.stop()
+        await interaction.response.defer() # 🔄 Deferring interaction
+        self.value = "shift management" # 💾 Setting value to 'shift management'
+        self.stop() # 🛑 Stopping the view
+
 
 
 class Dropdown(discord.ui.Select):
@@ -3877,133 +3878,133 @@ class ActionCreationToolkit(discord.ui.View):
             button.callback = return_correspondent_callback(item)
             self.add_item(button)
 
-        button = discord.ui.Button(
-            style=discord.ButtonStyle.primary, label="Access Roles"
-        )
-        button.callback = self.set_access_roles
+        button = discord.ui.Button( # 🎨 Create a new button
+            style=discord.ButtonStyle.primary, label="Access Roles" # 🔘 Set style and label
+        ) # 📦 Close button definition
+        button.callback = self.set_access_roles # ⚙️ Assign callback function
 
-        self.add_item(button)
+        self.add_item(button) # ➕ Add button to the view
 
-        for item in extras:
-            button = discord.ui.Button(style=discord.ButtonStyle.danger, label=item)
-            button.callback = self.remove_last_integration
+        for item in extras: # 🔄 Iterate through extra items
+            button = discord.ui.Button(style=discord.ButtonStyle.danger, label=item) # 🔘 Create danger button
+            button.callback = self.remove_last_integration # ⚙️ Assign removal callback
 
-            self.add_item(button)
+            self.add_item(button) # ➕ Add removal button to view
 
-        button = discord.ui.Button(style=discord.ButtonStyle.success, label="Finish")
-        button.callback = self.finish
+        button = discord.ui.Button(style=discord.ButtonStyle.success, label="Finish") # 🔘 Create finish button
+        button.callback = self.finish # ⚙️ Assign finish callback
 
-        self.add_item(button)
+        self.add_item(button) # ➕ Add finish button to view
 
-    async def finish(self, interaction: discord.Interaction):
-        if len(self.action_data["Integrations"]) == 0:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Enough Integrations",
-                    description="You need at least one integration to finish this action.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+    async def finish(self, interaction: discord.Interaction): # 🏁 Define finish method
+        if len(self.action_data["Integrations"]) == 0: # ❓ Check if no integrations exist
+            return await interaction.response.send_message( # 💬 Send error message
+                embed=discord.Embed( # 🖼️ Create embed for error
+                    title="Not Enough Integrations", # 📝 Set title
+                    description="You need at least one integration to finish this action.", # 📝 Set description
+                    color=BLANK_COLOR, # 🎨 Set color
+                ), # 📦 Close embed
+                ephemeral=True, # 🔒 Make it private
+            ) # 📦 Close send_message
 
-        self.action_data["Guild"] = interaction.guild.id
-        self.stop()
+        self.action_data["Guild"] = interaction.guild.id # 🆔 Store guild ID
+        self.stop() # 🛑 Stop the view
 
-    async def remove_last_integration(self, interaction: discord.Interaction):
-        if len(self.action_data["Integrations"]) == 0:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Unable To Remove",
-                    description="I was unable to remove the last integration from this action. It may be that there are no integrations.",
-                    color=BLANK_COLOR
-                ),
-                ephemeral=True
-            )
-        self.action_data["Integrations"].pop(-1)
-        message = interaction.message
-        embed = message.embeds[-1]
-        lines = embed.description.splitlines()
-        lines.pop(-2)
-        content = "\n".join(lines)
-        embed.description = content
-        await interaction.message.edit(embed=embed)
-        await interaction.response.defer(thinking=False)
+    async def remove_last_integration(self, interaction: discord.Interaction): # 🗑️ Define removal method
+        if len(self.action_data["Integrations"]) == 0: # ❓ Check if empty
+            return await interaction.response.send_message( # 💬 Send error message
+                embed=discord.Embed( # 🖼️ Create error embed
+                    title="Unable To Remove", # 📝 Set title
+                    description="I was unable to remove the last integration from this action. It may be that there are no integrations.", # 📝 Set description
+                    color=BLANK_COLOR # 🎨 Set color
+                ), # 📦 Close embed
+                ephemeral=True # 🔒 Private message
+            ) # 📦 Close send_message
+        self.action_data["Integrations"].pop(-1) # 📉 Remove last item
+        message = interaction.message # 📨 Get origin message
+        embed = message.embeds[-1] # 🖼️ Get last embed
+        lines = embed.description.splitlines() # 📑 Split description lines
+        lines.pop(-2) # ✂️ Remove second to last line
+        content = "\n".join(lines) # 🔗 Join lines back
+        embed.description = content # 📝 Update description
+        await interaction.message.edit(embed=embed) # 🔄 Edit the message
+        await interaction.response.defer(thinking=False) # ⏳ Defer response
 
-    async def set_access_roles(self, interaction: discord.Interaction):
-        view = RoleSelect(interaction.user.id, limit=10)
-        view.children[0].default_values = [
-            discord.utils.get(interaction.guild.roles, id=item)
-            for item in (self.action_data.get("AccessRoles", []) or [])
-        ]
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Access Roles",
-                description="These roles will be able to execute this action. **Usually this would be your staff role.**",
-                color=BLANK_COLOR,
-            ),
-            view=view,
-            ephemeral=True,
-        )
-        timeout = await view.wait()
-        if timeout:
-            return
-        self.action_data["AccessRoles"] = [i.id for i in view.value]
-        await (await interaction.original_response()).delete()
+    async def set_access_roles(self, interaction: discord.Interaction): # 🎭 Define role setting method
+        view = RoleSelect(interaction.user.id, limit=10) # 👀 Create role selection view
+        view.children[0].default_values = [ # 📋 Set default values
+            discord.utils.get(interaction.guild.roles, id=item) # 🔍 Find role by ID
+            for item in (self.action_data.get("AccessRoles", []) or []) # 🔄 For each stored role
+        ] # 📦 Close list comprehension
+        await interaction.response.send_message( # 💬 Prompt for roles
+            embed=discord.Embed( # 🖼️ Create prompt embed
+                title="Access Roles", # 📝 Set title
+                description="These roles will be able to execute this action. **Usually this would be your staff role.**", # 📝 Set description
+                color=BLANK_COLOR, # 🎨 Set color
+            ), # 📦 Close embed
+            view=view, # 👀 Attach view
+            ephemeral=True, # 🔒 Private message
+        ) # 📦 Close send_message
+        timeout = await view.wait() # ⏰ Wait for interaction
+        if timeout: # ⌛ If timed out
+            return # ↩️ Exit
+        self.action_data["AccessRoles"] = [i.id for i in view.value] # 🆔 Save role IDs
+        await (await interaction.original_response()).delete() # 🗑️ Cleanup message
 
-    @discord.ui.button(
-        label="Change Conditions",
-        style=discord.ButtonStyle.primary,
-        row=2,
-    )
-    async def add_condition(
-        self, interaction: discord.Interaction, button: discord.ui.Button
-    ):
-        embed = discord.Embed(
-            title="Change Conditions",
-            description="Conditions are requirements that must be met for the action. When a condition is selected, the action will be activated when the condition is met. Otherwise, the action will only be executed when ran with `/actions execute`.\n\n**If ...**\n> *No Conditions*",
-            color=BLANK_COLOR,
-        )
-        if len(self.action_data["Conditions"]) > 0:
-            embed.description = embed.description.replace("> *No Conditions*", "")
-            for item in self.action_data["Conditions"]:
-                embed.description += f"\n> **{(('`{}`'.format(item.get('LogicGate', '').upper())) + ' ') if item.get('LogicGate', '') != '' else ''}{item['Variable']}** `{item['Operation']}` {item['Value']}"
+    @discord.ui.button( # 🔘 Define UI button
+        label="Change Conditions", # 📝 Set button label
+        style=discord.ButtonStyle.primary, # 🎨 Primary blue style
+        row=2, # 📍 Position on row 2
+    ) # 📦 Close decorator
+    async def add_condition( # 🛠️ Condition adder method
+        self, interaction: discord.Interaction, button: discord.ui.Button # 📥 Input parameters
+    ): # 📦 Method body
+        embed = discord.Embed( # 🖼️ Create basic embed
+            title="Change Conditions", # 📝 Set title
+            description="Conditions are requirements that must be met for the action. When a condition is selected, the action will be activated when the condition is met. Otherwise, the action will only be executed when ran with `/actions execute`.\n\n**If ...**\n> *No Conditions*", # 📜 Set description
+            color=BLANK_COLOR, # 🎨 Set color
+        ) # 📦 Close embed
+        if len(self.action_data["Conditions"]) > 0: # ❓ Are there existing conditions?
+            embed.description = embed.description.replace("> *No Conditions*", "") # ✂️ Remove placeholder
+            for item in self.action_data["Conditions"]: # 🔄 Loop through conditions
+                embed.description += f"\n> **{(('`{}`'.format(item.get('LogicGate', '').upper())) + ' ') if item.get('LogicGate', '') != '' else ''}{item['Variable']}** `{item['Operation']}` {item['Value']}" # 📝 Append condition text
 
-        embed.add_field(
-            name="Execution Interval",
-            value=td_format(
-                datetime.timedelta(
-                    seconds=self.action_data["ConditionExecutionInterval"]
-                )
-            ),
-            inline=False,
-        )
+        embed.add_field( # ➕ Add info field
+            name="Execution Interval", # 🏷️ Field name
+            value=td_format( # ⏳ Format time delta
+                datetime.timedelta( # ⏰ Create time object
+                    seconds=self.action_data["ConditionExecutionInterval"] # ⏱️ Get stored seconds
+                ) # 📦 Close timedelta
+            ), # 📦 Close td_format
+            inline=False, # ↔️ Multiline field
+        ) # 📦 Close add_field
 
-        view = ConditionCreationToolkit(self.bot)
-        await interaction.response.send_message(embed=embed, ephemeral=True, view=view)
-        timeout = await view.wait()
-        if timeout:
-            return
-        self.action_data["Conditions"] = view.conditions
-        self.action_data["ConditionExecutionInterval"] = view.execution_interval
+        view = ConditionCreationToolkit(self.bot) # 🛠️ Create toolkit view
+        await interaction.response.send_message(embed=embed, ephemeral=True, view=view) # 💬 Send setup message
+        timeout = await view.wait() # ⏰ Wait for input
+        if timeout: # ⌛ Check for timeout
+            return # ↩️ Exit early
+        self.action_data["Conditions"] = view.conditions # 💾 Save new conditions
+        self.action_data["ConditionExecutionInterval"] = view.execution_interval # ⌚ Save interval
 
-        embed = interaction.message.embeds[-1]
-        if len(view.conditions) != 0:
-            embed.add_field(
-                name="Conditions",
-                value="\n".join(
-                    [
-                        f"> **{('`{}`'.format(item.get('LogicGate', '')) + ' ') if item.get('LogicGate') else ''}{item['Variable']}** `{item['Operation']}` {item['Value']}"
-                        for item in view.conditions
-                    ]
-                ),
-                inline=False,
-            )
-            embed.add_field(
-                name="Execution Interval",
-                value=td_format(datetime.timedelta(seconds=view.execution_interval)),
-                inline=False,
-            )
-        await interaction.message.edit(embed=embed)
+        embed = interaction.message.embeds[-1] # 🖼️ Get current embed
+        if len(view.conditions) != 0: # ❓ Are conditions present?
+            embed.add_field( # ➕ Add field for summary
+                name="Conditions", # 🏷️ Field label
+                value="\n".join( # 🔗 Join with newlines
+                    [ # 🏗️ List comprehension
+                        f"> **{('`{}`'.format(item.get('LogicGate', '')) + ' ') if item.get('LogicGate') else ''}{item['Variable']}** `{item['Operation']}` {item['Value']}" # 📝 Format line
+                        for item in view.conditions # 🔄 Iterate conditions
+                    ] # 📦 Close list
+                ), # 📦 Close join
+                inline=False, # ↔️ Large field
+            ) # 📦 Close add_field
+            embed.add_field( # ➕ Add interval summary
+                name="Execution Interval", # 🏷️ Label
+                value=td_format(datetime.timedelta(seconds=view.execution_interval)), # ⏳ Formatted time
+                inline=False, # ↔️ Full width
+            ) # 📦 Close add_field
+        await interaction.message.edit(embed=embed) # 🔄 Update original message
 
     async def native_callback(self, interaction: discord.Interaction, button_name):
 

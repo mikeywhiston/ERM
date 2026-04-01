@@ -188,17 +188,18 @@ class MCDiscordCheckConfig(discord.ui.View):
             sett["MC"]["discord_checks"] = {"enabled": False}
 
         # 💾 Updating channel in database...
-        sett["MC"]["discord_checks"]["channel_id"] = channel_id
+        sett["MC"]["discord_checks"]["channel_id"] = channel_id # 💾 Saving channel ID
 
-        await self.bot.settings.upsert(sett)
+        await self.bot.settings.upsert(sett) # 📥 Upserting settings
 
         # 📝 Logging update...
-        await config_change_log(
-            self.bot,
-            interaction.guild,
-            interaction.user,
-            f"MC Discord Checks alert channel set to <#{channel_id}>."
+        await config_change_log( # 📜 Logging the change
+            self.bot, # 🤖 Bot instance
+            interaction.guild, # 🏰 Guild instance
+            interaction.user, # 👤 User instance
+            f"MC Discord Checks alert channel set to <#{channel_id}>." # ✍️ Log message
         )
+
 
         await interaction.response.send_message(
             f"Alert channel set to <#{channel_id}>.",

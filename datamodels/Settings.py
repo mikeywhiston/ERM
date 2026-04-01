@@ -1,26 +1,26 @@
-from discord.ext import commands
-import discord
-from utils.mongo import Document
+from discord.ext import commands  # 🛠️ Command extensions
+import discord  # 🤖 Discord library
+from utils.mongo import Document  # 🗄️ Database base class
 
 
-class PunishmentType:
-    def __init__(self, generic: bool, custom: bool, name: str):
+class PunishmentType:  # 📦 Define punishment structure
+    def __init__(self, generic: bool, custom: bool, name: str):  # 🔨 Initialize punishment
         # 📦 Data model helper: Initialize PunishmentType settings
-        self.generic = generic
-        self.custom = custom
-        self.name = name
+        self.generic = generic  # 📎 Generic flag
+        self.custom = custom  # 📎 Custom flag
+        self.name = name  # 📎 Punishment name
 
-    generic: bool
-    custom: bool
-    name: str
+    generic: bool  # 📋 Type hint: generic
+    custom: bool  # 📋 Type hint: custom
+    name: str  # 📋 Type hint: name
 
 
-class Settings(Document):
-    async def get_settings(self, guild_id: int) -> dict:
+class Settings(Document):  # ⚙️ Guild settings model
+    async def get_settings(self, guild_id: int) -> dict:  # 🔍 Fetch settings by ID
         """
         Gets the settings for a guild.
         """
         # ⚙️ Data model helper: Retrieve guild-specific settings
-        return await self.db.find_one({"_id": guild_id})
+        return await self.db.find_one({"_id": guild_id})  # 📡 Execute DB query
 
-    pass
+    pass  # ⏭️ End of class

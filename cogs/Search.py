@@ -1,103 +1,103 @@
-import datetime
-import logging
+import datetime # 📅 Date/time utils
+import logging # 📝 Logging module
 
-import aiohttp
-import discord
-import pytz
-from discord import app_commands
-from discord.ext import commands
-from reactionmenu import ViewButton, ViewMenu, Page
-from reactionmenu.abc import _PageController
-from roblox import client as roblox
-import roblox as rbx_api
+import aiohttp # 🌐 Async HTTP
+import discord # 🟦 Discord API
+import pytz # 🌍 Timezones
+from discord import app_commands # 🏷️ Slash commands
+from discord.ext import commands # 📦 Command framework
+from reactionmenu import ViewButton, ViewMenu, Page # 📑 UI menus
+from reactionmenu.abc import _PageController # 📏 UI logic
+from roblox import client as roblox # 👤 Roblox client
+import roblox as rbx_api # 🤖 Roblox types
 
-from datamodels.StaffConnections import StaffConnection
-from datamodels.Warnings import WarningItem
-from erm import check_privacy, is_staff, staff_predicate
-from utils.autocompletes import user_autocomplete
-from copy import copy
-from utils.constants import BLANK_COLOR
+from datamodels.StaffConnections import StaffConnection # 🔗 Connections
+from datamodels.Warnings import WarningItem # ⚠️ Warning model
+from erm import check_privacy, is_staff, staff_predicate # 🛡️ Permissions
+from utils.autocompletes import user_autocomplete # 🔍 Autocomplete
+from copy import copy # 📋 Copy utils
+from utils.constants import BLANK_COLOR # 🎨 UI color
 from utils.utils import (
-    invis_embed,
-    failure_embed,
-    get_roblox_by_username,
-    require_settings,
+    invis_embed, # 👻 Hidden embed
+    failure_embed, # ❌ Error embed
+    get_roblox_by_username, # 👤 Roblox resolver
+    require_settings, # ⚙️ Config lock
 )
-from utils.paginators import SelectPagination, CustomPage
+from utils.paginators import SelectPagination, CustomPage # 📏 Pagination
 
-client = roblox.Client()
+client = roblox.Client() # 🤖 Init client
 
 
 class Search(commands.Cog):
     def __init__(self, bot):
         # 🔍 Initialize the Search cog...
-        self.bot = bot
+        self.bot = bot # 🤖 Bot instance
 
-    @commands.guild_only()
+    @commands.guild_only() # 🏠 Server only
     @commands.hybrid_command(
-        name="mywarnings",
-        aliases=["mymoderations", "mypunishments", "moderations"],
-        description="Lookup your punishments with ERM.",
-        extras={"category": "Search"},
-        with_app_command=True,
+        name="mywarnings", # ⚠️ Command name
+        aliases=["mymoderations", "mypunishments", "moderations"], # 🏷️ Aliases
+        description="Lookup your punishments with ERM.", # 📝 Description
+        extras={"category": "Search"}, # 🏷️ Category
+        with_app_command=True, # ✅ Slash support
     )
-    @require_settings()
+    @require_settings() # ⚙️ Setup required
     async def mywarnings(
-        self, ctx: commands.Context, user: discord.Member = None
+        self, ctx: commands.Context, user: discord.Member = None # 👤 Targeted user
     ):  # changing this to discord.Member, change back to discord.User in the event of error
         # ⚠️ Lookup warnings for a specific user...
-        if user is None:
-            user = ctx.author
-        guild_id = ctx.guild.id
-        if guild_id == 823606319529066548:
-            guild_id = 1015622817452138606
-        if self.bot.punishments_disabled is True:
-            return await failure_embed(
+        if user is None: # ❓ No user provided
+            user = ctx.author # 👤 Use author
+        guild_id = ctx.guild.id # 🆔 Current server
+        if guild_id == 823606319529066548: # 🔄 ID mapping
+            guild_id = 1015622817452138606 # 🔄 New ID
+        if self.bot.punishments_disabled is True: # 🛑 Maintenance check
+            return await failure_embed( # ❌ Error msg
                 ctx,
                 "This command is currently disabled as ERM is currently undergoing maintenance updates. This command will be turned off briefly to ensure that no data is lost during the maintenance. It will be returned shortly.",
             )
 
-        bot = self.bot
-        roblox_user = await bot.bloxlink.find_roblox(user.id)
-        if not roblox_user or not (roblox_user or {}).get("robloxID"):
+        bot = self.bot # 🤖 Bot ref
+        roblox_user = await bot.bloxlink.find_roblox(user.id) # 🔍 Find Roblox link
+        if not roblox_user or not (roblox_user or {}).get("robloxID"): # ❌ Missing link
             return await ctx.send(
                 embed=discord.Embed(
-                    title="Could not find user",
-                    description="I could not find this user's ROBLOX account. Ensure that they are linked with Bloxlink and try again.",
-                    color=BLANK_COLOR,
+                    title="Could not find user", # 📭 Not found
+                    description="I could not find this user's ROBLOX account. Ensure that they are linked with Bloxlink and try again.", # 📝 Msg
+                    color=BLANK_COLOR, # 🎨 Color
                 )
             )
-        roblox_user = roblox_user["robloxID"]
+        roblox_user = roblox_user["robloxID"] # 🆔 Roblox ID
 
-        client = roblox.Client()
-        roblox_player = await client.get_user(roblox_user)
+        client = roblox.Client() # 🤖 Init client
+        roblox_player = await client.get_user(roblox_user) # 👤 Get user details
 
         warnings: list[WarningItem] = (
-            await bot.punishments.get_warnings(roblox_player.id, guild_id) or []
+            await bot.punishments.get_warnings(roblox_player.id, guild_id) or [] # 🔍 Fetch DB warnings
         )
 
         player_information_embed = discord.Embed(
-            title=f"{roblox_player.name}",
-            color=BLANK_COLOR,
+            title=f"{roblox_player.name}", # 👤 Name
+            color=BLANK_COLOR, # 🎨 Color
         )
         punishments_embed = discord.Embed(
-            title=player_information_embed.title,
-            color=BLANK_COLOR,
+            title=player_information_embed.title, # 👤 Name
+            color=BLANK_COLOR, # 🎨 Color
         )
-        embed_list = [player_information_embed, punishments_embed]
+        embed_list = [player_information_embed, punishments_embed] # 📄 Page list
 
         magic_flags = {
-            "ERM Team": 1001972346661384302,
-            "ERM Developer": 1046204873496068176,
-            "ERM Management": 1038597868023447552,
-            "ERM Senior Support": 1028848687927013396,
-            "ERM Support": 1053417531278364713,
-            "ERM Staff": 988055417907200010,
-            "ERM Quality Assurance": 1306431506914218067,
+            "ERM Team": 1001972346661384302, # 🛡️ Team flag
+            "ERM Developer": 1046204873496068176, # 👨‍💻 Dev flag
+            "ERM Management": 1038597868023447552, # 💼 Management flag
+            "ERM Senior Support": 1028848687927013396, # 🛡️ Senior flag
+            "ERM Support": 1053417531278364713, # 🛡️ Support flag
+            "ERM Staff": 988055417907200010, # 👤 Staff flag
+            "ERM Quality Assurance": 1306431506914218067, # 🧪 QA flag
         }
 
         magic_flags_reverse = {
-            v: k for k, v in magic_flags.items()
+            v: k for k, v in magic_flags.items() # 🔄 Reverse map
         }  # this is reverse mapping for quick lookup
 
         g_id = 987798554972143728

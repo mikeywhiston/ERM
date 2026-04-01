@@ -37,66 +37,66 @@ class ActivityCoreCommands:
 
     def __init__(self, bot: commands.Bot):
         # 🤖 Initialize the Activity core commands...
-        self.bot = bot
+        self.bot = bot # 🦾 Bot instance
 
     async def upload_schema(self, schema: dict):
         # 📤 Upload notice schema to database...
-        await self.bot.loas.insert(schema)
+        await self.bot.loas.insert(schema) # 💾 Database insertion
 
     async def upload_to_views(self, code, message_id, *args):
         # 👁️ Track notice views for interaction...
-        await self.bot.views.insert(
+        await self.bot.views.insert( # 💾 Track view
             {
-                "_id": code,
-                "args": [*args],
-                "view_type": "LOAMenu",
-                "message_id": message_id,
+                "_id": code, # 🔑 Code ID
+                "args": [*args], # 📝 Arguments
+                "view_type": "LOAMenu", # 📑 View type
+                "message_id": message_id, # 🆔 Msg ID
             }
         )
 
     async def send_activity_request(
         self,
-        guild: discord.Guild,
-        staff_channel: discord.TextChannel,
-        author: discord.Member,
-        schema,
+        guild: discord.Guild, # 🛡️ Guild
+        staff_channel: discord.TextChannel, # 📺 Target channel
+        author: discord.Member, # 👤 Request author
+        schema, # 📝 Notice data
     ) -> dict:
         # ✉️ Send activity notice request for approval...
-        request_type = schema["type"]
-        settings = await self.bot.settings.find_by_id(guild.id)
-        management_roles = settings.get("staff_management").get("management_role")
-        loa_roles = settings.get("staff_management").get(f"{request_type.lower()}_role")
+        request_type = schema["type"] # 🏷️ Get type
+        settings = await self.bot.settings.find_by_id(guild.id) # ⚙️ Get settings
+        management_roles = settings.get("staff_management").get("management_role") # 🔑 Management rank
+        loa_roles = settings.get("staff_management").get(f"{request_type.lower()}_role") # 🔑 Requirement rank
 
-        embed = discord.Embed(title=f"{request_type} Request", color=BLANK_COLOR)
-        embed.set_author(name=guild.name, icon_url=guild.icon.url if guild.icon else "")
+        embed = discord.Embed(title=f"{request_type} Request", color=BLANK_COLOR) # 📄 Create embed
+        embed.set_author(name=guild.name, icon_url=guild.icon.url if guild.icon else "") # 🏠 Set icon
 
         past_author_notices = [
             item
-            async for item in self.bot.loas.db.find(
+            async for item in self.bot.loas.db.find( # 🔍 Search history
                 {
-                    "guild_id": guild.id,
-                    "user_id": author.id,
-                    "accepted": True,
-                    "denied": False,
-                    "expired": True,
-                    "type": request_type.upper(),
+                    "guild_id": guild.id, # 🆔 Server
+                    "user_id": author.id, # 🆔 Member
+                    "accepted": True, # ✅ Accepted
+                    "denied": False, # ❌ Not denied
+                    "expired": True, # ⌛ Expired
+                    "type": request_type.upper(), # 🏷️ Kind
                 }
             )
         ]
 
-        shifts = []
+        shifts = [] # 📋 Shift list
         storage_item = [
             i
-            async for i in self.bot.shift_management.shifts.db.find(
-                {"UserID": author.id, "Guild": guild.id}
+            async for i in self.bot.shift_management.shifts.db.find( # 🔍 Search shifts
+                {"UserID": author.id, "Guild": guild.id} # 🆔 Filter
             )
         ]
 
-        for s in storage_item:
-            if s["EndEpoch"] != 0:
-                shifts.append(s)
+        for s in storage_item: # 🔄 Process shifts
+            if s["EndEpoch"] != 0: # 🏁 Finished shifts
+                shifts.append(s) # 📥 Add to list
 
-        total_seconds = sum([get_elapsed_time(i) for i in shifts])
+        total_seconds = sum([get_elapsed_time(i) for i in shifts]) # ⏱️ Calculate total
 
         embed.add_field(
             name="Staff Information",

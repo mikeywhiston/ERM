@@ -1,81 +1,81 @@
-import asyncio
-import base64
-import datetime
-import logging
-import re
-import typing
+import asyncio # ⏱️ Asynchronous operations
+import base64 # 🔐 Base64 encoding/decoding
+import datetime # 📅 Time handling
+import logging # 📝 Logging module
+import re # 🔍 Regular expressions
+import typing # 📝 Type hinting
 
-import aiohttp
-import discord
-import pytz
-import requests
-from decouple import config
-import roblox.users
-from discord import Embed, InteractionResponse, Webhook
-from discord.ext import commands
-from fuzzywuzzy import fuzz
-from snowflake import SnowflakeGenerator
-from zuid import ZUID
+import aiohttp # 🌐 HTTP client
+import discord # 🎮 Discord library
+import pytz # 🌍 Timezone handling
+import requests # 📡 Synchronous HTTP requests
+from decouple import config # ⚙️ environment variables
+import roblox.users # 🧱 Roblox users
+from discord import Embed, InteractionResponse, Webhook # 🖼️ Discord UI components
+from discord.ext import commands # 🛡️ Discord extensions
+from fuzzywuzzy import fuzz # 🔍 String fuzzy matching
+from snowflake import SnowflakeGenerator # ❄️ ID generation
+from zuid import ZUID # 🆔 ID generation
 
-import utils.prc_api as prc_api
-from utils.constants import BLANK_COLOR, RED_COLOR
-from utils.prc_api import ServerStatus, Player
+import utils.prc_api as prc_api # 🎮 API components
+from utils.constants import BLANK_COLOR, RED_COLOR # 🎨 Color constants
+from utils.prc_api import ServerStatus, Player # 📦 Data models
 
 
 class ArgumentMockingInstance:
     # 🎭 Mocking instance for argument simulation
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+    def __init__(self, **kwargs): # 🏗️ Initialize mock
+        for key, value in kwargs.items(): # 🔁 Iterate properties
+            setattr(self, key, value) # 🏷️ Set attributes
 
 
-tokenGenerator = ZUID(
+tokenGenerator = ZUID( # 🔑 Auth token generator
     prefix="",
     length=64,
     timestamped=True,
     charset="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",
 )
 
-generator = SnowflakeGenerator(192)
-error_gen = ZUID(prefix="error_", length=10)
-system_code_gen = ZUID(prefix="erm-systems-", length=7)
+generator = SnowflakeGenerator(192) # ❄️ Unique ID generator
+error_gen = ZUID(prefix="error_", length=10) # 🚫 Error code generator
+system_code_gen = ZUID(prefix="erm-systems-", length=7) # ⚙️ System code generator
 
 
 # ✂️ Remove suffix from string (backport for older Python)
-def removesuffix(input_string: str, suffix: str):
-    if suffix and input_string.endswith(suffix):
-        return input_string[: -len(suffix)]
-    return input_string
+def removesuffix(input_string: str, suffix: str): # ✂️ String trimmer
+    if suffix and input_string.endswith(suffix): # ❓ Ends with suffix
+        return input_string[: -len(suffix)] # 📤 Return trimmed
+    return input_string # 📤 Return original
 
 
 # 🖼️ Get guild icon URL or fallback to bot avatar
 def get_guild_icon(
-    bot: typing.Union[commands.Bot, commands.AutoShardedBot], guild: discord.Guild
+    bot: typing.Union[commands.Bot, commands.AutoShardedBot], guild: discord.Guild # 📥 Input bot/guild
 ):
-    if guild.icon is None:
-        return bot.user.display_avatar.url
+    if guild.icon is None: # ❓ No icon set
+        return bot.user.display_avatar.url # 🤖 Use bot avatar
     else:
-        return guild.icon.url
+        return guild.icon.url # 🖼️ Use guild icon
 
 
 # 🚫 Standardized response for interaction check failures
 async def generalised_interaction_check_failure(
-    responder: InteractionResponse | Webhook | typing.Callable,
+    responder: InteractionResponse | Webhook | typing.Callable, # 📥 Target responder
 ):
-    if isinstance(responder, typing.Callable):
-        responder = responder()
+    if isinstance(responder, typing.Callable): # ❓ Is a callback
+        responder = responder() # 📞 Invoke it
 
-    if isinstance(responder, InteractionResponse):
-        await responder.send_message(
+    if isinstance(responder, InteractionResponse): # ❓ Is interaction response
+        await responder.send_message( # 📡 Send ephemeral alert
             embed=discord.Embed(
                 title="Not Permitted",
                 description="You are not permitted to interact with these buttons.",
                 color=BLANK_COLOR,
             ),
-            ephemeral=True,
+            ephemeral=True, # 👻 User only
         )
-    else:
-        await responder.send(
+    else: # ❓ Is webhook
+        await responder.send( # 📡 Send alert
             embed=discord.Embed(
                 title="Not Permitted",
                 description="You are not permitted to interact with these buttons.",
@@ -85,19 +85,19 @@ async def generalised_interaction_check_failure(
 
 
 # 🏷️ Check if a guild has whitelabeling enabled
-async def has_whitelabel(bot, guild_id: int) -> bool:
-    if (item := await bot.whitelabel.db.find_one({"GuildID": str(guild_id)})) is not None and config("ENVIRONMENT") not in ["ALPHA", "DEVELOPMENT"]:
-        guild = bot.get_guild(guild_id)
-        token = item.get("Token")
-        b64_userid = token.split(".")[0]
-        user_id = base64.b64decode(b64_userid + "==").decode("utf-8")
-        member = guild.get_member(int(user_id))
-        if not member:
+async def has_whitelabel(bot, guild_id: int) -> bool: # 🔍 Check subscription
+    if (item := await bot.whitelabel.db.find_one({"GuildID": str(guild_id)})) is not None and config("ENVIRONMENT") not in ["ALPHA", "DEVELOPMENT"]: # 🗄️ Query DB & check ENV
+        guild = bot.get_guild(guild_id) # 🏰 Get guild object
+        token = item.get("Token") # 🔑 Get bot token
+        b64_userid = token.split(".")[0] # 🆔 Extract encoded ID
+        user_id = base64.b64decode(b64_userid + "==").decode("utf-8") # 🔓 Decode user ID
+        member = guild.get_member(int(user_id)) # 👤 Check presence
+        if not member: # ❓ Not in cache
             try:
-                member = await guild.fetch_member(int(user_id))
-            except discord.NotFound:
-                return False
-        return True
+                member = await guild.fetch_member(int(user_id)) # 📡 Fetch member
+            except discord.NotFound: # ❌ Not found
+                return False # 🚫 Deactivate whitelabel
+        return True # ✅ Active whitelabel
     return False
 
 # 🕵️ Get Roblox user profile by username or mention

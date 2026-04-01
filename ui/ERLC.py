@@ -63,18 +63,18 @@ class callSignCheck(discord.ui.View):
 
     async def add_whitelist_callback(self, interaction: discord.Interaction):
         # 📝 Opening whitelist addition UI...
-        embed = discord.Embed(
-            title="This is a add whitelist UI",
-            description="DUMMY",
-            color=blank_color
+        embed = discord.Embed( # 🖼️ Creating new embed
+            title="This is a add whitelist UI", # 🏷️ Setting title
+            description="DUMMY", # 📄 Setting description
+            color=blank_color # 🎨 Setting color
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True) # 📤 Sending response
 
     async def delete_whitelist_callback(self, interaction: discord.Interaction):
         # 🗑️ Opening whitelist deletion UI...
-        embed = discord.Embed(
-            title="This is a delete whitelist UI",
-            description="DUMMY",
-            color=blank_color
+        embed = discord.Embed( # 🖼️ Creating new embed
+            title="This is a delete whitelist UI", # 🏷️ Setting title
+            description="DUMMY", # 📄 Setting description
+            color=blank_color # 🎨 Setting color
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True) # 📤 Sending response

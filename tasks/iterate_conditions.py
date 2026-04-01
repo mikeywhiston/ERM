@@ -1,103 +1,100 @@
-import logging
-import random
-import asyncio
-from functools import lru_cache
-from collections import defaultdict
+import logging # 📝 Import logging
+import random # 🎲 Import random
+import asyncio # 🔄 Import asyncio
+from functools import lru_cache # 💾 Import lru_cache
+from collections import defaultdict # 🗄️ Import defaultdict
 
-import discord
-from decouple import config
-from discord.ext import commands, tasks
-from discord.ext.commands.view import StringView
+import discord # 📦 Import discord
+from decouple import config # ⚙️ Import config
+from discord.ext import commands, tasks # 🚀 Import commands, tasks
+from discord.ext.commands.view import StringView # 🔍 Import StringView
 
-import utils.prc_api
-from utils import prc_api
-from utils.prc_api import Player
-from utils.conditions import *
-import datetime
-import pytz
+import utils.prc_api # 🔌 Import prc_api
+from utils import prc_api # 🔌 Import prc_api
+from utils.prc_api import Player # 👤 Import Player
+from utils.conditions import * # ⚙️ Import conditions
+import datetime # 📅 Import datetime
+import pytz # 🌍 Import pytz
 
-_guild_cache = {}
-_guild_cache_timeout = 300
+_guild_cache = {} # 🗄️ Cache for guilds
+_guild_cache_timeout = 300 # ⏲️ Cache expiry time
 
 
-def _evict_guild_cache():
+def _evict_guild_cache(): # 🧹 Clean up guild cache
     # 🏰 Evicting guild cache entries...
     now = datetime.datetime.now().timestamp()
     stale = [k for k, (_, t) in _guild_cache.items() if now - t >= _guild_cache_timeout]
-    for k in stale:
+    for k in stale: # ❌ Remove old guilds
         del _guild_cache[k]
 
 
-async def get_cached_guild(bot, guild_id):
+async def get_cached_guild(bot, guild_id): # 🏛️ Get guild with caching
     """Get guild with caching to reduce API calls"""
     # 🏛️ Retrieving cached guild...
     now = datetime.datetime.now().timestamp()
 
-    if guild_id in _guild_cache:
+    if guild_id in _guild_cache: # 💾 Check cache
         guild_obj, cached_time = _guild_cache[guild_id]
-        if now - cached_time < _guild_cache_timeout:
+        if now - cached_time < _guild_cache_timeout: # ✅ Return if fresh
             return guild_obj
 
-    guild = bot.get_guild(guild_id)
-    if not guild:
+    guild = bot.get_guild(guild_id) # 🔍 Get from memory
+    if not guild: # 🌐 Fetch if missing
         try:
             guild = await bot.fetch_guild(guild_id)
-        except discord.HTTPException:
+        except discord.HTTPException: # 🔴 Handle fetch error
             return None
 
-    _guild_cache[guild_id] = (guild, now)
+    _guild_cache[guild_id] = (guild, now) # 📥 Update cache
     return guild
 
 
-asyn# 🕹️ Evaluating ERLC condition...
-    c def handle_erlc_condition(bot, guild_id, condition) -> bool:
-    api_client = bot.prc_api
-    if await bot.mc_api.get_server_key(guild_id) is not None:
+async def handle_erlc_condition(bot, guild_id, condition) -> bool: # 🕹️ Evaluating ERLC condition...
+    api_client = bot.prc_api # 🔌 Default API
+    if await bot.mc_api.get_server_key(guild_id) is not None: # 🔑 Check for MC key
         api_client = bot.mc_api
     try:
-        players = await api_client.get_server_players(guild_id)
-    except prc_api.ResponseFailure:
+        players = await api_client.get_server_players(guild_id) # 👥 Fetch players
+    except prc_api.ResponseFailure: # ⚠️ Fail if API error
         return False
 
-    values = []
-    for item in (condition["Variable"], condition["Value"]):
-        if str(item).split(" ")[0] not in variable_table:
+    values = [] # 📑 Comparison values
+    for item in (condition["Variable"], condition["Value"]): # 🔄 Check both sides
+        if str(item).split(" ")[0] not in variable_table: # 🔢 Constant value
             values.append(
                 int(item) if str(item).isdigit() else str(item)
             )  # this means we're comparing a raw constant
             continue
-        cond, args = separate_arguments(item)
-        futures = await fetch_predetermined_futures(
+        cond, args = separate_arguments(item) # 🛠️ Parse variable
+        futures = await fetch_predetermined_futures( # 🔮 Get future data
             bot, guild_id, condition, item, api_client
         )
 
-        func, func_args = determine_func_info(cond)
+        func, func_args = determine_func_info(cond) # 🛠️ Get handler function
         submitted_arguments = [
             players
         ]  # change the 1st submitted argument to be our players object
         if func_args[0] != "players":  # we already have players, we can use this
             submitted_arguments = []
 
-        for item in func_args[0 if func_args[0] != "players" else 1 :]:
+        for item in func_args[0 if func_args[0] != "players" else 1 :]: # 📥 Prepare args
             submitted_arguments.append(futures[item.lower()]())
-        if len(func_args) > 1:
+        if len(func_args) > 1: # 🚀 Execute logic
             values.append(func(*submitted_arguments))
         else:
             values.append(func(*submitted_arguments))
 
-    new_values = []
+    new_values = [] # 📑 Cleaned values
     # unfuture the values
-    for value in values:
+    for value in values: # 🔄 Resolution loop
         if isinstance(value, asyncio.Future):
             new_values.append(await value)
         else:
             new_values.append(value)
     
-    return handle_comparison_operations(*values, condition["Operation"])
+    return handle_comparison_operations(*values, condition["Operation"]) # ⚖️ Perform comparison
 
-# 🤖 Evaluating ERM condition...
-    
-async def handle_erm_condition(bot, guild_id, condition) -> bool:
+async def handle_erm_condition(bot, guild_id, condition) -> bool: # 🤖 Evaluating ERM condition...
     values = []
     for item in (condition["Variable"], condition["Value"]):
         if str(item).split(" ")[0] not in variable_table:

@@ -1,18 +1,18 @@
-import asyncio
-import copy
-import datetime
-import typing
-from collections import defaultdict
+import asyncio # ⏱️ Import asyncio for async operations
+import copy # 📋 Import copy for duplicating objects
+import datetime # 📅 Import datetime for time tracking
+import typing # 📝 Import typing for type hinting
+from collections import defaultdict # 🗄️ Import defaultdict for easier dict management
 
-import aiohttp
-import pytz
-import uvicorn
-from bson import ObjectId
-from fastapi import FastAPI, APIRouter, Header, HTTPException, Request
-from discord.ext import commands
-import discord
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
+import aiohttp # 🌐 Import aiohttp for async HTTP requests
+import pytz # 🌍 Import pytz for timezone handling
+import uvicorn # 🦄 Import uvicorn for ASGI server
+from bson import ObjectId # 🆔 Import ObjectId for MongoDB compatibility
+from fastapi import FastAPI, APIRouter, Header, HTTPException, Request # 🚀 Import FastAPI components
+from discord.ext import commands # 🛡️ Import discord command extension
+import discord # 🎮 Import discord base library
+from starlette.middleware.base import BaseHTTPMiddleware # 🌉 Import Starlette middleware
+from starlette.responses import Response # 📩 Import Starlette response
 
 from erm import (
     Bot,
@@ -23,61 +23,61 @@ from erm import (
     management_check,
     admin_check,
 )
-from typing import Annotated
-from decouple import config
-import copy
-from menus import LOAMenu
-from utils.constants import BLANK_COLOR, GREEN_COLOR
-from utils.utils import get_elapsed_time, secure_logging
-from pydantic import BaseModel
+from typing import Annotated # 📝 Type annotations
+from decouple import config # ⚙️ Configuration management
+import copy # 📋 Internal copy utility
+from menus import LOAMenu # 📂 Leave of Absence menu
+from utils.constants import BLANK_COLOR, GREEN_COLOR # 🎨 UI Colors
+from utils.utils import get_elapsed_time, secure_logging # 🛠️ Helper functions
+from pydantic import BaseModel # 📦 Data validation
 
-from utils.timestamp import td_format
-from utils.utils import tokenGenerator, system_code_gen
-import logging
+from utils.timestamp import td_format # ⏱️ Time formatting
+from utils.utils import tokenGenerator, system_code_gen # 🔑 Token generation
+import logging # 📝 System logging
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # 🕵️ Logger instance
 
-_api_rate_limiter = defaultdict(list)
-_rate_limit_window = 60
-_max_requests_per_window = 50
+_api_rate_limiter = defaultdict(list) # 🛑 Initialize rate limiter storage
+_rate_limit_window = 60 # ⏱️ Rate limit window in seconds
+_max_requests_per_window = 50 # 🔢 Max requests per window
 
 # 🚦 Check API rate limits
-async def check_rate_limit(identifier: str):
-    """Check if we're hitting rate limits"""
-    now = datetime.datetime.now().timestamp()
+async def check_rate_limit(identifier: str): # 👮 Rate limit checker
+    """Check if we're hitting rate limits""" # 📖 Docstring
+    now = datetime.datetime.now().timestamp() # ⏰ Current timestamp
     
-    _api_rate_limiter[identifier] = [
+    _api_rate_limiter[identifier] = [ # 🧹 Clean up old requests
         req_time for req_time in _api_rate_limiter[identifier]
-        if now - req_time < _rate_limit_window
+        if now - req_time < _rate_limit_window # ⏳ Filter within window
     ]
 
-    if len(_api_rate_limiter[identifier]) >= _max_requests_per_window:
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    if len(_api_rate_limiter[identifier]) >= _max_requests_per_window: # 🛑 Check threshold
+        raise HTTPException(status_code=429, detail="Rate limit exceeded") # 🔇 Raise 429 error
     
-    _api_rate_limiter[identifier].append(now)
+    _api_rate_limiter[identifier].append(now) # 📝 Log request timestamp
 
-class Identification(BaseModel):
-    license: typing.Optional[typing.Any]
-    discord: typing.Optional[typing.Any]
-    source: typing.Literal["fivem", "discord"]
+class Identification(BaseModel): # 🆔 ID data model
+    license: typing.Optional[typing.Any] # 📜 License key
+    discord: typing.Optional[typing.Any] # 👤 Discord account
+    source: typing.Literal["fivem", "discord"] # 🔗 Identity source
 
 # 🔐 Validate API authorization tokens
 
-async def validate_authorization(bot: Bot, token: str, disable_static_tokens=False):
+async def validate_authorization(bot: Bot, token: str, disable_static_tokens=False): # 👮 Auth validator
     # Check static and dynamic tokens
-    if not disable_static_tokens:
-        static_token = config("API_STATIC_TOKEN")
-        if token == static_token:
-            return True
-    token_obj = await bot.api_tokens.db.find_one({"token": token})
-    if token_obj:
-        if int(datetime.datetime.now().timestamp()) < token_obj["expires_at"]:
-            return True
+    if not disable_static_tokens: # ❓ Static check enabled
+        static_token = config("API_STATIC_TOKEN") # ⚙️ Get static token
+        if token == static_token: # ✅ Match static token
+            return True # 👌 Authorized
+    token_obj = await bot.api_tokens.db.find_one({"token": token}) # 🗄️ Search DB for token
+    if token_obj: # ✅ Token found
+        if int(datetime.datetime.now().timestamp()) < token_obj["expires_at"]: # ⏳ Check expiry
+            return True # 👌 Authorized
         else:
-            return False
+            return False # ⏰ Expired
     else:
-        return False
+        return False # 🚫 Token missing
 
 
 clas# 🛣️ Manage and route API requests
@@ -100,46 +100,46 @@ clas# 🛣️ Manage and route API requests
         return {"guilds": len(self.bot.guilds), "ping": round(self.bot.latency * 1000)}
 
     # 🏢 Get mutual guilds between a list and the bot
-    async def POST_get_mutual_guilds(self, request: Request):
-        json_data = await request.json()
-        guild_ids = json_data.get("guilds")
-        if not guild_ids:
-            return HTTPException(status_code=400, detail="No guild ids given")
+    async def POST_get_mutual_guilds(self, request: Request): # 🤝 Find mutual servers
+        json_data = await request.json() # 📥 Parse body
+        guild_ids = json_data.get("guilds") # 🔍 Extract IDs
+        if not guild_ids: # ❓ Missing IDs
+            return HTTPException(status_code=400, detail="No guild ids given") # 🚫 Bad request
 
-        guilds = []
-        for i in guild_ids:
-            guild: discord.Guild = self.bot.get_guild(int(i))
-            if not guild:
-                continue
+        guilds = [] # 📋 Results list
+        for i in guild_ids: # 🔄 Iterate IDs
+            guild: discord.Guild = self.bot.get_guild(int(i)) # 🔍 Find guild
+            if not guild: # ❓ Not found
+                continue # ⏭️ Skip
 
-            try:
-                icon = guild.icon.with_size(512)
-                icon = icon.with_format("png")
-                icon = str(icon)
-            except Exception as e:
-                icon = "https://cdn.discordapp.com/embed/avatars/0.png?size=512"
+            try: # 🖼️ Process icon
+                icon = guild.icon.with_size(512) # 📏 Set size
+                icon = icon.with_format("png") # 📄 Set format
+                icon = str(icon) # 🔗 To string
+            except Exception as e: # ❌ Error
+                icon = "https://cdn.discordapp.com/embed/avatars/0.png?size=512" # 👤 Default
 
-            guilds.append(
-                {"id": str(guild.id), "name": str(guild.name), "icon_url": icon}
+            guilds.append( # ➕ Add to results
+                {"id": str(guild.id), "name": str(guild.name), "icon_url": icon} # 📊 Guild info
             )
 
-        return {"guilds": guilds}
+        return {"guilds": guilds} # 📤 Return list
 
     # 📡 Get shard pings
-    async def GET_shard_pings(self, authorization: Annotated[str | None, Header()]):
-        if not authorization:
-            raise HTTPException(status_code=401, detail="Invalid authorization")
+    async def GET_shard_pings(self, authorization: Annotated[str | None, Header()]): # 📶 Check health
+        if not authorization: # ❓ No auth
+            raise HTTPException(status_code=401, detail="Invalid authorization") # 🚫 Unauthorized
 
-        if not await validate_authorization(self.bot, authorization):
-            raise HTTPException(
-                status_code=401, detail="Invalid or expired authorization."
+        if not await validate_authorization(self.bot, authorization): # 🕵️ Validate
+            raise HTTPException( # 🚫 Expired/Invalid
+                status_code=401, detail="Invalid or expired authorization." # 🛑 Error
             )
 
-        shard_pings = {}
-        for shard_id, shard in self.bot.shards.items():
-            shard_pings[shard_id] = round(shard.latency * 1000, 2)
+        shard_pings = {} # 📊 Stats dict
+        for shard_id, shard in self.bot.shards.items(): # 🔄 Each shard
+            shard_pings[shard_id] = round(shard.latency * 1000, 2) # ⏱️ Calc ping
 
-        return {"shard_pings": shard_pings}
+        return {"shard_pings": shard_pings} # 📤 Return stats
 
     # 🛡️ Get shard ID for a specific guild
     async def GET_guild_shard(

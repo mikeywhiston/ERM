@@ -1,52 +1,52 @@
-import datetime
-import re
-import time
-import discord
-import pytz
-from decouple import config
-from discord.ext import commands, tasks
-import logging
-import asyncio
-import roblox
-from collections import defaultdict
+import datetime # 📅 Import datetime
+import re # 🔍 Import re
+import time # ⏱️ Import time
+import discord # 📦 Import discord
+import pytz # 🌍 Import pytz
+from decouple import config # ⚙️ Import config
+from discord.ext import commands, tasks # 🚀 Import commands, tasks
+import logging # 📝 Import logging
+import asyncio # 🔄 Import asyncio
+import roblox # 🧱 Import roblox
+from collections import defaultdict # 🗄️ Import defaultdict
 
-from utils.constants import RED_COLOR, BLANK_COLOR
-from utils.prc_api import Player
-from utils import prc_api
-from utils.utils import is_whitelisted, run_command
-
-_guild_cache = {}
-_member_search_cache = defaultdict(dict)
-_cache_timeout = 300
+from utils.constants import RED_COLOR, BLANK_COLOR # 🎨 Import colors
+from utils.prc_api import Player # 👤 Import Player
+from utils import prc_api # 🔌 Import prc_api
+from utils.utils import is_whitelisted, run_command # 🛠️ Import utils
 
 
-def _evict_caches():
+_guild_cache = {} # 🗄️ Cache for guilds
+_member_search_cache = defaultdict(dict) # 🗄️ Cache for members
+_cache_timeout = 300 # ⏲️ Cache expiry
+
+
+def _evict_caches(): # 🧹 Function to clear memory
     # 🗑️ Clearing expired caches...
-    now = time.time()
+    now = time.time() # 🕒 Current time
     stale_keys = [k for k, (_, t) in _guild_cache.items() if now - t >= _cache_timeout]
-    for k in stale_keys:
+    for k in stale_keys: # ❌ Remove stale guilds
         del _guild_cache[k]
 
-    empty_guilds = []
-    for guild_id, members in _member_search_cache.items():
+    empty_guilds = [] # 🗑️ Cleaner for empty dicts
+    for guild_id, members in _member_search_cache.items(): # 📑 Iterate through cached members
         stale = [k for k, (_, t) in members.items() if now - t >= _cache_timeout]
-        for k in stale:
+        for k in stale: # ❌ Remove stale users
             del members[k]
-        if not members:
+        if not members: # 🏷️ Mark empty guilds
             empty_guilds.append(guild_id)
-    for guild_id in empty_guilds:
+    for guild_id in empty_guilds: # 🧼 Cleanup empty guild keys
         del _member_search_cache[guild_id]
 
 
-@tasks.loop(minutes=10, reconnect=True)
-asyn# 🏎️ Checking vehicle restrictions...
-    c def check_whitelisted_car(bot):
-    _evict_caches()
-    initial_time = time.time()
-    logging.info("Starting check_whitelisted_car task")
+@tasks.loop(minutes=10, reconnect=True) # ⏰ Run every 10 mins
+async def check_whitelisted_car(bot): # 🏎️ Checking vehicle restrictions...
+    _evict_caches() # 🧼 Maintenance check
+    initial_time = time.time() # ⏱️ Start benchmark
+    logging.info("Starting check_whitelisted_car task") # 📝 Log start
 
-    base = {"ERLC.vehicle_restrictions.enabled": True}
-    pipeline = [
+    base = {"ERLC.vehicle_restrictions.enabled": True} # 🔍 Filter for enabled guilds
+    pipeline = [ # 🛠️ DB aggregation pipeline
         {"$match": base},
         {
             "$lookup": {
@@ -56,24 +56,24 @@ asyn# 🏎️ Checking vehicle restrictions...
                 "as": "server_key",
             }
         },
-        {"$match": {"server_key": {"$ne": []}}},
+        {"$match": {"server_key": {"$ne": []}}}, # 🔑 Ensure they have keys
     ]
 
-    semaphore = asyncio.Semaphore(3)
-    async def process_guild(items):
-        async with semaphore:
-            guild_id = items["_id"]
-            logging.info(f"Processing guild ID: {guild_id}")
+    semaphore = asyncio.Semaphore(3) # 🚦 Limit concurrency
+    async def process_guild(items): # 🛠️ Inner processing logic
+        async with semaphore: # 🛑 Apply rate limiting
+            guild_id = items["_id"] # 🆔 Fetch guild ID
+            logging.info(f"Processing guild ID: {guild_id}") # 📝 Log guild being checked
 
             try:
-                settings = items["ERLC"].get("vehicle_restrictions", {})
-                if not settings:
+                settings = items["ERLC"].get("vehicle_restrictions", {}) # ⚙️ Get car settings
+                if not settings: # ❓ Skip if missing
                     return
 
-                whitelisted_vehicle_roles = settings.get("roles", [])
-                alert_channel_id = settings.get("channel")
-                whitelisted_vehicles = settings.get("cars", [])
-                alert_message = settings.get(
+                whitelisted_vehicle_roles = settings.get("roles", []) # 👥 Required roles
+                alert_channel_id = settings.get("channel") # 📺 Log channel
+                whitelisted_vehicles = settings.get("cars", []) # 🚗 Restricted cars
+                alert_message = settings.get( # 💬 Custom kick message
                     "message", "You do not have the required role to use this vehicle."
                 )
 
@@ -81,19 +81,19 @@ asyn# 🏎️ Checking vehicle restrictions...
                     not whitelisted_vehicle_roles
                     or not alert_channel_id
                     or not whitelisted_vehicles
-                ):
+                ): # 🚫 Validate config presence
                     return
 
-                guild = await get_cached_guild(bot, guild_id)
-                if not guild:
+                guild = await get_cached_guild(bot, guild_id) # 🏰 Load guild
+                if not guild: # ❓ Skip if not found
                     return
 
-                alert_channel = await get_cached_channel(bot, alert_channel_id)
-                if not alert_channel:
+                alert_channel = await get_cached_channel(bot, alert_channel_id) # 📺 Load log channel
+                if not alert_channel: # ❓ Skip if missing
                     return
 
-                exotic_roles = await get_cached_roles(guild, whitelisted_vehicle_roles)
-                if not exotic_roles:
+                exotic_roles = await get_cached_roles(guild, whitelisted_vehicle_roles) # 🏷️ Load role objects
+                if not exotic_roles: # ❓ Skip if roles invalid
                     return
 
                 try:

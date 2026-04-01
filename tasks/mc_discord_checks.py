@@ -1,90 +1,89 @@
-import re
-import time
-import discord
-from discord.ext import tasks
-import logging
-import asyncio
-from collections import defaultdict
-import datetime
-import pytz
+import re # 🔍 Import re
+import time # ⏱️ Import time
+import discord # 📦 Import discord
+from discord.ext import tasks # 🚀 Import tasks
+import logging # 📝 Import logging
+import asyncio # 🔄 Import asyncio
+from collections import defaultdict # 🗄️ Import defaultdict
+import datetime # 📅 Import datetime
+import pytz # 🌍 Import pytz
 
-from utils.constants import BLANK_COLOR
+from utils.constants import BLANK_COLOR # 🎨 Import BLANK_COLOR
 
 
-_guild_cache = {}
-_member_search_cache = defaultdict(dict)
-_cache_timeout = 300
+_guild_cache = {} # 🗄️ Guild cache
+_member_search_cache = defaultdict(dict) # 🗄️ Member search cache
+_cache_timeout = 300 # ⏲️ Cache expiry
 
-async def get_cached_member_by_username(bot, guild, username):
+async def get_cached_member_by_username(bot, guild, username): # 👤 Get member with caching
     """Get member by username with caching"""
     # 🔍 Finding member by username...
-    now = time.time()
-    cache_key = f"{guild.id}_{username.lower()}"
+    now = time.time() # 🕒 Current time
+    cache_key = f"{guild.id}_{username.lower()}" # 🔑 Cache key
 
-    if cache_key in _member_search_cache[guild.id]:
+    if cache_key in _member_search_cache[guild.id]: # 💾 Check cache
         member_obj, cached_time = _member_search_cache[guild.id][cache_key]
-        if now - cached_time < _cache_timeout:
+        if now - cached_time < _cache_timeout: # ✅ Return if fresh
             return member_obj
 
-    member = await bot.accounts.roblox_to_discord(guild, username)
+    member = await bot.accounts.roblox_to_discord(guild, username) # 🌐 Fetch link
 
-    _member_search_cache[guild.id][cache_key] = (member, now)
+    _member_search_cache[guild.id][cache_key] = (member, now) # 📥 Update cache
     return member
 
-async def get_cached_guild(bot, guild_id):
+async def get_cached_guild(bot, guild_id): # 🏰 Get guild with caching
     """Get guild with caching"""
     # 🏰 Getting cached guild...
-    now = time.time()
-    cache_key = f"guild_{guild_id}"
+    now = time.time() # 🕒 Current time
+    cache_key = f"guild_{guild_id}" # 🔑 Cache key
 
-    if cache_key in _guild_cache:
+    if cache_key in _guild_cache: # 💾 Check cache
         guild_obj, cached_time = _guild_cache[cache_key]
-        if now - cached_time < _cache_timeout and guild_obj:
+        if now - cached_time < _cache_timeout and guild_obj: # ✅ Return if fresh
             return guild_obj
 
-    guild = bot.get_guild(guild_id)
-    if not guild:
+    guild = bot.get_guild(guild_id) # 🔍 Get from memory
+    if not guild: # 🏢 Fetch if missing
         try:
             guild = await bot.fetch_guild(guild_id)
-        except discord.HTTPException:
+        except discord.HTTPException: # 🛡️ Handle error
             guild = None
 
-    _guild_cache[cache_key] = (guild, now)
+    _guild_cache[cache_key] = (guild, now) # 📥 Update cache
     return guild
 
 
-async def get_cached_channel(bot, channel_id):
+async def get_cached_channel(bot, channel_id): # 📺 Get channel with caching
     # 📺 Getting cached channel...
     """Get channel with caching"""
-    now = time.time()
-    cache_key = f"channel_{channel_id}"
+    now = time.time() # 🕒 Current time
+    cache_key = f"channel_{channel_id}" # 🔑 Cache key
 
-    if cache_key in _guild_cache:
+    if cache_key in _guild_cache: # 💾 Check cache
         channel_obj, cached_time = _guild_cache[cache_key]
-        if now - cached_time < _cache_timeout and channel_obj:
+        if now - cached_time < _cache_timeout and channel_obj: # ✅ Return if fresh
             return channel_obj
 
-    channel = bot.get_channel(channel_id)
-    if not channel:
+    channel = bot.get_channel(channel_id) # 🔍 Get from memory
+    if not channel: # 🏢 Fetch if missing
         try:
             channel = await bot.fetch_channel(channel_id)
-        except discord.HTTPException:
+        except discord.HTTPException: # 🛡️ Handle error
             channel = None
 
-    _guild_cache[cache_key] = (channel, now)
+    _guild_cache[cache_key] = (channel, now) # 📥 Update cache
     return channel
 
 
-@tasks.loop(minutes=10, reconnect=True)
-async def mc_discord_checks(bot):
+@tasks.loop(minutes=10, reconnect=True) # ⏰ Run every 10 mins
+async def mc_discord_checks(bot): # 🛡️ Running MC Discord checks...
     """
-    # 🛡️ Running MC Discord checks...
     Automated Discord Checks for MC Servers.
     """
-    initial_time = time.time()
+    initial_time = time.time() # ⏱️ Start benchmark
 
-    base = {"MC.discord_checks.enabled": True}
-    pipeline = [
+    base = {"MC.discord_checks.enabled": True} # 🔍 Filter enabled
+    pipeline = [ # 🛠️ DB pipeline
         {"$match": base},
         {
             "$lookup": {
@@ -94,10 +93,10 @@ async def mc_discord_checks(bot):
                 "as": "server_key",
             }
         },
-        {"$match": {"server_key": {"$ne": []}}},
+        {"$match": {"server_key": {"$ne": []}}}, # 🔑 Check for keys
     ]
     
-    semaphore = asyncio.Semaphore(3)
+    semaphore = asyncio.Semaphore(3) # 🚦 Rate limit
     async def process_guild(items):
         async with semaphore:
             guild_id = items["_id"]

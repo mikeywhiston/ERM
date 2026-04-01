@@ -2,60 +2,60 @@
 This configuration is used in setup as a base configuration before modification.
 """
 
-import discord
+import discord # 🎮 Import discord
 
-base_configuration = {
-    "_id": 0,
-    "antiping": {
-        "enabled": False,
-        "role": [],
-        "bypass_role": [],
-        "use_hierarchy": False,
+base_configuration = { # ⚙️ Default bot settings
+    "_id": 0, # 🆔 Primary key
+    "antiping": { # 🔇 Anti-ping configuration
+        "enabled": False, # 🔘 Active flag
+        "role": [], # 🛡️ Targeted roles
+        "bypass_role": [], # 🔓 Exempt roles
+        "use_hierarchy": False, # ⚖️ Hierarchy check
     },
-    "staff_management": {
-        "enabled": False,
-        "role": [],
-        "management_role": [],
-        "channel": None,
-        "loa_role": [],
-        "ra_role": [],
+    "staff_management": { # 👥 Staff management module
+        "enabled": False, # 🔘 Active flag
+        "role": [], # 🎖️ Staff roles
+        "management_role": [], # 👔 Management roles
+        "channel": None, # 📺 Logs channel
+        "loa_role": [], # 📅 LOA roles
+        "ra_role": [], # 🛡️ RA roles
     },
-    "punishments": {
-        "enabled": False,
-        "channel": None,
-        "kick_channel": None,
-        "ban_channel": None,
-        "bolo_channel": None,
+    "punishments": { # 🔨 Punishment settings
+        "enabled": False, # 🔘 Active flag
+        "channel": None, # 📺 Main logs
+        "kick_channel": None, # 👢 Kick logs
+        "ban_channel": None, # 🚫 Ban logs
+        "bolo_channel": None, # 🚨 BOLO logs
     },
-    "shift_management": {
-        "enabled": False,
-        "role": [],
-        "channel": None,
-        "quota": 0,
-        "nickname_prefix": "",
-        "maximum_staff": 0,
-        "role_quotas": [],
+    "shift_management": { # 👕 Shift tracking module
+        "enabled": False, # 🔘 Active flag
+        "role": [], # 🎖️ Staff roles
+        "channel": None, # 📺 Shift logs
+        "quota": 0, # 🔢 Time quota
+        "nickname_prefix": "", # 🏷️ Nickname prefix
+        "maximum_staff": 0, # 📶 Capacity limit
+        "role_quotas": [], # 📊 Tiered quotas
     },
-    "customisation": {"prefix": ">"},
-    "shift_types": {"types": []},
-    "game_security": {
-        "enabled": False,
-        "webhook_channel": None,
-        "channel": None,
-        "role": [],
+    "customisation": {"prefix": ">"}, # 🎨 Command prefix
+    "shift_types": {"types": []}, # 👕 Shift categories
+    "game_security": { # 🛡️ Game security module
+        "enabled": False, # 🔘 Active flag
+        "webhook_channel": None, # 📡 Webhook target
+        "channel": None, # 📺 Security channel
+        "role": [], # 🎖️ Security roles
     },
-    "game_logging": {
-        "message": {"enabled": False, "channel": None},
-        "sts": {"enabled": False, "channel": None},
-        "priority": {"enabled": False, "channel": None},
+    "game_logging": { # 📋 Game logs module
+        "message": {"enabled": False, "channel": None}, # 💬 Chat logs
+        "sts": {"enabled": False, "channel": None}, # 👮 STS logs
+        "priority": {"enabled": False, "channel": None}, # 🚨 Priority logs
     },
-    "ERLC": {
-        "player_logs": None,
-        "kill_logs": None,
-        "elevation_required": None,
-        "rdm_mentionables": [],
-        "rdm_channel": None,
-        "automatic_shifts": {"enabled": False, "shift_type": None},
+    "ERLC": { # 🧱 ERLC specific integration
+        "player_logs": None, # 📺 Player tracking
+        "kill_logs": None, # 💀 Kill tracking
+        "elevation_required": None, # 📶 Permission level
+        "rdm_mentionables": [], # 🔔 RDM pings
+        "rdm_channel": None, # 📺 RDM reporting
+        "automatic_shifts": {"enabled": False, "shift_type": None}, # 🤖 Auto-shifting
     },
 }
 
@@ -63,31 +63,31 @@ base_configuration = {
     Colour constants
 """
 
-BLANK_COLOR = 0x2B2D31
-blank_color = BLANK_COLOR  # Redundancy
+BLANK_COLOR = 0x2B2D31 # ⬛ Dark theme color
+blank_color = BLANK_COLOR  # Redundancy # ⬛ Alias
 
 
-GREEN_COLOR = discord.Colour.brand_green()
-RED_COLOR = 0xD12F32
-ORANGE_COLOR = discord.Colour.orange()
+GREEN_COLOR = discord.Colour.brand_green() # 🟩 Success color
+RED_COLOR = 0xD12F32 # 🟥 Error color
+ORANGE_COLOR = discord.Colour.orange() # 🟧 Warning color
 
-SERVER_CONDITIONS = {
-    "In-Game Players": "ERLC_Players",
-    "In-Game Moderators": "ERLC_Moderators",
-    "In-Game Admins": "ERLC_Admins",
-    "In-Game Owner": "ERLC_Owner",
-    "In-Game Staff": "ERLC_Staff",
-    "In-Game Queue": "ERLC_Queue",
-    "On Duty Staff": "OnDuty",
-    "On Break Staff": "OnBreak",
-    "Players on Police": "ERLC_Police",
-    "Players on Sheriff": "ERLC_Sheriff",
-    "Players on Fire": "ERLC_Fire",
-    "Players on DOT": "ERLC_DOT",
-    "Players on Civilian": "ERLC_Civilian",
-    "Players on Jail": "ERLC_Jail",
-    "Vehicles Spawned": "ERLC_Vehicles",
-    "If ... is in-game": "ERLC_X_InGame",
+SERVER_CONDITIONS = { # 📊 Condition mapping
+    "In-Game Players": "ERLC_Players", # 👥 Players
+    "In-Game Moderators": "ERLC_Moderators", # 🛡️ Mods
+    "In-Game Admins": "ERLC_Admins", # 👔 Admins
+    "In-Game Owner": "ERLC_Owner", # 👑 Owners
+    "In-Game Staff": "ERLC_Staff", # 🎖️ Staff
+    "In-Game Queue": "ERLC_Queue", # ⏳ Queue
+    "On Duty Staff": "OnDuty", # 👕 Active
+    "On Break Staff": "OnBreak", # ⏸️ Resting
+    "Players on Police": "ERLC_Police", # 👮 LEO
+    "Players on Sheriff": "ERLC_Sheriff", # 🤠 Sheriff
+    "Players on Fire": "ERLC_Fire", # 🚒 Fire
+    "Players on DOT": "ERLC_DOT", # 🚧 DOT
+    "Players on Civilian": "ERLC_Civilian", # 🚶 Civs
+    "Players on Jail": "ERLC_Jail", # ⛓️ Prisoners
+    "Vehicles Spawned": "ERLC_Vehicles", # 🚘 Cars
+    "If ... is in-game": "ERLC_X_InGame", # ❓ Specific search
 }
 
 RELEVANT_DESCRIPTIONS = [

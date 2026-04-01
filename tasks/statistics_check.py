@@ -1,101 +1,100 @@
-import asyncio
-import logging
-import time
+import asyncio # 🔄 Import asyncio
+import logging # 📝 Import logging
+import time # ⏱️ Import time
 
-import discord
-from decouple import config
-from discord.ext import tasks
+import discord # 📦 Import discord
+from decouple import config # ⚙️ Import config
+from discord.ext import tasks # 🚀 Import tasks
 
-from utils import prc_api
-from utils.prc_api import Player, ServerStatus
-from utils.utils import fetch_get_channel
+from utils import prc_api # 🔌 Import prc_api
+from utils.prc_api import Player, ServerStatus # 👤 Import models
+from utils.utils import fetch_get_channel # 🛠️ Import channel helper
 
-_guild_cache = {}
-_channel_cache = {}
-_cache_timeout = 300
+_guild_cache = {} # 🗄️ Cache for guilds
+_channel_cache = {} # 🗄️ Cache for channels
+_cache_timeout = 300 # ⏲️ Cache expiry
 
-async def get_cached_guild(bot, guild_id):
+async def get_cached_guild(bot, guild_id): # 🏰 Get guild with caching
     """Get guild with caching"""
     # 🏰 Getting guild from cache...
-    cache_key = f"guild_{guild_id}"
-    now = time.time()
+    cache_key = f"guild_{guild_id}" # 🔑 Cache key
+    now = time.time() # 🕒 Current time
     
-    if cache_key in _guild_cache:
+    if cache_key in _guild_cache: # 💾 Check cache
         guild, timestamp = _guild_cache[cache_key]
-        if now - timestamp < _cache_timeout and guild:
+        if now - timestamp < _cache_timeout and guild: # ✅ Return if valid
             return guild
     
-    try:
+    try: # 🏢 Fetch guild from API
         guild = await bot.fetch_guild(guild_id)
-    except discord.errors.NotFound:
+    except discord.errors.NotFound: # ❓ Flag as None if missing
         guild = None
-    except Exception as e:
+    except Exception as e: # 🔴 Log other errors
         logging.error(f"Error fetching guild {guild_id}: {e}")
         guild = None
     
-    _guild_cache[cache_key] = (guild, now)
+    _guild_cache[cache_key] = (guild, now) # 📥 Update cache
     return guild
 
-async def get_cached_channel(bot, guild, channel_id):
+async def get_cached_channel(bot, guild, channel_id): # 📺 Get channel with caching
     """Get channel with caching"""
     # 📺 Getting channel from cache...
-    cache_key = f"channel_{guild.id}_{channel_id}"
-    now = time.time()
+    cache_key = f"channel_{guild.id}_{channel_id}" # 🔑 Cache key
+    now = time.time() # 🕒 Current time
     
-    if cache_key in _channel_cache:
+    if cache_key in _channel_cache: # 💾 Check cache
         channel, timestamp = _channel_cache[cache_key]
-        if now - timestamp < _cache_timeout and channel:
+        if now - timestamp < _cache_timeout and channel: # ✅ Return if valid
             return channel
     
-    try:
+    try: # 📟 Fetch channel object
         channel = await fetch_get_channel(guild, int(channel_id))
-    except Exception as e:
+    except Exception as e: # 🔴 Log failures
         logging.error(f"Error fetching channel {channel_id} in guild {guild.id}: {e}")
         channel = None
     
-    _channel_cache[cache_key] = (channel, now)
+    _channel_cache[cache_key] = (channel, now) # 📥 Update cache
     return channel
 
 
-async def update_channel(bot, guild, channel_id, stat_config, placeholders):
+async def update_channel(bot, guild, channel_id, stat_config, placeholders): # 🔄 Update channel name
     # 🔄 Updating channel name...
     """Update channel name with statistics and caching"""
     try:
-        channel = await get_cached_channel(bot, guild, channel_id)
+        channel = await get_cached_channel(bot, guild, channel_id) # 📺 Fetch channel
         if channel:
-            format_string = stat_config["format"]
-            for key, value in placeholders.items():
+            format_string = stat_config["format"] # 📝 Get format string
+            for key, value in placeholders.items(): # 🔁 Replace placeholders
                 format_string = format_string.replace(f"{{{key}}}", str(value))
 
-            if channel.name != format_string:
+            if channel.name != format_string: # 🔄 Only update if different
                 await channel.edit(name=format_string)
                 logging.info(f"Updated channel {channel_id} in guild {guild.id}")
-            else:
+            else: # ⏭️ Skip redundant update
                 logging.debug(
                     f"Skipped update for channel {channel_id} in guild {guild.id} - no changes needed"
                 )
-        else:
+        else: # 🔴 Channel missing error
             logging.error(f"Channel {channel_id} not found in guild {guild.id}")
-    except Exception as e:
+    except Exception as e: # ⚠️ Log update failure
         logging.error(
             f"Failed to update channel {channel_id} in guild {guild.id}: {e}", exc_info=True
         )
 
 
-@tasks.loop(minutes=5, reconnect=True)
-async def statistics_check(bot):
+@tasks.loop(minutes=5, reconnect=True) # ⏰ Run every 5 mins
+async def statistics_check(bot): # 📊 Running statistics check...
     """
-    # 📊 Running statistics check...
     Statistics Check with caching and batch processing optimization.
     """
-    initial_time = time.time()
+    initial_time = time.time() # ⏱️ Benchmark start
     
-    semaphore = asyncio.Semaphore(3)
+    semaphore = asyncio.Semaphore(3) # 🚦 Concurrency lock
     
-    async def process_guild(guild_data):
-        async with semaphore:
-            guild_id = guild_data["_id"]
-            logging.info(f"Processing statistics for guild {guild_id}")
+    async def process_guild(guild_data): # 🛠️ Logic per guild
+        async with semaphore: # 🛑 Limit simultaneous requests
+            guild_id = guild_data["_id"] # 🆔 Fetch ID
+            logging.info(f"Processing statistics for guild {guild_id}") # 📝 Log guild check
             
             try:
                 guild = await get_cached_guild(bot, guild_id)

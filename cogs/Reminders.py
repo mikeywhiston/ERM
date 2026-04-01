@@ -1,102 +1,102 @@
-import datetime
-import discord
-from discord.ext import commands
-from erm import is_management, is_admin
+import datetime # 📅 Date/time utils
+import discord # 🟦 Discord API
+from discord.ext import commands # 📦 Command framework
+from erm import is_management, is_staff, is_admin # 🛡️ Permissions
 from menus import (
-    ManageReminders,
-    YesNoColourMenu,
-    ReminderCreationToolkit,
+    ManageReminders, # ⚙️ Management menu
+    YesNoColourMenu, # 🎨 Choice menu
+    ReminderCreationToolkit, # 🛠️ Creation kit
 )
-from utils.constants import BLANK_COLOR, GREEN_COLOR
-from utils.timestamp import td_format
-from utils.utils import generator, time_converter, require_settings, log_command_usage
+from utils.constants import BLANK_COLOR, GREEN_COLOR # 🎨 UI colors
+from utils.timestamp import td_format # ⏱️ Formatting
+from utils.utils import generator, time_converter, require_settings, log_command_usage # 🛠️ Logic utils
 
 
 class Reminders(commands.Cog):
     def __init__(self, bot):
         # ⏰ Initialize the Reminders cog...
-        self.bot = bot
+        self.bot = bot # 🤖 Bot instance
 
-    @commands.hybrid_group(name="reminders")
-    @is_management()
+    @commands.hybrid_group(name="reminders") # 📂 Reminders group
+    @is_management() # 🛡️ Management only
     async def reminders(self, ctx):
         # 📂 Base reminders group command...
-        pass
+        pass # 🛑 Root group
 
-    @commands.guild_only()
+    @commands.guild_only() # 🏠 Server only
     @reminders.command(
-        name="manage",
-        description="Manage your reminders",
-        extras={"category": "Reminders"},
+        name="manage", # ⚙️ Manage subcmd
+        description="Manage your reminders", # 📝 Description
+        extras={"category": "Reminders"}, # 🏷️ Category
     )
-    @is_admin()
-    @require_settings()
+    @is_admin() # 🛡️ Admin only
+    @require_settings() # ⚙️ Needs setup
     async def manage_reminders(self, ctx):
         # ⚙️ Manage server reminders...
-        bot = self.bot
-        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Reminders Manage")
-        reminder_data = await bot.reminders.find_by_id(ctx.guild.id)
-        if reminder_data is None:
-            reminder_data = {"_id": ctx.guild.id, "reminders": []}
+        bot = self.bot # 🤖 Bot ref
+        await log_command_usage(self.bot, ctx.guild, ctx.author, f"Reminders Manage") # 📝 Log
+        reminder_data = await bot.reminders.find_by_id(ctx.guild.id) # 🔍 Fetch reminders
+        if reminder_data is None: # ❓ Missing
+            reminder_data = {"_id": ctx.guild.id, "reminders": []} # 🆕 Init doc
 
-        embed = discord.Embed(title="Reminders", color=BLANK_COLOR)
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
+        embed = discord.Embed(title="Reminders", color=BLANK_COLOR) # 📄 Create embed
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon) # 🏠 Guild author
         [
             embed.add_field(
-                name=f"{reminder['name']}",
+                name=f"{reminder['name']}", # 🏷️ Name
                 value=(
-                    f"> **Name:** {reminder['name']}\n"
-                    f"> **ID:** {reminder['id']}\n"
-                    f"> **Interval:** {td_format(datetime.timedelta(seconds=reminder['interval']))}\n"
-                    f"> **ER:LC Integration:** {self.bot.emoji_controller.get_emoji('check') if reminder.get('integration') is not None else self.bot.emoji_controller.get_emoji('xmark')}\n"
-                    f"> **Paused:** {self.bot.emoji_controller.get_emoji('check') if reminder.get('paused') is True else self.bot.emoji_controller.get_emoji('xmark')}"
+                    f"> **Name:** {reminder['name']}\n" # 📝 Name
+                    f"> **ID:** {reminder['id']}\n" # 🆔 ID
+                    f"> **Interval:** {td_format(datetime.timedelta(seconds=reminder['interval']))}\n" # 🕒 Freq
+                    f"> **ER:LC Integration:** {self.bot.emoji_controller.get_emoji('check') if reminder.get('integration') is not None else self.bot.emoji_controller.get_emoji('xmark')}\n" # 🔗 API
+                    f"> **Paused:** {self.bot.emoji_controller.get_emoji('check') if reminder.get('paused') is True else self.bot.emoji_controller.get_emoji('xmark')}" # ⏸️ State
                 ),
-                inline=False,
+                inline=False, # 📏 Full width
             )
-            for reminder in reminder_data["reminders"]
+            for reminder in reminder_data["reminders"] # 🔄 Iterate
         ]
-        embed.set_thumbnail(url=ctx.guild.icon)
+        embed.set_thumbnail(url=ctx.guild.icon) # 🖼️ Icon
 
-        if len(embed.fields) == 0:
-            embed.add_field(name="No Reminders", value="This server has no reminders.")
+        if len(embed.fields) == 0: # ❓ No data
+            embed.add_field(name="No Reminders", value="This server has no reminders.") # 📭 Empty msg
 
-        view = ManageReminders(ctx.author.id)
+        view = ManageReminders(ctx.author.id) # 🔘 Management UI
 
         msg = await ctx.reply(
-            embed=embed,
-            view=view,
+            embed=embed, # 📤 Send embed
+            view=view, # 🔘 Show view
         )
-        await view.wait()
-        if view.value == "pause":
-            reminder = view.modal.id_value.value
+        await view.wait() # ⏳ Interaction
+        if view.value == "pause": # ⏸️ Toggle pause
+            reminder = view.modal.id_value.value # 🆔 Target ID
 
-            for index, item in enumerate(reminder_data["reminders"]):
+            for index, item in enumerate(reminder_data["reminders"]): # 🔄 List loop
                 if item["id"] == int(
-                    reminder if all(n for n in reminder if n.isdigit()) else 0
+                    reminder if all(n for n in reminder if n.isdigit()) else 0 # 🔢 Input check
                 ):
-                    if item.get("paused") is True:
-                        item["paused"] = False
-                        reminder_data["reminders"][index] = item
-                        await bot.reminders.upsert(reminder_data)
-                        return await msg.edit(
+                    if item.get("paused") is True: # ✅ Already paused
+                        item["paused"] = False # ▶️ Resume
+                        reminder_data["reminders"][index] = item # 📥 Update item
+                        await bot.reminders.upsert(reminder_data) # 💾 Save
+                        return await msg.edit( # 📝 Confirmation
                             embed=discord.Embed(
-                                title=f"{self.bot.emoji_controller.get_emoji('success')} Reminder Resumed",
-                                description="Your reminder has been resumed!",
-                                color=GREEN_COLOR,
+                                title=f"{self.bot.emoji_controller.get_emoji('success')} Reminder Resumed", # ✅ Success
+                                description="Your reminder has been resumed!", # 📝 Text
+                                color=GREEN_COLOR, # 🟢 Green
                             ),
-                            view=None,
+                            view=None, # 🧹 Remove view
                         )
-                    else:
-                        item["paused"] = True
-                        reminder_data["reminders"][index] = item
-                        await bot.reminders.upsert(reminder_data)
-                        return await msg.edit(
+                    else: # ▶️ Running
+                        item["paused"] = True # ⏸️ Pause
+                        reminder_data["reminders"][index] = item # 📥 Update item
+                        await bot.reminders.upsert(reminder_data) # 💾 Save
+                        return await msg.edit( # 📝 Confirmation
                             embed=discord.Embed(
-                                title=f"{self.bot.emoji_controller.get_emoji('success')} Reminder Paused",
-                                description="Your reminder has been paused!",
-                                color=GREEN_COLOR,
+                                title=f"{self.bot.emoji_controller.get_emoji('success')} Reminder Paused", # ⏸️ Success
+                                description="Your reminder has been paused!", # 📝 Text
+                                color=GREEN_COLOR, # 🟢 Green
                             ),
-                            view=None,
+                            view=None, # 🧹 Remove view
                         )
 
             return await msg.edit(

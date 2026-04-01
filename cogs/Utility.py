@@ -1,103 +1,103 @@
-import datetime
-import logging
-import aiohttp
-import os
-from decouple import config
+import datetime # 📅 Date/time utils
+import logging # 📝 Logging module
+import aiohttp # 🌐 Async HTTP
+import os # 📁 OS module
+from decouple import config # ⚙️ Config loader
 
-import discord
-from discord import app_commands
-from discord.app_commands import AppCommandGroup
-from discord.ext import commands
-import pytz
+import discord # 🟦 Discord API
+from discord import app_commands # 🏷️ Slash commands
+from discord.app_commands import AppCommandGroup # 📂 Command groups
+from discord.ext import commands # 📦 Command framework
+import pytz # 🌍 Timezone support
 
-from menus import LinkView, CustomSelectMenu, MultiPaginatorMenu, APIKeyConfirmation
-from utils.constants import BLANK_COLOR, GREEN_COLOR
-from utils.timestamp import td_format
-from utils.utils import invis_embed, failure_embed, require_settings, time_converter
-from erm import is_staff, is_management
+from menus import LinkView, CustomSelectMenu, MultiPaginatorMenu, APIKeyConfirmation # 📑 UI components
+from utils.constants import BLANK_COLOR, GREEN_COLOR # 🎨 UI colors
+from utils.timestamp import td_format # ⏱️ Time formatting
+from utils.utils import invis_embed, failure_embed, require_settings, time_converter # 🛠️ Utility functions
+from erm import is_staff, is_management # 🛡️ Permissions
 
 
 class Utility(commands.Cog):
     # ⚙️ Cog initialization
     def __init__(self, bot):
-        self.bot = bot
+        self.bot = bot # 🤖 Bot instance
 
 
     @commands.hybrid_group(
-        name="import",
-        description="Internal Use Command - import data from the recent outage.",
-        extras={"category": "Utility"},
+        name="import", # 📥 Import group
+        description="Internal Use Command - import data from the recent outage.", # 📝 Description
+        extras={"category": "Utility"}, # 🏷️ Category
     )
-    @is_staff()
+    @is_staff() # 🛡️ Staff only
     # 📥 Import command group
     async def import_group(self, ctx: commands.Context):
-        pass
+        pass # 🛑 Base group
 
     @import_group.command(
-        name="punishments",
-        description="Import punishments from the outage.",
-        extras={"category": "Utility"},
+        name="punishments", # 🔨 Punishment import
+        description="Import punishments from the outage.", # 📝 Description
+        extras={"category": "Utility"}, # 🏷️ Category
     )
-    @commands.cooldown(1, 300, commands.BucketType.guild)
-    @is_management()
+    @commands.cooldown(1, 300, commands.BucketType.guild) # ⏳ Cooldown
+    @is_management() # 🛡️ Management only
     # 🔨 Import punishments
     async def import_punishments(self, ctx: commands.Context, channel: discord.TextChannel=None, time_frame: str=None):
-        if channel is None:
-            channel = ctx.channel
+        if channel is None: # ❓ No channel
+            channel = ctx.channel # 📺 Use current
 
-        after = None
-        if time_frame is None:
-            after = datetime.datetime.fromtimestamp(1754516493)
-        else:
-            after = datetime.datetime.fromtimestamp(datetime.datetime.now(tz=pytz.UTC).timestamp() - time_converter(time_frame))
+        after = None # 🕒 Time filter
+        if time_frame is None: # ❓ No timeframe
+            after = datetime.datetime.fromtimestamp(1754516493) # 📅 Use default
+        else: # 🕒 Parse timeframe
+            after = datetime.datetime.fromtimestamp(datetime.datetime.now(tz=pytz.UTC).timestamp() - time_converter(time_frame)) # 📅 Calculate
 
         msg = await ctx.send(
             embed=discord.Embed(
-                title="Punishments Import",
-                description="> **Channel:** {}\n> **After:** <t:{}:R>\n> **Imported:** 0".format(channel.mention, int(after.timestamp())),
-                color=BLANK_COLOR,
-            ).set_author(name=ctx.guild.name, icon_url=ctx.guild.icon.url if ctx.guild.icon else None)
+                title="Punishments Import", # 📢 Title
+                description="> **Channel:** {}\n> **After:** <t:{}:R>\n> **Imported:** 0".format(channel.mention, int(after.timestamp())), # 💬 Details
+                color=BLANK_COLOR, # 🎨 Color
+            ).set_author(name=ctx.guild.name, icon_url=ctx.guild.icon.url if ctx.guild.icon else None) # 🏠 Author
         )
-        success = 0
-        async for message in channel.history(limit=None, after=after):
-            embeds = message.embeds
-            if len(embeds) == 0:
-                continue
-            if "ERM" not in message.author.name:
-                continue
+        success = 0 # 🔢 Count
+        async for message in channel.history(limit=None, after=after): # 🔄 Iterate history
+            embeds = message.embeds # 📄 Get embeds
+            if len(embeds) == 0: # ❓ Empty
+                continue # ⏭️ Skip
+            if "ERM" not in message.author.name: # 🤖 Verification
+                continue # ⏭️ Skip
 
-            embed = embeds[0]
-            embed_title = embed.title.lower() if embed.title else ""
-            if embed_title != "punishment issued":
-                continue
+            embed = embeds[0] # 📄 First embed
+            embed_title = embed.title.lower() if embed.title else "" # 🏷️ Title
+            if embed_title != "punishment issued": # ❓ Wrong type
+                continue # ⏭️ Skip
 
-            fields = embed.fields
-            moderator_field = fields[0]
-            violator_field = fields[1]
+            fields = embed.fields # 📝 Fields
+            moderator_field = fields[0] # 👤 Mod field
+            violator_field = fields[1] # 👤 Violator field
 
-            punishment = {}
-            punishment["Moderator"] = ""
-            punishment["ModeratorID"] = int(moderator_field.value.split("<@")[1].split(">")[0])
-            punishment["Snowflake"] = int(moderator_field.value.split("`")[1].split("`")[0])
-            punishment["Reason"] = moderator_field.value.split("Reason:** ")[1].split("\n")[0]
-            punishment["Epoch"] = int(moderator_field.value.split("<t:")[1].split(">")[0])
-            punishment["Username"] = violator_field.value.split("Username:** ")[1].split("\n")[0]
-            punishment["UserID"] = int(violator_field.value.split("`")[1].split("`")[0])
-            punishment["Guild"] = ctx.guild.id
-            punishment["Type"] = violator_field.value.split("Type:** ")[1].split("\n")[0]
+            punishment = {} # 🔨 Init data
+            punishment["Moderator"] = "" # 👤 Mod name
+            punishment["ModeratorID"] = int(moderator_field.value.split("<@")[1].split(">")[0]) # 🆔 Mod ID
+            punishment["Snowflake"] = int(moderator_field.value.split("`")[1].split("`")[0]) # 🆔 UUID
+            punishment["Reason"] = moderator_field.value.split("Reason:** ")[1].split("\n")[0] # 💬 Reason
+            punishment["Epoch"] = int(moderator_field.value.split("<t:")[1].split(">")[0]) # ⏰ Time
+            punishment["Username"] = violator_field.value.split("Username:** ")[1].split("\n")[0] # 👤 User
+            punishment["UserID"] = int(violator_field.value.split("`")[1].split("`")[0]) # 🆔 User ID
+            punishment["Guild"] = ctx.guild.id # 🏠 Home guild
+            punishment["Type"] = violator_field.value.split("Type:** ")[1].split("\n")[0] # 🔨 Type
 
-            if punishment["Type"] == "Temporary Ban":
-                try:
-                    punishment["UntilEpoch"] = int(violator_field.value.split("Until:** <t:")[1].split(">")[0])
-                except:
-                    punishment["UntilEpoch"] = punishment["Epoch"]
+            if punishment["Type"] == "Temporary Ban": # ⏳ Temporary check
+                try: # 🔍 Extract expiry
+                    punishment["UntilEpoch"] = int(violator_field.value.split("Until:** <t:")[1].split(">")[0]) # ⌛ Expire time
+                except: # ❌ Fallback
+                    punishment["UntilEpoch"] = punishment["Epoch"] # 📅 Same as start
 
-            if await self.bot.punishments.db.find_one({"Snowflake": punishment["Snowflake"]}):
-                continue
+            if await self.bot.punishments.db.find_one({"Snowflake": punishment["Snowflake"]}): # 🔍 Duplicate check
+                continue # ⏭️ Skip
 
-            await self.bot.punishments.db.insert_one(punishment)
-            success += 1
-            logging.info(f"Imported punishment: {punishment}")
+            await self.bot.punishments.db.insert_one(punishment) # 💾 Save to DB
+            success += 1 # ➕ Increment
+            logging.info(f"Imported punishment: {punishment}") # 📝 Log info
             if success % 100 == 0:
                 await msg.edit(
                     embed=discord.Embed(

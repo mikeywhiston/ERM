@@ -1,103 +1,103 @@
-import datetime
-import discord
-from discord.ext import commands
-from menus import CustomExecutionButton, CustomSelectMenu
-from utils.constants import BLANK_COLOR
+import datetime # 📅 Date/time utils
+import discord # 🟦 Discord API
+from discord.ext import commands # 📦 Command framework
+from menus import CustomExecutionButton, CustomSelectMenu # 📑 UI components
+from utils.constants import BLANK_COLOR # 🎨 UI color
 
 
 class Privacy(commands.Cog):
     def __init__(self, bot):
         # 🛡️ Initialize the Privacy cog...
-        self.bot = bot
+        self.bot = bot # 🤖 Bot instance
 
-    @commands.guild_only()
+    @commands.guild_only() # 🏠 Server only
     @commands.hybrid_command(
-        name="consent",
-        description="Change your privacy settings.",
-        extras={"category": "Privacy"},
+        name="consent", # 🔐 Command name
+        description="Change your privacy settings.", # 📝 Description
+        extras={"category": "Privacy"}, # 🏷️ Category
     )
     async def consent(self, ctx: commands.Context):
         # 🔐 Manage user privacy consent...
-        bot = self.bot
-        punishments_enabled = True
-        ai_enabled = True
-        selected = None
-        shift_reports_enabled = True
-        automatic_shifts_enabled = True
+        bot = self.bot # 🤖 Bot ref
+        punishments_enabled = True # 🔨 Alerts flag
+        ai_enabled = True # 🤖 AI flag
+        selected = None # 📄 Doc placeholder
+        shift_reports_enabled = True # 📋 Shift flag
+        automatic_shifts_enabled = True # ⏱️ Auto shift flag
 
-        async for document in bot.consent.db.find({"_id": ctx.author.id}):
+        async for document in bot.consent.db.find({"_id": ctx.author.id}): # 🔍 Fetch user settings
             punishments_enabled = (
-                document.get("punishments")
+                document.get("punishments") # 🔨 User choice
                 if document.get("punishments") is not None
                 else True
             )
             shift_reports_enabled = (
-                document.get("shift_reports")
+                document.get("shift_reports") # 📋 User choice
                 if document.get("shift_reports") is not None
                 else True
             )
             automatic_shifts_enabled = (
-                document.get("automatic_shifts")
+                document.get("automatic_shifts") # ⏱️ User choice
                 if document.get("automatic_shifts") is not None
                 else True
             )
-            selected = document
-        embed = discord.Embed(title="User Settings", color=BLANK_COLOR)
+            selected = document # 📄 Save doc
+        embed = discord.Embed(title="User Settings", color=BLANK_COLOR) # 📄 Create embed
         embed.add_field(
-            name="Configurations",
+            name="Configurations", # ⚙️ Field title
             value=(
-                f"> **Punishment Alerts:** {bot.emoji_controller.get_emoji('check') if punishments_enabled is True else bot.emoji_controller.get_emoji('xmark')}\n"
-                f"> **Shift Reports:** {bot.emoji_controller.get_emoji('check') if shift_reports_enabled is True else bot.emoji_controller.get_emoji('xmark')}\n"
-                f"> **Automatic Shifts:** {bot.emoji_controller.get_emoji('check') if automatic_shifts_enabled is True else bot.emoji_controller.get_emoji('xmark')}"
+                f"> **Punishment Alerts:** {bot.emoji_controller.get_emoji('check') if punishments_enabled is True else bot.emoji_controller.get_emoji('xmark')}\n" # 🔔 State
+                f"> **Shift Reports:** {bot.emoji_controller.get_emoji('check') if shift_reports_enabled is True else bot.emoji_controller.get_emoji('xmark')}\n" # 📋 State
+                f"> **Automatic Shifts:** {bot.emoji_controller.get_emoji('check') if automatic_shifts_enabled is True else bot.emoji_controller.get_emoji('xmark')}" # ⏱️ State
             ),
-            inline=False,
+            inline=False, # 📏 Wide
         )
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
-        embed.set_thumbnail(url=ctx.author.display_avatar.url)
-        embed.set_footer(text="User Settings")
-        embed.timestamp = datetime.datetime.now()
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon) # 🏠 Server icon
+        embed.set_thumbnail(url=ctx.author.display_avatar.url) # 🖼️ User avatar
+        embed.set_footer(text="User Settings") # 📑 Footer text
+        embed.timestamp = datetime.datetime.now() # ⏰ Update time
 
-        custom_view = discord.ui.View()
+        custom_view = discord.ui.View() # 🔘 New view
 
         async def punishment_alerts(
             interaction: discord.Interaction, button: discord.ui.Button
         ):
             # 🔔 Toggle punishment alerts...
-            nonlocal selected
-            nonlocal punishments_enabled
-            if interaction.user.id == ctx.author.id:
-                await interaction.response.defer()
-                view = CustomSelectMenu(
-                    ctx.author.id,
+            nonlocal selected # 📄 Use outer doc
+            nonlocal punishments_enabled # 🏹 Use outer flag
+            if interaction.user.id == ctx.author.id: # 🛡️ Match author
+                await interaction.response.defer() # ⏳ Let engine work
+                view = CustomSelectMenu( # 📑 Choice menu
+                    ctx.author.id, # 🆔 User check
                     [
                         discord.SelectOption(
-                            label="Enable",
+                            label="Enable", # ✅ Turn on
                             value="enable",
                             description="Enable punishment alerts.",
                         ),
                         discord.SelectOption(
-                            label="Disable",
+                            label="Disable", # ❌ Turn off
                             value="disable",
                             description="Disable punishment alerts.",
                         ),
                     ],
                 )
 
-                await interaction.message.edit(view=view)
-                await view.wait()
-                if view.value == "enable":
-                    if selected is None:
-                        await bot.consent.insert(
+                await interaction.message.edit(view=view) # 📝 Swap UI
+                await view.wait() # ⏳ Interaction
+                if view.value == "enable": # ✅ Input
+                    if selected is None: # ✨ New user
+                        await bot.consent.insert( # 📥 Create doc
                             {"_id": ctx.author.id, "punishments": True}
                         )
-                    else:
-                        selected["punishments"] = True
-                        if not selected.get("_id"):
+                    else: # 🔄 Existing user
+                        selected["punishments"] = True # ✅ Update
+                        if not selected.get("_id"): # 🆔 Ensure key
                             selected["_id"] = ctx.author.id
-                        await bot.consent.update_by_id(selected)
-                    punishments_enabled = True
-                    embed = discord.Embed(title="User Settings", color=BLANK_COLOR)
-                    embed.add_field(
+                        await bot.consent.update_by_id(selected) # 💾 Sync DB
+                    punishments_enabled = True # 🏹 Update flag
+                    embed = discord.Embed(title="User Settings", color=BLANK_COLOR) # 📄 Redraw embed
+                    embed.add_field( # 📝 Re-add data
                         name="Configurations",
                         value=(
                             f"> **Punishment Alerts:** {bot.emoji_controller.get_emoji('check') if punishments_enabled is True else bot.emoji_controller.get_emoji('xmark')}\n"
