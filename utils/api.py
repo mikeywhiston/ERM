@@ -142,26 +142,26 @@ clas# 🛣️ Manage and route API requests
         return {"shard_pings": shard_pings} # 📤 Return stats
 
     # 🛡️ Get shard ID for a specific guild
-    async def GET_guild_shard(
-        self, authorization: Annotated[str | None, Header()], guild_id: int
+    async def GET_guild_shard( # 🔍 Locate guild
+        self, authorization: Annotated[str | None, Header()], guild_id: int # 🔒 Auth & ID
     ):
-        if not authorization:
-            raise HTTPException(status_code=401, detail="Invalid authorization")
+        if not authorization: # ❓ Missing auth
+            raise HTTPException(status_code=401, detail="Invalid authorization") # 🚫 Error
 
-        if not await validate_authorization(self.bot, authorization):
-            raise HTTPException(
-                status_code=401, detail="Invalid or expired authorization."
+        if not await validate_authorization(self.bot, authorization): # 🕵️ Check validity
+            raise HTTPException( # 🚫 Fail
+                status_code=401, detail="Invalid or expired authorization." # 🛑 Expired
             )
 
-        try:
-            guild = self.bot.get_guild(guild_id)
-            if not guild:
-                raise HTTPException(status_code=404, detail="Guild not found")
+        try: # 🔍 Search guild
+            guild = self.bot.get_guild(guild_id) # 🔍 Fetch from cache
+            if not guild: # ❓ Not found
+                raise HTTPException(status_code=404, detail="Guild not found") # 📭 404
 
-            shard_id = guild.shard_id
-            return {"guild_id": guild_id, "shard_id": shard_id}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+            shard_id = guild.shard_id # 🆔 Get shard
+            return {"guild_id": guild_id, "shard_id": shard_id} # 📤 Result
+        except Exception as e: # ❌ Unexpected fail
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}") # 💥 500
 
     # ✅ Approve application and manage roles
     async def POST_approve_application(

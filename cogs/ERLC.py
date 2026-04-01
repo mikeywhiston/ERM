@@ -106,24 +106,24 @@ class ERLC(commands.Cog):
         else:
             roblox_id = oauth2_user["roblox_id"]
 
-        try:
-            server_token = await self.bot.mc_api.authorize(
-                roblox_id, server_name, ctx.guild.id
+        try: # 🔍 Link server
+            server_token = await self.bot.mc_api.authorize( # 🔐 Authenticate
+                roblox_id, server_name, ctx.guild.id # 👤 Identify
             )
-        except prc_api.ResponseFailure:  # yes, this is correct.
-            return await ctx.send(
+        except prc_api.ResponseFailure:  # yes, this is correct. # ❌ API failed
+            return await ctx.send( # 📣 Notify
                 embed=discord.Embed(
-                    title="Server Not Found",
-                    description="We could not find a server you own under the server name provided. Make sure you are linked with ERM by running `/link` in any server.",
-                    color=BLANK_COLOR,
+                    title="Server Not Found", # 📭 Not found
+                    description="We could not find a server you own under the server name provided. Make sure you are linked with ERM by running `/link` in any server.", # 📝 Help
+                    color=BLANK_COLOR, # 🎨 Gray
                 )
             )
 
-        await ctx.send(
+        await ctx.send( # ✅ Success
             embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Server Linked",
-                description=f"Your server has been linked with the name `{server_name}`.",
-                color=GREEN_COLOR,
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Server Linked", # 🎉 Linked!
+                description=f"Your server has been linked with the name `{server_name}`.", # 📝 Linked name
+                color=GREEN_COLOR, # 🎨 Green
             )
         )
 
