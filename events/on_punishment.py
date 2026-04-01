@@ -9,10 +9,12 @@ import logging
 
 
 class OnPunishment(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # ⚖️ Handling punishment event...
     async def on_punishment(self, objectid: ObjectId):
         warning: WarningItem = await self.bot.punishments.fetch_warning(objectid)
         guild = self.bot.get_guild(warning.guild_id)
@@ -84,6 +86,7 @@ class OnPunishment(commands.Cog):
         )
         thumbnail = thumbnails[0].image_url
 
+        # 🆔 Getting Discord ID by Roblox ID...
         async def get_discord_id_by_roblox_id(self, roblox_id):
             linked_account = await self.bot.oauth2_users.db.find_one(
                 {"roblox_id": roblox_id}

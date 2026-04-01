@@ -42,6 +42,7 @@ _api_rate_limiter = defaultdict(list)
 _rate_limit_window = 60
 _max_requests_per_window = 50
 
+# 🚦 Check API rate limits
 async def check_rate_limit(identifier: str):
     """Check if we're hitting rate limits"""
     now = datetime.datetime.now().timestamp()
@@ -61,6 +62,7 @@ class Identification(BaseModel):
     discord: typing.Optional[typing.Any]
     source: typing.Literal["fivem", "discord"]
 
+# 🔐 Validate API authorization tokens
 
 async def validate_authorization(bot: Bot, token: str, disable_static_tokens=False):
     # Check static and dynamic tokens
@@ -78,7 +80,7 @@ async def validate_authorization(bot: Bot, token: str, disable_static_tokens=Fal
         return False
 
 
-class APIRoutes:
+clas# 🛣️ Manage and route API requests
     def __init__(self, bot: Bot):
         self.bot = bot
         self.router = APIRouter()
@@ -93,9 +95,11 @@ class APIRoutes:
                     methods=[i.split("_")[0].upper()],
                 )
 
+    # 🟢 Get bot status
     def GET_status(self):
         return {"guilds": len(self.bot.guilds), "ping": round(self.bot.latency * 1000)}
 
+    # 🏢 Get mutual guilds between a list and the bot
     async def POST_get_mutual_guilds(self, request: Request):
         json_data = await request.json()
         guild_ids = json_data.get("guilds")
@@ -121,6 +125,7 @@ class APIRoutes:
 
         return {"guilds": guilds}
 
+    # 📡 Get shard pings
     async def GET_shard_pings(self, authorization: Annotated[str | None, Header()]):
         if not authorization:
             raise HTTPException(status_code=401, detail="Invalid authorization")
@@ -136,6 +141,7 @@ class APIRoutes:
 
         return {"shard_pings": shard_pings}
 
+    # 🛡️ Get shard ID for a specific guild
     async def GET_guild_shard(
         self, authorization: Annotated[str | None, Header()], guild_id: int
     ):
@@ -157,6 +163,7 @@ class APIRoutes:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
+    # ✅ Approve application and manage roles
     async def POST_approve_application(
         self, authorization: Annotated[str | None, Header()], request: Request
     ):
@@ -260,6 +267,7 @@ class APIRoutes:
                 status_code=500, detail=f"Internal server error: {str(e)}"
             )
 
+    # ❌ Deny application and notify user
     async def POST_deny_application(
         self, authorization: Annotated[str | None, Header()], request: Request
     ):
@@ -363,6 +371,7 @@ class APIRoutes:
                 status_code=500, detail=f"Internal server error: {str(e)}"
             )
 
+    # 📢 Notify staff of new application
     async def POST_notify_new_application(
         self, authorization: Annotated[str | None, Header()], request: Request
     ):
@@ -414,6 +423,7 @@ class APIRoutes:
         except discord.HTTPException as e:
             raise HTTPException(status_code=500, detail=f"Failed to send message: {str(e)}")
 
+    # 🆘 Send staff request notification
     async def POST_send_staff_request(
         self, authorization: Annotated[str | None, Header()], request: Request
     ):
@@ -430,6 +440,7 @@ class APIRoutes:
         self.bot.dispatch("staff_request_send", ObjectId(staff_request_id))
         return {"op": 1, "code": 200}
 
+    # 📬 Send priority DM to user
     async def POST_send_priority_dm(
         self, authorization: Annotated[str | None, Header()], request: Request
     ):
@@ -477,6 +488,8 @@ class APIRoutes:
             return HTTPException(
                 status_code=400, detail="Member cannot be direct messaged."
             )
+
+    # 📩 Send priority notification            )
 
     async def POST_send_priority(
         self, authorization: Annotated[str | None, Header()], request: Request

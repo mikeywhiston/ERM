@@ -14,11 +14,13 @@ from utils.utils import generator, time_converter, require_settings, log_command
 
 class Reminders(commands.Cog):
     def __init__(self, bot):
+        # ⏰ Initialize the Reminders cog...
         self.bot = bot
 
     @commands.hybrid_group(name="reminders")
     @is_management()
     async def reminders(self, ctx):
+        # 📂 Base reminders group command...
         pass
 
     @commands.guild_only()
@@ -30,6 +32,7 @@ class Reminders(commands.Cog):
     @is_admin()
     @require_settings()
     async def manage_reminders(self, ctx):
+        # ⚙️ Manage server reminders...
         bot = self.bot
         await log_command_usage(self.bot, ctx.guild, ctx.author, f"Reminders Manage")
         reminder_data = await bot.reminders.find_by_id(ctx.guild.id)
@@ -287,4 +290,5 @@ class Reminders(commands.Cog):
 
 
 async def setup(bot):
+    # 🔩 Register Reminders cog...
     await bot.add_cog(Reminders(bot))

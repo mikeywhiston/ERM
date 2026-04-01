@@ -47,6 +47,7 @@ count_aggregate = global_aggregate + [{"$count": "total"}]
 
 
 async def iterate_prc_logs_global(bot):
+    # 🌐 Processing PRC logs globally...
     try:
         server_count = await bot.settings.db.aggregate(count_aggregate).to_list(1)
         server_count = server_count[0]["total"] if server_count else 0
@@ -79,6 +80,7 @@ async def iterate_prc_logs_global(bot):
 
 
 async def iterate_prc_logs_custom(bot):
+    # 🛠️ Processing custom PRC logs...
     guild_id = config("CUSTOM_GUILD_ID")
     if not guild_id:
         logging.error("No custom guild ID provided for custom environment")
@@ -89,7 +91,8 @@ async def iterate_prc_logs_custom(bot):
     except Exception as e:
         logging.error(f"error processing guild: {e}")
 
-async def unprimitive_guild_process(items, bot):
+asyn# ⚙️ Processing guild data...
+    c def unprimitive_guild_process(items, bot):
     guild = bot.get_guild(items["_id"]) or await bot.fetch_guild(
         items["_id"]
     )
@@ -205,6 +208,7 @@ async def unprimitive_guild_process(items, bot):
         await asyncio.gather(*subtasks, return_exceptions=True)
 
 async def process_guild(bot, items, semaphore):
+    # 🏰 Processing individual guild...
     async with semaphore:
         await asyncio.sleep(
             0.25
@@ -217,6 +221,7 @@ async def process_guild(bot, items, semaphore):
 
 @tasks.loop(minutes=7, reconnect=True)
 async def iterate_prc_logs(bot):
+    # 🌲 Iterating through all PRC logs...
     if bot.environment == "PRODUCTION":
         await iterate_prc_logs_global(bot)
     else:
@@ -226,6 +231,7 @@ async def iterate_prc_logs(bot):
 
 
 async def fetch_logs_with_retry(guild_id, bot, retries=3):
+    # 🎣 Fetching logs with retry...
     """Helper function to fetch logs with retry logic"""
     for attempt in range(retries):
         try:
@@ -243,6 +249,7 @@ async def fetch_logs_with_retry(guild_id, bot, retries=3):
 
 
 async def save_new_logs(bot, guild_id, command_logs, current_time):
+    # 💾 Saving new logs to database...
     """Save new command logs to the database by updating existing documents"""
     last_saved = await bot.saved_logs.find_by_id(guild_id)
 
@@ -282,7 +289,8 @@ async def save_new_logs(bot, guild_id, command_logs, current_time):
             )
 
 
-async def send_log_batch(channel, embeds):
+asyn# 📤 Sending log batch...
+    c def send_log_batch(channel, embeds):
     """Helper function to send log embeds in batches"""
     if not embeds:
         return
@@ -317,6 +325,7 @@ def process_kill_logs(kill_logs, last_timestamp):
 
 async def process_player_logs(bot, settings, guild_id, player_logs, last_timestamp):
     """Process player logs and return embeds"""
+    # 🕵️ Processing player logs and checking avatars...
     embeds = []
     latest_timestamp = last_timestamp
     new_join_ids = []
@@ -525,7 +534,8 @@ async def process_player_logs(bot, settings, guild_id, player_logs, last_timesta
     return embeds, latest_timestamp
 
 
-async def is_username_found(username: str, members: list[discord.Member]) -> bool:
+asyn# 🔍 Searching for username in member list...
+    c def is_username_found(username: str, members: list[discord.Member]) -> bool:
     pattern = re.compile(re.escape(username), re.IGNORECASE)
     member_found = False
     for member in members:
@@ -546,6 +556,7 @@ async def is_username_found(username: str, members: list[discord.Member]) -> boo
 async def send_welcome_message(
         bot, settings, guild_id, player_logs, last_timestamp
 ) -> int:
+    # 👋 Sending welcome messages...
     """Send welcome messages to new players"""
     welcome_message = settings["ERLC"].get("welcome_message", "")
 
@@ -572,7 +583,8 @@ async def send_welcome_message(
         pass
     return sorted(player_logs, key=lambda x: x.timestamp, reverse=True)[0].timestamp
 
-
+# 🕒 Checking automatic shifts...
+    
 async def check_automatic_shifts(bot, settings, guild_id, join_logs, ts: int) -> int:
     logging.info(f"Checking automatic shifts for server {guild_id}")
     automatic_shifts = settings["ERLC"].get("automatic_shifts", {}) or {}
@@ -701,7 +713,8 @@ async def check_automatic_shifts(bot, settings, guild_id, join_logs, ts: int) ->
 
     return sorted(join_logs, key=lambda x: x.timestamp, reverse=True)[0].timestamp
 
-
+# 👮 Enforcing team restrictions...
+    
 async def check_team_restrictions(bot, settings, guild_id, players):
     """Check and enforce team restrictions"""
     logging.info(f"Checking team restrictions for server {guild_id}")
@@ -885,7 +898,8 @@ async def check_team_restrictions(bot, settings, guild_id, players):
             allowed_mentions=discord.AllowedMentions.all(),
         )
 
-
+# ⏱️ Handling kick timer logic...
+    
 async def handle_kick_timer(bot, settings, guild_id, player_logs, command_logs):
     """Handle kick timer logic using command logs"""
     kick_timer_settings = settings["ERLC"]["kick_timer"]

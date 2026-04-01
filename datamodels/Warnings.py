@@ -26,10 +26,12 @@ class WarningItem:
     snowflake: int
 
     def __init__(self, **kwargs):
+        # 📦 Data model helper: Initialize WarningItem with keyword arguments
         for key, value in kwargs.items():
             setattr(self, key, value)
 
     def __getitem__(self, item):
+        # 📦 Data model helper: Get item from WarningItem with legacy support
         legacy_correspondents = {
             "_id": "id",
             "userid": "user_id",
@@ -51,6 +53,7 @@ class Warnings(Document):
     """
 
     def __init__(self, bot):
+        # 🛡️ Data model helper: Initialize Warnings with bot instance
         self.bot = bot
         super().__init__(bot.db, "punishments")
         self.recovery = Document(bot.db, "recovery")
@@ -59,6 +62,7 @@ class Warnings(Document):
         """
         Gets the warnings for a user in a guild.
         """
+        # 🛡️ Data model helper: Retrieve warnings for a guild member
         return [
             WarningItem(
                 id=i["_id"],
@@ -79,6 +83,7 @@ class Warnings(Document):
     async def fetch_warning(self, warning_id: str) -> WarningItem | None:
         """
         Fetches a warning by its ID.
+        # 🛡️ Data model helper: Fetch detailed warning info by database ID
         """
         i = await self.db.find_one({"_id": ObjectId(warning_id)})
         if i is None:
@@ -100,31 +105,35 @@ class Warnings(Document):
     async def get_warning(self, warning_id: str) -> dict:
         """
         Gets a warning by its ID.
-        """
+        # 🛡️ Data model helper: Retrieve raw warning dictionary by ID
         return await self.db.find_one({"_id": ObjectId(warning_id)})
 
     async def remove_warning(self, warning_id: str):
         """
         Removes a warning by its ID.
         """
+        # 🛡️ Data model helper: Delete a warning from the database
         await self.db.delete_one({"_id": ObjectId(warning_id)})
 
     async def get_warning_by_snowflake(self, snowflake: int) -> dict:
         """
         Gets a warning by its ID.
         """
+        # 🛡️ Data model helper: Retrieve warning using its unique snowflake
         return await self.db.find_one({"Snowflake": snowflake})
 
     async def get_global_warnings(self, user: int) -> list[dict]:
         """
         Gets the warnings for a user globally.
         """
+        # 🛡️ Data model helper: Retrieve all warnings for a user across all guilds
         return [i async for i in self.db.find({"UserID": user})]
 
     async def get_guild_bolos(self, guild: int) -> list[dict]:
         """
         Gets the BOLOs for a guild.
         """
+        # 🛡️ Data model helper: Retrieve all Active BOLOs for a guild
         return [
             i
             async for i in self.db.find(
@@ -146,18 +155,9 @@ class Warnings(Document):
     ) -> ObjectId | ValueError:
         """
         Inserts a warning into the database.
-        {
-          "_id": 123456789012345678,
-          "Username": "1friendlydoge",
-          "UserID": 123456789012345678,
-          "Type": "Warning",
-          "Reason": "Nerd",
-          "Moderator": "Noah",
-          "ModeratorID": 123456789012345678,
-          "Guild": 12345678910111213,
-          "Epoch": 706969420,
-          "UntilEpoch": 706969420
-        }
+        ...
+        """
+        # 🛡️ Data model helper: Create and insert a new punishment record
         """
         if all([until_epoch is None, moderation_type == "Temporary Ban"]):
             return ValueError("Epoch must be provided for temporary bans.")

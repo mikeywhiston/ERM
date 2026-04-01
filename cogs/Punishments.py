@@ -57,6 +57,7 @@ from utils.timestamp import td_format
 
 
 class Punishments(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot):
         self.bot = bot
 
@@ -77,6 +78,7 @@ class Punishments(commands.Cog):
         user="What's their username? You can mention a Discord user, or provide a ROBLOX username."
     )
     @app_commands.describe(reason="What is your reason for punishing this user?")
+    # 🔨 Punish a user
     async def punish(self, ctx, user: str, type: str, *, reason: str):
         if type.lower() == "warn":
             type = "Warning"
@@ -277,6 +279,7 @@ class Punishments(commands.Cog):
         aliases=["pm"],
     )
     @is_staff()
+    # 📂 Punishment command group
     async def punishments(self, ctx: commands.Context):
         await ctx.invoke(self.bot.get_command("punishment manage"))
 
@@ -290,6 +293,7 @@ class Punishments(commands.Cog):
     @require_settings()
     # @is_management()
     @is_staff()
+    # ⚙️ Manage punishments
     async def punishment_manage(self, ctx: commands.Context):
         embed = discord.Embed(
             title="Staff Options",
@@ -371,7 +375,8 @@ class Punishments(commands.Cog):
                 punishment_types = {"types": []}
 
             punishment_types = punishment_types["types"]
-
+# 🖼️ Setup embed for punishment types
+                
             def setup_embed() -> discord.Embed:
                 embed = discord.Embed(title="Punishment Types", color=BLANK_COLOR)
                 embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)

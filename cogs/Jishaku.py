@@ -16,6 +16,7 @@ class CustomDebugCog(*OPTIONAL_FEATURES, *STANDARD_FEATURES):
 
     @Feature.Command(parent="jsk", name="creator")
     async def jsk_creator(self, ctx: commands.Context):
+        # 👑 Display the bot creator...
         try:
             owner = await ctx.guild.fetch_member(OWNER)
         except discord.NotFound:
@@ -99,4 +100,5 @@ class CustomDebugCog(*OPTIONAL_FEATURES, *STANDARD_FEATURES):
 
 
 async def setup(bot):
+    # 🔩 Register Custom Jishaku cog...
     await bot.add_cog(CustomDebugCog(bot=bot))

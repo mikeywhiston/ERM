@@ -36,12 +36,15 @@ class ActivityCoreCommands:
     """
 
     def __init__(self, bot: commands.Bot):
+        # 🤖 Initialize the Activity core commands...
         self.bot = bot
 
     async def upload_schema(self, schema: dict):
+        # 📤 Upload notice schema to database...
         await self.bot.loas.insert(schema)
 
     async def upload_to_views(self, code, message_id, *args):
+        # 👁️ Track notice views for interaction...
         await self.bot.views.insert(
             {
                 "_id": code,
@@ -58,6 +61,7 @@ class ActivityCoreCommands:
         author: discord.Member,
         schema,
     ) -> dict:
+        # ✉️ Send activity notice request for approval...
         request_type = schema["type"]
         settings = await self.bot.settings.find_by_id(guild.id)
         management_roles = settings.get("staff_management").get("management_role")
@@ -134,6 +138,7 @@ class ActivityCoreCommands:
     async def core_command_admin(
         self, ctx: commands.Context, request_type_object: str, victim: discord.Member
     ):
+        # 🛠️ Administer activity notices for staff...
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
         if not settings:
             return await ctx.send(
@@ -471,7 +476,8 @@ class ActivityCoreCommands:
         return_bypass=None,
         override_victim=None,
         starting: str = None,
-    ):
+    ):# 📝 Process activity notice request logic...
+        
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
         if (
             not settings.get("staff_management")
@@ -595,6 +601,7 @@ class ActivityCoreCommands:
     async def core_command_active(
         self, ctx: commands.Context, request_type_object: str
     ):
+        # 📋 View active activity notices...
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
         if not settings.get("staff_management") or not settings.get(
             "staff_management", {}
@@ -625,6 +632,7 @@ class ActivityCoreCommands:
             active_requests.append(item)
 
         def setup_embed() -> discord.Embed:
+            # 🖼️ Set up embed for active notices...
             embed = discord.Embed(title="Activity Notices", color=BLANK_COLOR)
             embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
             return embed
@@ -666,7 +674,8 @@ class ActivityCoreCommands:
         else:
             await ctx.send(embed=embeds[0])
 
-    async def core_command_view(self, ctx: commands.Context, request_type_object: str):
+    asyn# 👁️ View your own activity notices...
+        c def core_command_view(self, ctx: commands.Context, request_type_object: str):
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
         if not settings.get("staff_management") or not settings.get(
             "staff_management", {}
@@ -687,7 +696,8 @@ class ActivityCoreCommands:
             {"guild_id": ctx.guild.id, "user_id": ctx.author.id, "type": request_upper}
         ):
             all_requests.append(item)
-
+# 🖼️ Set up embed for activity notices...
+            
         def setup_embed() -> discord.Embed:
             embed = discord.Embed(title="Activity Notices", color=BLANK_COLOR)
             embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
@@ -731,8 +741,7 @@ class ActivityCoreCommands:
             )
 
 
-class StaffManagement(commands.Cog):
-    def __init__(self, bot):
+class St# 🛡️ Initialize the Staff Management cog...
         self.bot = bot
         self.core_commands = ActivityCoreCommands(bot)
 
@@ -741,6 +750,9 @@ class StaffManagement(commands.Cog):
         description="File a Reduced Activity request",
         extras={"category": "Staff Management"},
         with_app_command=True,
+    )
+    async def ra(self, ctx, time, *, reason):
+        # 📂 Reduced Activity base command...
     )
     async def ra(self, ctx, time, *, reason):
         pass
@@ -804,7 +816,8 @@ class StaffManagement(commands.Cog):
         extras={"category": "Staff Management"},
         with_app_command=True,
     )
-    @app_commands.describe(time="How long are you going to be on LoA for? (s/m/h/d)")
+    @app# 📂 Leave of Absence base command...
+        _commands.describe(time="How long are you going to be on LoA for? (s/m/h/d)")
     @app_commands.describe(reason="What is your reason for going on LoA?")
     async def loa(self, ctx, time, *, reason):
         await ctx.invoke(self.bot.get_command("loa request"), time=time, reason=reason)
@@ -823,6 +836,7 @@ class StaffManagement(commands.Cog):
     @loa.command(
         name="active",
         description="View all active LOAs",
+        # 📋 View active LOAs...
         extras={"category": "Staff Management"},
     )
     @is_admin()
@@ -858,9 +872,6 @@ class StaffManagement(commands.Cog):
     )
     async def loa_admin(self, ctx, member: discord.Member):
         await log_command_usage(self.bot, ctx.guild, ctx.author, f"LOA Admin: {member}")
-
-        return await self.core_commands.core_command_admin(ctx, "loa", member)
-
-
+# 🔩 Register Staff Management cog...
 async def setup(bot):
     await bot.add_cog(StaffManagement(bot))

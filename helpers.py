@@ -50,6 +50,7 @@ class ColourMixin:
 
     @accent_color.setter
     def accent_color(self, color: discord.Colour) -> None:
+        # ✍️ Setting accent color property...
         self.accent_colour = color
 
 
@@ -72,6 +73,7 @@ class CustomMockMixin:
     additional_spec_asyncs = None
 
     def __init__(self, **kwargs):
+        # 🏗️ Initializing Custom Mock Mixin...
         name = kwargs.pop(
             "name", None
         )  # `name` has special meaning for Mock classes, so we need to set it manually.
@@ -93,6 +95,7 @@ class CustomMockMixin:
         overwriting this method is the best way to deal with that.
         This override will look for an attribute called `child_mock_type` and use that as the type of the child mock.
         """
+        # 👶 Creating child mock...
         _new_name = kw.get("_new_name")
         if _new_name in self.__dict__["_spec_asyncs"]:
             return unittest.mock.AsyncMock(**kw)
@@ -102,11 +105,12 @@ class CustomMockMixin:
             issubclass(_type, unittest.mock.MagicMock)
             and _new_name in unittest.mock._async_method_magics
         ):
-            # Any asynchronous magic becomes an AsyncMock
+            # 🪄 Handling async magic methods...
             klass = unittest.mock.AsyncMock
         else:
             klass = self.child_mock_type
 
+        # 🔒 Checking if mock is sealed...
         if self._mock_sealed:
             attribute = "." + kw["name"] if "name" in kw else "()"
             mock_name = self._extract_mock_name() + attribute

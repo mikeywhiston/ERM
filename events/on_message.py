@@ -22,10 +22,12 @@ from utils.utils import get_guild_icon, get_prefix, invis_embed
 
 
 class OnMessage(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot: Bot = bot
 
     @commands.Cog.listener("on_message")
+    # 💬 Handling message event...
     async def on_message(self, message: discord.Message):
         bot = self.bot
         bypass_role = None

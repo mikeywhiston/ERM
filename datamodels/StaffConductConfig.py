@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class StaffConductConfig(Document):
+    # 📝 Data model for staff conduct configuration
     pass

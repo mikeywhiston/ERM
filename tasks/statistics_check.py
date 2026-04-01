@@ -16,6 +16,7 @@ _cache_timeout = 300
 
 async def get_cached_guild(bot, guild_id):
     """Get guild with caching"""
+    # 🏰 Getting guild from cache...
     cache_key = f"guild_{guild_id}"
     now = time.time()
     
@@ -37,6 +38,7 @@ async def get_cached_guild(bot, guild_id):
 
 async def get_cached_channel(bot, guild, channel_id):
     """Get channel with caching"""
+    # 📺 Getting channel from cache...
     cache_key = f"channel_{guild.id}_{channel_id}"
     now = time.time()
     
@@ -56,6 +58,7 @@ async def get_cached_channel(bot, guild, channel_id):
 
 
 async def update_channel(bot, guild, channel_id, stat_config, placeholders):
+    # 🔄 Updating channel name...
     """Update channel name with statistics and caching"""
     try:
         channel = await get_cached_channel(bot, guild, channel_id)
@@ -82,6 +85,7 @@ async def update_channel(bot, guild, channel_id, stat_config, placeholders):
 @tasks.loop(minutes=5, reconnect=True)
 async def statistics_check(bot):
     """
+    # 📊 Running statistics check...
     Statistics Check with caching and batch processing optimization.
     """
     initial_time = time.time()

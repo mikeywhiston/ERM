@@ -14,9 +14,11 @@ from utils.utils import invis_embed, require_settings, time_converter
 
 
 class GameLogging(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot):
         self.bot = bot
 
+    # 🔍 Check for missing settings
     def check_missing(self, settings, section):
         if not settings:
             return False
@@ -40,6 +42,7 @@ class GameLogging(commands.Cog):
         description="Request more staff to be in-game!",
         extras={"category": "Game Logging"},
     )
+    # 👮 Staff command group
     async def staff(self, ctx: commands.Context):
         pass
 
@@ -50,6 +53,7 @@ class GameLogging(commands.Cog):
     )
     @app_commands.describe(reason="Reason for your Staff Request!")
     @require_settings()
+    # 📧 Send staff request
     async def staff_request(self, ctx: commands.Context, *, reason: str):
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
         game_logging = settings.get("game_logging", {})
@@ -187,6 +191,7 @@ class GameLogging(commands.Cog):
         description="Manage your game with logging such as messages, and events",
         extras={"category": "Game Logging"},
     )
+    # 🎮 Game command group
     async def game(self, ctx):
         pass
 
@@ -198,6 +203,8 @@ class GameLogging(commands.Cog):
     )
     @app_commands.describe(announcement="The game message you are going to log.")
     @is_staff()
+    # 💬 Log game message
+    async def game_message(self, ctx, *, announcement: str):
     @require_settings()
     async def game_message(self, ctx: commands.Context, *, announcement: str):
         bot = self.bot
@@ -258,6 +265,7 @@ class GameLogging(commands.Cog):
         description="Log a Shoulder-to-Shoulder in your game",
         extras={"category": "Game Logging"},
     )
+    # 🤝 Log STS
     async def game_sts(self, ctx: commands.Context, duration: str, *, reason: str):
         bot = self.bot
         configItem = await bot.settings.find_by_id(ctx.guild.id)
@@ -359,6 +367,7 @@ class GameLogging(commands.Cog):
         description="Log Roleplay Permissions and Priorities in your game",
         extras={"category": "Game Logging"},
     )
+    # 🔝 Log priority
     @is_staff()
     async def game_priority(self, ctx: commands.Context, duration: str, *, reason):
         bot = self.bot

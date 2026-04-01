@@ -11,6 +11,7 @@ class StaffConnection(BaseDataClass):
     document_id: ObjectId
 
     def to_document(self) -> dict:
+        # 🤝 Data model helper: Convert connection object to database document format
         return (
             {"discord_id": self.discord_id, "roblox_id": self.roblox_id}
             if not self.document_id
@@ -29,7 +30,7 @@ class StaffConnections(Document):
         discord_id: typing.Optional[int] = None,
         document_id: typing.Optional[typing.Union[ObjectId, str]] = None,
     ) -> StaffConnection | None:
-
+        # 🤝 Data model helper: Find a staff connection by multiple criteria (Roblox, Discord, or DB ID)
         attributes = {}
 
         for key, value in {
@@ -51,4 +52,5 @@ class StaffConnections(Document):
         )
 
     async def insert_connection(self, connection: StaffConnection):
+        # 🤝 Data model helper: Insert a new staff connection record
         return await self.db.insert_one(connection.to_document())

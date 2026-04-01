@@ -6,6 +6,7 @@ from datamodels.ServerKeys import ServerKey
 
 class MapleKeys(Document):
     async def get_server_key(self, guild_id: int):
+        # 🔑 Data model helper: Retrieve the unique Maple key for a guild
         doc = await self.db.find_one({"guildId": guild_id})
         if not doc:
             return None

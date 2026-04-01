@@ -5,10 +5,12 @@ from utils.constants import BLANK_COLOR
 
 
 class OnLOADeny(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # ❌ Handling LOA deny event...
     async def on_loa_deny(
         self, s_loa: dict, denied_by: int, reason: str = "No reason provided."
     ):
@@ -65,5 +67,6 @@ class OnLOADeny(commands.Cog):
         await self.bot.views.delete_by_id(view_item.id)
 
 
+# 🚀 Setting up cog...
 async def setup(bot):
     await bot.add_cog(OnLOADeny(bot))

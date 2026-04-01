@@ -4,6 +4,7 @@ import aiohttp
 
 
 class Punishment:
+    # 📦 Punishment data model
     def __init__(self, text, prediction, confidence, *args, **kwargs):
         self.text = text
         self.prediction = prediction
@@ -12,10 +13,12 @@ class Punishment:
 
 
 class AI:
+    # 🤖 AI interaction handler
     def __init__(self, api_url, api_auth):
         self.api_url = api_url
         self.api_auth = api_auth
 
+    # 🎯 Get recommended punishment from AI
     async def recommended_punishment(
         self, reason: str, past: typing.Union[list[str], None]
     ) -> Punishment:

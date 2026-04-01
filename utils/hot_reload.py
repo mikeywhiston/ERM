@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands, tasks
 
 
+# 🗺️ Get file path from extension string
 def path_from_extension(extension: str) -> pathlib.Path:
     return pathlib.Path(extension.replace(".", os.sep) + ".py")
 
@@ -18,9 +19,11 @@ class HotReload(commands.Cog):
         self.bot = bot
         self.hot_reload_loop.start()
 
+    # 🔌 Unload the cog and stop loop
     def cog_unload(self):
         self.hot_reload_loop.stop()
 
+    # 🔄 Loop to check for file edits and reload
     @tasks.loop(seconds=3)
     async def hot_reload_loop(self):
         for extension in list(self.bot.extensions.keys()):
@@ -48,6 +51,7 @@ class HotReload(commands.Cog):
             finally:
                 self.last_modified_time[extension] = time
 
+    # ⏱️ Cache last modified times before starting loop
     @hot_reload_loop.before_loop
     async def cache_last_modified_time(self):
         self.last_modified_time = {}
@@ -59,6 +63,7 @@ class HotReload(commands.Cog):
             self.last_modified_time[extension] = time
 
 
+# 🛠️ Setup function for HotReload cog
 async def setup(bot):
     cog = HotReload(bot)
     await bot.add_cog(cog)

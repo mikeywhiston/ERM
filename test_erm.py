@@ -9,6 +9,7 @@ from helpers import MockContext, MockRole
 
 
 async def has_any_role_check(ctx: Context, *roles: Union[str, int]) -> bool:
+    # 🛡️ Checks if a user has any of the specified roles
     """
     Returns True if the context's author has any of the specified roles.
     `roles` are the names or IDs of the roles for which to check.
@@ -21,6 +22,7 @@ async def has_any_role_check(ctx: Context, *roles: Union[str, int]) -> bool:
 
 
 async def has_no_roles_check(ctx: Context, *roles: Union[str, int]) -> bool:
+    # ❌ Checks if a user has none of the specified roles
     """
     Returns True if the context's author doesn't have any of the specified roles.
     `roles` are the names or IDs of the roles for which to check.
@@ -37,24 +39,29 @@ async def has_no_roles_check(ctx: Context, *roles: Union[str, int]) -> bool:
 class ChecksTests(unittest.IsolatedAsyncioTestCase):
     """Tests the check functions defined in `bot.checks`."""
 
-    def setUp(self):
+    def # ⚙️ Set up the test context
         self.ctx = MockContext()
 
     async def test_has_any_role_check_without_guild(self):
+        # 🧪 Test has_any_role_check in a non-guild channel
         """`has_any_role_check` returns `False` for non-guild channels."""
         self.ctx.channel = MagicMock(DMChannel)
         self.assertFalse(await has_any_role_check(self.ctx))
 
     async def test_has_any_role_check_without_required_roles(self):
+        # 🧪 Test has_any_role_check when user lacks roles
         """`has_any_role_check` returns `False` if `Context.author` lacks the required role."""
         self.ctx.author.roles = []
         self.assertFalse(await has_any_role_check(self.ctx))
 
     async def test_has_any_role_check_with_guild_and_required_role(self):
+        # 🧪 Test has_any_role_check when user has the role
         """`has_any_role_check` returns `True` if `Context.author` has the required role."""
         self.ctx.author.roles.append(MockRole(id=10))
         self.assertTrue(await has_any_role_check(self.ctx, 10))
 
+    async def test_has_no_roles_check_without_guild(self):
+        # 🧪 Test has_no_roles_check in a non-guild channel
     async def test_has_no_roles_check_without_guild(self):
         """`has_no_roles_check` should return `False` when `Context.guild` is None."""
         self.ctx.channel = MagicMock(DMChannel)

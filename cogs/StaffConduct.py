@@ -25,9 +25,11 @@ embedColour = 0xED4348
 
 class StaffConduct(commands.Cog):
     def __init__(self, bot):
+        # 🛡️ Initialize the Staff Conduct cog...
         self.bot = bot
 
     async def check_settings(self, ctx: commands.Context):
+        # 🔍 Verify staff conduct settings...
         error_text = "<:ERMClose:1111101633389146223> **{},** this server isn't setup with ERM! Please run `/setup` to setup the bot before trying to manage infractions".format(
             ctx.author.name
         )
@@ -50,6 +52,7 @@ class StaffConduct(commands.Cog):
     )
     @is_management()
     async def infraction(self, ctx: commands.Context):
+        # 🚦 Base infraction group command...
         pass
 
     @infraction.command(
@@ -59,6 +62,7 @@ class StaffConduct(commands.Cog):
     )
     @is_management()
     async def manage(self, ctx: commands.Context):
+        # ⚙️ Manage staff conduct system...
         bot = self.bot
         guild_settings = await bot.settings.find_by_id(ctx.guild.id)
         result = await self.check_settings(ctx)
@@ -344,6 +348,6 @@ a user upon receiving a **{infraction_type_name}**."
                 f"{successEmoji} **{ctx.author.name},** I deleted your Staff Conduct configuration."
             )
 
-
+# 🔩 Register Staff Conduct cog...
 async def setup(bot):
     await bot.add_cog(StaffConduct(bot))

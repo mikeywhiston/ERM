@@ -6,10 +6,12 @@ from utils.constants import BLANK_COLOR
 
 
 class OnBreakEnd(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 🔔 Handling break end event...
     async def on_break_end(self, object_id: ObjectId):
 
         document = await self.bot.shift_management.shifts.find_by_id(object_id)

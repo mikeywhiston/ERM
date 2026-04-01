@@ -6,6 +6,7 @@ from utils.prc_api import ResponseFailure, ServerStatus, Player, CommandLog, Ban
 
 
 class MCApiClient:
+    # 🍁 Client for interacting with the Maple County API
     def __init__(self, bot, base_url: str, api_key: str):
         self.bot = bot
         self.session = aiohttp.ClientSession()
@@ -14,9 +15,11 @@ class MCApiClient:
 
         bot.external_http_sessions.append(self.session)
 
+    # 🔑 Get server key for a specific guild
     async def get_server_key(self, guild_id: int) -> ServerKey:
         return await self.bot.mc_keys.get_server_key(guild_id)
 
+    # 📡 Send internal API request to Maple County
     async def _send_api_request(
         self,
         method: typing.Literal["GET", "POST"],
@@ -69,6 +72,7 @@ class MCApiClient:
                 await response.json() if response.content_type != "text/html" else {}
             )
 
+    # 🌐 Get server status information
     async def get_server_status(self, guild_id: int):
         status_code, response_json = await self._send_api_request(
             "GET", "/Server", guild_id
@@ -87,6 +91,7 @@ class MCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 🧪 Send test request to verify server key
     async def send_test_request(self, server_key: str) -> int | ServerStatus:
         code, response_json = await self._send_api_request(
             "GET", "/Server", 0, None, server_key
@@ -106,6 +111,7 @@ class MCApiClient:
             )
         )
 
+    # 👥 Get list of players in the server
     async def get_server_players(self, guild_id: int) -> list:
         status_code, response_json = await self._send_api_request(
             "GET", "/Server/Players", guild_id

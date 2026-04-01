@@ -11,6 +11,7 @@ import pytz
 
 @tasks.loop(hours=1)
 async def check_infractions(bot):
+    # ⚖️ Checking infractions for expiry...
     try:
         current_time = datetime.datetime.now(tz=pytz.UTC).timestamp()
         initial_time = time.time()

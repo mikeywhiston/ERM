@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class Consent(Document):
+    # ✅ Data model for user consent
     pass

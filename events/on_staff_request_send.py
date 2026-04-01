@@ -12,10 +12,12 @@ from utils.constants import BLANK_COLOR
 
 
 class OnStaffRequestSend(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 📩 Handling staff request send event...
     async def on_staff_request_send(self, o_id: ObjectId):
         doc = await self.bot.staff_requests.db.find_one({"_id": o_id})
         user_id = doc["user_id"]
@@ -86,5 +88,6 @@ class OnStaffRequestSend(commands.Cog):
         )
 
 
+# 🚀 Setting up cog...
 async def setup(bot):
     await bot.add_cog(OnStaffRequestSend(bot))

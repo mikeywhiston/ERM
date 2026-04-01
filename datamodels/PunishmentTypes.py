@@ -8,5 +8,6 @@ class PunishmentTypes(Document):
         """
         Gets the punishment types for a guild.
         """
+        # 🛡️ Data model helper: Retrieve all available punishment types for a guild
         return await self.db.find_one({"_id": guild_id})
         

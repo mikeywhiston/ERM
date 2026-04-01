@@ -5,10 +5,12 @@ from utils.constants import BLANK_COLOR, GREEN_COLOR
 
 
 class OnLOAAccept(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # ✅ Handling LOA accept event...
     async def on_loa_accept(self, s_loa: dict, role_ids: list[int], accepted_by: int):
         guild = self.bot.get_guild(s_loa["guild_id"])
         try:
@@ -81,5 +83,6 @@ class OnLOAAccept(commands.Cog):
         await self.bot.views.delete_by_id(view_item["_id"])
 
 
+# 🚀 Setting up cog...
 async def setup(bot):
     await bot.add_cog(OnLOAAccept(bot))

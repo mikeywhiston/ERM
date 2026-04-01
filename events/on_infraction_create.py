@@ -8,9 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 class OnInfractionCreate(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
+    # 🔄 Replacing variables...
     def replace_variables(self, data, variables):
         if isinstance(data, str):
             result = data
@@ -34,6 +36,7 @@ class OnInfractionCreate(commands.Cog):
         return data
 
     @commands.Cog.listener()
+    # 📝 Handling infraction create event...
     async def on_infraction_create(self, infraction_doc):
         try:
             guild = self.bot.get_guild(infraction_doc["guild_id"])

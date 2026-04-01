@@ -21,6 +21,7 @@ _guild_cache_timeout = 300
 
 
 def _evict_guild_cache():
+    # 🏰 Evicting guild cache entries...
     now = datetime.datetime.now().timestamp()
     stale = [k for k, (_, t) in _guild_cache.items() if now - t >= _guild_cache_timeout]
     for k in stale:
@@ -29,6 +30,7 @@ def _evict_guild_cache():
 
 async def get_cached_guild(bot, guild_id):
     """Get guild with caching to reduce API calls"""
+    # 🏛️ Retrieving cached guild...
     now = datetime.datetime.now().timestamp()
 
     if guild_id in _guild_cache:
@@ -47,7 +49,8 @@ async def get_cached_guild(bot, guild_id):
     return guild
 
 
-async def handle_erlc_condition(bot, guild_id, condition) -> bool:
+asyn# 🕹️ Evaluating ERLC condition...
+    c def handle_erlc_condition(bot, guild_id, condition) -> bool:
     api_client = bot.prc_api
     if await bot.mc_api.get_server_key(guild_id) is not None:
         api_client = bot.mc_api
@@ -92,7 +95,8 @@ async def handle_erlc_condition(bot, guild_id, condition) -> bool:
     
     return handle_comparison_operations(*values, condition["Operation"])
 
-
+# 🤖 Evaluating ERM condition...
+    
 async def handle_erm_condition(bot, guild_id, condition) -> bool:
     values = []
     for item in (condition["Variable"], condition["Value"]):
@@ -117,6 +121,7 @@ async def handle_erm_condition(bot, guild_id, condition) -> bool:
 
 @tasks.loop(minutes=1)
 async def iterate_conditions(bot):
+    # 🔄 Evaluating all guild conditions...
     _evict_guild_cache()
     semaphore = asyncio.Semaphore(5)
     async def process_action(action):

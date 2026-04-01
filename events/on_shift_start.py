@@ -6,10 +6,12 @@ from utils.constants import BLANK_COLOR
 
 
 class OnShiftStart(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 🏁 Handling shift start event...
     async def on_shift_start(self, object_id: ObjectId):
 
         document = await self.bot.shift_management.shifts.find_by_id(object_id)

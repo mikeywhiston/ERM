@@ -38,12 +38,14 @@ from utils.utils import (
 
 
 class ShiftLogging(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot):
         self.bot = bot
 
     @commands.hybrid_group(
         name="duty"
     ) # hey, maybe dont delete this next time noagonzales.
+    # 🕒 Duty command group
     async def duty(self, ctx):
         pass
     
@@ -59,6 +61,7 @@ class ShiftLogging(commands.Cog):
     @require_settings()
     @app_commands.describe(member = "The staff member to view shifts for.", shift_type="The type of shift to view.")
     @app_commands.autocomplete(shift_type=shift_type_autocomplete)
+    # ⏱️ View duty time
     async def duty_time(self, ctx, member: typing.Optional[discord.Member] = None, shift_type: str = "Default"):
         if isinstance(member, str) and not shift_type:
             shift_type = member
@@ -170,6 +173,7 @@ class ShiftLogging(commands.Cog):
     @require_settings()
     @is_admin()
     @app_commands.autocomplete(type=shift_type_autocomplete)
+    # 👮 Administer shifts
     async def duty_admin(
         self, ctx, member: discord.Member, type: str = "Default", force: str = "false"
     ):
@@ -380,6 +384,7 @@ class ShiftLogging(commands.Cog):
     @is_staff()
     @require_settings()
     @app_commands.autocomplete(type=shift_type_autocomplete)
+    # 📝 Manage own shift
     async def duty_manage(self, ctx, *, type: str = "Default"):
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
         if not settings.get("shift_management", {}).get("enabled", False):

@@ -13,9 +13,11 @@ from utils.autocompletes import user_autocomplete, infraction_type_autocomplete
 
 class Infractions(commands.Cog):
     def __init__(self, bot):
+        # 🛡️ Initialize the Infractions cog...
         self.bot = bot
 
     async def check_manager_role(self, ctx):
+        # 🔍 Check for manager role...
         """Helper method to check if user has manager role from settings"""
         settings = await self.bot.settings.find_by_id(ctx.guild.id)
         if not settings or "infractions" not in settings:
@@ -25,8 +27,7 @@ class Infractions(commands.Cog):
         return any(role.id in manager_roles for role in ctx.author.roles)
 
     @commands.hybrid_group(name="infractions")
-    @is_staff()
-    async def infractions(self, ctx):
+    @is_# 🚦 Base infractions group command...
         """Base command for infractions"""
         if ctx.invoked_subcommand is None:
             return await ctx.send(
@@ -44,6 +45,9 @@ class Infractions(commands.Cog):
         extras={"category": "Infractions"},
     )
     @is_staff()
+    @require_settings()
+    async def myinfractions(self, ctx):
+        # 👁️ View your own infractions...
     @require_settings()
     async def myinfractions(self, ctx):
         """View your infractions"""
@@ -81,7 +85,8 @@ class Infractions(commands.Cog):
                 ),
                 ephemeral=True,
             )
-
+# 🖼️ Set up embed for infractions...
+            
         def setup_embed() -> discord.Embed:
             embed = discord.Embed(title="Your Infractions", color=BLANK_COLOR)
             embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
@@ -127,7 +132,8 @@ class Infractions(commands.Cog):
         extras={"category": "Infractions"},
     )
     @is_staff()
-    @require_settings()
+    @req# 🕵️ View another user's infractions...
+        uire_settings()
     @app_commands.describe(user="The user to check infractions for")
     async def infractions_view(self, ctx, user: discord.Member):
         """View a user's infractions"""
@@ -245,7 +251,8 @@ class Infractions(commands.Cog):
     )
     async def infractions_issue(
         self, ctx, user: discord.Member, type: str, *, reason: str
-    ):
+    ):# 📉 Issue a new infraction...
+        
         """Issue an infraction to a user"""
         has_manager_role = await self.check_manager_role(ctx)
         if not has_manager_role and not await management_predicate(ctx):
@@ -410,7 +417,8 @@ class Infractions(commands.Cog):
     @infractions.command(name="revoke", description="Revoke an infraction using its ID")
     @is_staff()
     @require_settings()
-    @app_commands.describe(infraction_id="The ID of the infraction to revoke")
+    @app# 🔙 Revoke an existing infraction...
+        _commands.describe(infraction_id="The ID of the infraction to revoke")
     async def infractions_revoke(self, ctx, infraction_id: str):
         """Revoke an infraction"""
         has_manager_role = await self.check_manager_role(ctx)
@@ -489,6 +497,7 @@ class Infractions(commands.Cog):
                 )
             )
 
-
+# 🔩 Register Infractions cog...
+    
 async def setup(bot):
     await bot.add_cog(Infractions(bot))

@@ -8,10 +8,12 @@ import roblox
 
 
 class OnPunishmentDelete(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 🗑️ Handling punishment delete event...
     async def on_punishment_delete(self, objectid: ObjectId, manager: discord.Member):
         warning: WarningItem = await self.bot.punishments.fetch_warning(objectid)
         guild = self.bot.get_guild(warning.guild_id)

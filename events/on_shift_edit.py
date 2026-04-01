@@ -8,10 +8,12 @@ from utils.constants import BLANK_COLOR
 
 
 class OnShiftEdit(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 📝 Handling shift edit event...
     async def on_shift_edit(
         self,
         object_id: ObjectId,

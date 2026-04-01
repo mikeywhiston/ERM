@@ -11,10 +11,12 @@ from utils.utils import get_elapsed_time
 
 
 class OnShiftVoid(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 🚫 Handling shift void event...
     async def on_shift_void(self, voider: discord.Member, object_id: ObjectId):
 
         document = await self.bot.shift_management.shifts.find_by_id(object_id)

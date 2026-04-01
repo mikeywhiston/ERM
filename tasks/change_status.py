@@ -5,6 +5,7 @@ import logging
 
 @tasks.loop(hours=1)
 async def change_status(bot):
+    # 🔌 Updating bot status...
     await bot.wait_until_ready()
     logging.info("Changing status")
     status = "⚡ /about | ermbot.xyz"

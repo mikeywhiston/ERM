@@ -9,10 +9,12 @@ from utils.timestamp import td_format
 
 
 class OnBreakStart(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 🔔 Handling break start event...
     async def on_break_start(self, object_id: ObjectId):
 
         document = await self.bot.shift_management.shifts.find_by_id(object_id)

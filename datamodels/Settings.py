@@ -5,6 +5,7 @@ from utils.mongo import Document
 
 class PunishmentType:
     def __init__(self, generic: bool, custom: bool, name: str):
+        # 📦 Data model helper: Initialize PunishmentType settings
         self.generic = generic
         self.custom = custom
         self.name = name
@@ -19,6 +20,7 @@ class Settings(Document):
         """
         Gets the settings for a guild.
         """
+        # ⚙️ Data model helper: Retrieve guild-specific settings
         return await self.db.find_one({"_id": guild_id})
 
     pass

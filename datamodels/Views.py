@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class Views(Document):
+    # 👁️ Data model for tracking view analytics
     pass

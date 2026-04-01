@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class Whitelabel(Document):
+    # 🏷️ Data model for whitelabel configuration
     pass

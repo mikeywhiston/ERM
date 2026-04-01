@@ -33,16 +33,19 @@ class ShiftItem:
     removed_time: int
 
     def __init__(self, **kwargs):
+        # 📦 Data model helper: Initialize ShiftItem with keyword arguments
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 
 class ShiftManagement:
     def __init__(self, connection, current_shifts):
+        # ⌛ Data model helper: Initialize ShiftManagement with DB connection
         self.shifts = Document(connection, current_shifts)
         self.logger = logging.getLogger(__name__)
 
     async def fetch_shift(self, object_id: ObjectId) -> Optional[ShiftItem]:
+        # ⌛ Data model helper: Fetch a shift by its unique ID
         shift = await self.shifts.find_by_id(object_id)
         if not shift:
             return None
@@ -74,20 +77,9 @@ class ShiftManagement:
     ) -> ObjectId:
         """
         Adds a shift for the specified user to the database and syncs with external APIs.
-
-        Args:
-            member: Discord member starting the shift
-            shift_type: Type of shift being started
-            breaks: List of break periods
-            guild: Guild ID where the shift is being started
-            timestamp: Optional custom start timestamp
-
-        Returns:
-            ObjectId of the created shift document
-
-        Raises:
-            aiohttp.ClientError: If API sync fails
+        ...
         """
+        # ⌛ Data model helper: Start a new shift for a user and sync across systems
         data = {
             "_id": ObjectId(),
             "Username": member.name,
@@ -113,6 +105,7 @@ class ShiftManagement:
         panel_url_var = config("PANEL_API_URL")
 
         async def sync_with_apis():
+            # ⌛ Data model helper: Internal helper to sync shift data with external APIs
             async with aiohttp.ClientSession() as session:
                 tasks = []
 
@@ -153,6 +146,7 @@ class ShiftManagement:
         """
         Adds time to the specified user's shift.
         """
+        # ⌛ Data model helper: Extend shift duration by adding seconds
         document = await self.shifts.db.find_one({"_id": ObjectId(identifier)})
         document["AddedTime"] += int(seconds)
         await self.shifts.update_by_id(document)
@@ -162,6 +156,7 @@ class ShiftManagement:
         """
         Removes time from the specified user's shift.
         """
+        # ⌛ Data model helper: Reduce shift duration by removing seconds
         document = await self.shifts.db.find_one({"_id": ObjectId(identifier)})
         document["RemovedTime"] += int(seconds)
         await self.shifts.update_by_id(document)
@@ -172,18 +167,9 @@ class ShiftManagement:
     ):
         """
         Ends the specified user's shift and syncs with external APIs.
-
-        Args:
-            identifier: Shift document ID
-            guild_id: Optional guild ID override
-            timestamp: Optional custom end timestamp
-
-        Returns:
-            Updated shift document
-
-        Raises:
-            ValueError: If shift not found or guild mismatch
+        ...
         """
+        # ⌛ Data model helper: Terminate current shift and close active breaks
         document = await self.shifts.db.find_one({"_id": ObjectId(identifier)})
         if not document:
             raise ValueError("Shift not found.")
@@ -209,14 +195,9 @@ class ShiftManagement:
     async def get_current_shift(self, member: discord.Member, guild_id: int):
         """
         Gets the current shift for the specified user.
-
-        Args:
-            member: Discord member to check
-            guild_id: Guild ID to check
-
-        Returns:
-            Current shift document or None if no active shift
+        ...
         """
+        # ⌛ Data model helper: Retrieve the user's currently active shift
         return await self.shifts.db.find_one(
             {"UserID": member.id, "EndEpoch": 0, "Guild": guild_id}
         )

@@ -6,10 +6,12 @@ from decouple import config
 
 
 class OnMemberRemove(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener("on_member_remove")
+    # 📤 Handling member remove event...
     async def on_member_remove(self, member: discord.Member):
         try:
             url_var = config("BASE_API_URL")
@@ -37,5 +39,6 @@ class OnMemberRemove(commands.Cog):
             print(f"l35, on_member_remove: {e}")
 
 
+# 🚀 Setting up cog...
 async def setup(bot):
     await bot.add_cog(OnMemberRemove(bot))

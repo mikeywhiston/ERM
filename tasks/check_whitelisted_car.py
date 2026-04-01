@@ -21,6 +21,7 @@ _cache_timeout = 300
 
 
 def _evict_caches():
+    # 🗑️ Clearing expired caches...
     now = time.time()
     stale_keys = [k for k, (_, t) in _guild_cache.items() if now - t >= _cache_timeout]
     for k in stale_keys:
@@ -38,7 +39,8 @@ def _evict_caches():
 
 
 @tasks.loop(minutes=10, reconnect=True)
-async def check_whitelisted_car(bot):
+asyn# 🏎️ Checking vehicle restrictions...
+    c def check_whitelisted_car(bot):
     _evict_caches()
     initial_time = time.time()
     logging.info("Starting check_whitelisted_car task")
@@ -95,6 +97,7 @@ async def check_whitelisted_car(bot):
                     return
 
                 try:
+                    # 🚦 Processing vehicle info...
                     players, vehicles = await asyncio.gather(
                         bot.prc_api.get_server_players(guild_id),
                         bot.prc_api.get_server_vehicles(guild_id),
@@ -203,6 +206,7 @@ async def get_cached_channel(bot, channel_id):
 
 async def get_cached_roles(guild, role_ids):
     """Get roles with caching"""
+    # 🎭 Retrieving roles from cache...
     exotic_roles = []
     if isinstance(role_ids, int):
         role = guild.get_role(role_ids)
@@ -217,6 +221,7 @@ async def get_cached_roles(guild, role_ids):
 async def process_vehicle(
     bot, guild, player_lookup, vehicle, whitelisted_vehicles, exotic_roles, alert_channel, alert_message
 ):
+    # 🚔 Processing vehicle check...
     """Process individual vehicle check"""
     try:
         player = player_lookup.get(vehicle.username)
@@ -263,6 +268,7 @@ async def process_vehicle(
 
 
 async def get_cached_member_by_username(bot, guild, username, exotic_roles):
+    # 🔍 Finding member by username...
     """Get member by username with caching"""
     now = time.time()
     cache_key = f"{guild.id}_{username.lower()}"
@@ -277,7 +283,8 @@ async def get_cached_member_by_username(bot, guild, username, exotic_roles):
     _member_search_cache[guild.id][cache_key] = (member, now)
     return member
 
-
+# 📟 Handling PM counter for vehicle alerts...
+    
 async def handle_pm_counter(bot, player, guild, alert_channel):
     if player.username not in bot.pm_counter:
         bot.pm_counter[player.username] = 1
@@ -287,11 +294,13 @@ async def handle_pm_counter(bot, player, guild, alert_channel):
     if bot.pm_counter[player.username] >= 4:
         await send_warning_embed(bot, player, guild, alert_channel)
         bot.pm_counter.pop(player.username)
-
-
-async def handle_non_member(bot, player, guild, alert_channel, alert_message):
+# 🚫 Handling non-member vehicle alerts...
     await run_command(bot, guild.id, player.username, alert_message)
     await handle_pm_counter(bot, player, guild, alert_channel)
+
+
+async def send_warning_embed(bot, player, guild, alert_channel):
+    # ⚠️ Sending vehicle warning embed...
 
 
 async def send_warning_embed(bot, player, guild, alert_channel):

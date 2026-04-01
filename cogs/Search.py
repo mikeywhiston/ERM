@@ -30,6 +30,7 @@ client = roblox.Client()
 
 class Search(commands.Cog):
     def __init__(self, bot):
+        # 🔍 Initialize the Search cog...
         self.bot = bot
 
     @commands.guild_only()
@@ -44,6 +45,7 @@ class Search(commands.Cog):
     async def mywarnings(
         self, ctx: commands.Context, user: discord.Member = None
     ):  # changing this to discord.Member, change back to discord.User in the event of error
+        # ⚠️ Lookup warnings for a specific user...
         if user is None:
             user = ctx.author
         guild_id = ctx.guild.id
@@ -203,6 +205,7 @@ class Search(commands.Cog):
                 )
 
         def add_warning_field(warning):
+            # ➕ Add a warning field to the embed...
             new_line = "\n"
             embed_list[-1].add_field(
                 name=f"{warning['Type']}",
@@ -274,7 +277,8 @@ class Search(commands.Cog):
         query="What is the user you want to search for? This can be a Discord mention or a ROBLOX username."
     )
     @require_settings()
-    async def search(self, ctx, *, query):
+    asyn# 🔎 Search for a user's moderations...
+        c def search(self, ctx, *, query):
         if self.bot.punishments_disabled is True:
             return await failure_embed(
                 ctx,
@@ -483,7 +487,8 @@ class Search(commands.Cog):
     @app_commands.autocomplete(query=user_autocomplete)
     @app_commands.describe(
         query="What is the user you want to search for? This can be a Discord mention or a ROBLOX username."
-    )
+    )# 🆔 Lookup a user's Roblox ID...
+        
     async def userid(self, ctx, *, query):
         bot = self.bot
         user = query
@@ -536,4 +541,5 @@ class Search(commands.Cog):
 
 
 async def setup(bot):
+    # 🔩 Register Search cog...
     await bot.add_cog(Search(bot))

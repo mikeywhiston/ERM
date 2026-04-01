@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class Actions(Document):
+    # 🎬 Data model for member actions
     pass

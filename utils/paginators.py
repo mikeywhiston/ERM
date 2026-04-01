@@ -17,12 +17,14 @@ class CustomPage:
     view: typing.Optional[discord.ui.View]
     identifier: typing.Optional[str]
 
+    # 📄 Data model for a custom pagination page
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 
 class SelectPagination(discord.ui.View):
+    # 📑 View for select-based pagination
     def __init__(
         self,
         bot: Bot,
@@ -57,6 +59,7 @@ class SelectPagination(discord.ui.View):
                 if item.label == "TEMP":
                     item.label = starting_page.identifier
 
+    # 👁️ Get the view for the current page
     def get_current_view(self) -> discord.ui.View:
         current_page = self.pages[self.current_index]
         new_page = self.pages[self.current_index]
@@ -106,6 +109,7 @@ class SelectPagination(discord.ui.View):
                 view.add_item(item)
         return view
 
+    # 🔄 Internal pagination logic
     async def _paginate(
         self,
         interaction: discord.Interaction,
@@ -157,6 +161,7 @@ class SelectPagination(discord.ui.View):
         else:
             await interaction.message.edit(embeds=new_page.embeds, view=view)
 
+    # ⬅️ Back button handler
     @discord.ui.button(label="1", emoji="<:l_arrow:1169754353326903407>", row=4)
     async def back_button(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -173,6 +178,7 @@ class SelectPagination(discord.ui.View):
         await interaction.response.defer()
         await self._paginate(interaction, -1, "increment")
 
+    # 🔢 Jump to page button handler
     @discord.ui.button(label="TEMP", row=4)
     async def set_current_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -211,6 +217,7 @@ class SelectPagination(discord.ui.View):
         if index != 1000:
             await self._paginate(interaction, index, "set")
 
+    # ➡️ Next button handler
     @discord.ui.button(label="2", emoji="<:arrow:1169695690784518154>", row=4)
     async def next_button(
         self, interaction: discord.Interaction, button: discord.ui.Button

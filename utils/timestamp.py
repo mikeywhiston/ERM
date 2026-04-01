@@ -1,3 +1,4 @@
+# 🕒 Format a timedelta object into a human-readable string
 def td_format(td_object):
     seconds = int(td_object.total_seconds())
 

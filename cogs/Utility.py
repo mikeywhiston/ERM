@@ -18,6 +18,7 @@ from erm import is_staff, is_management
 
 
 class Utility(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot):
         self.bot = bot
 
@@ -28,6 +29,7 @@ class Utility(commands.Cog):
         extras={"category": "Utility"},
     )
     @is_staff()
+    # 📥 Import command group
     async def import_group(self, ctx: commands.Context):
         pass
 
@@ -38,6 +40,7 @@ class Utility(commands.Cog):
     )
     @commands.cooldown(1, 300, commands.BucketType.guild)
     @is_management()
+    # 🔨 Import punishments
     async def import_punishments(self, ctx: commands.Context, channel: discord.TextChannel=None, time_frame: str=None):
         if channel is None:
             channel = ctx.channel
@@ -116,6 +119,7 @@ class Utility(commands.Cog):
         name="shifts",
         description="Import shifts from the outage.",
         extras={"category": "Utility"},
+    # 🕒 Import shifts
     )
     @commands.cooldown(1, 300, commands.BucketType.guild)
     @is_management()
@@ -193,6 +197,7 @@ class Utility(commands.Cog):
         extras={"category": "Utility"},
     )
     @commands.cooldown(1, 300, commands.BucketType.guild)
+    # 📅 Import LOAs
     @is_management()
     async def import_loas(self, ctx: commands.Context, channel: discord.TextChannel=None, time_frame: str=None):
         if channel is None:
@@ -274,6 +279,7 @@ class Utility(commands.Cog):
         with_app_command=False,
     )
     @commands.has_role(988055417907200010)
+    # 🔄 Sync staff accounts
     async def staff_sync(self, ctx: commands.Context, discord_id: int, roblox_id: int):
         from bson import ObjectId
         from datamodels.StaffConnections import StaffConnection
@@ -296,6 +302,7 @@ class Utility(commands.Cog):
         name="ping",
         description="Shows information of the bot, such as uptime and latency",
         extras={"category": "Utility"},
+    # 🏓 Ping command
     )
     async def ping(self, ctx):
         latency = round(self.bot.latency * 1000)
@@ -349,6 +356,7 @@ class Utility(commands.Cog):
         extras={"category": "Website"},
     )
     @is_staff()
+    # 🛡️ Link to mod panel
     @require_settings()
     async def mod_panel(self, ctx: commands.Context):
         guild_icon = ctx.guild.icon.url if ctx.guild.icon else None
@@ -368,6 +376,7 @@ class Utility(commands.Cog):
         aliases=["dash", "applications"],
         description="Get the link to manage your server through the dashboard.",
         extras={"category": "Website"},
+    # 📊 Link to dashboard
     )
     @is_management()
     async def dashboard(self, ctx: commands.Context):
@@ -387,6 +396,7 @@ class Utility(commands.Cog):
         name="support",
         aliases=["support-server"],
         description="Information about the ERM Support Server",
+    # 🆘 Link to support server
         extras={"category": "Utility"},
     )
     async def support_server(self, ctx):

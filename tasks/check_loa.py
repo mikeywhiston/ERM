@@ -13,6 +13,7 @@ _member_cache_timeout = 300
 
 
 def _evict_member_cache():
+    # 🧹 Evicting stale member cache...
     now = datetime.datetime.now().timestamp()
     empty_guilds = []
     for guild_id, members in _member_cache.items():
@@ -27,6 +28,7 @@ def _evict_member_cache():
 
 async def get_cached_member(guild, user_id):
     """Get member with caching to reduce API calls"""
+    # 👤 Fetching or getting cached member...
     now = datetime.datetime.now().timestamp()
 
     if user_id in _member_cache[guild.id]:
@@ -46,7 +48,8 @@ async def get_cached_member(guild, user_id):
 
 
 @tasks.loop(minutes=1, reconnect=True)
-async def check_loa(bot):
+asyn# 🗓️ Checking LOA status for members...
+    c def check_loa(bot):
     _evict_member_cache()
     try:
         guild_loas = defaultdict(list)
@@ -104,6 +107,7 @@ async def check_loa(bot):
 
 async def process_loa(bot, guild, loaObject, settings, roles):
     """Process individual LOA expiration"""
+    # 📝 Processing individual LOA...
     try:
         if not loaObject["accepted"]:
             return

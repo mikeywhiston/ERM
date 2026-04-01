@@ -83,15 +83,19 @@ _fetch_delays = defaultdict(float)
 
 async def rate_limited_fetch(coro, endpoint_type="default"):
     """Rate-limited wrapper for Discord API calls"""
+    # ⏳ Waiting for semaphore...
     async with _global_fetch_semaphore:
+        # 💤 Checking for fetch delays...
         if _fetch_delays[endpoint_type] > 0:
             await asyncio.sleep(_fetch_delays[endpoint_type])
         
         try:
+            # 🚀 Executing fetch...
             result = await coro
             _fetch_delays[endpoint_type] = max(0, _fetch_delays[endpoint_type] - 0.1)
             return result
         except discord.HTTPException as e:
+            # ⚠️ Handling rate limits...
             if e.status == 429:
                 _fetch_delays[endpoint_type] = min(_fetch_delays[endpoint_type] + 0.5, 5.0)
                 if e.retry_after:
@@ -125,6 +129,7 @@ scope = [
 
 class Bot(commands.AutoShardedBot):
     def __init__(self, *args, **kwargs):
+        # 🤖 Initializing the Bot...
         super().__init__(*args, **kwargs)
         self.setup_status: bool = False
         self._member_cache = {}
@@ -132,22 +137,22 @@ class Bot(commands.AutoShardedBot):
         self._cache_timeout = 300
 
     async def close(self):
+        # 🛑 Closing sessions and bot...
         for session in self.external_http_sessions:
             if session is not None and session.closed is False:
                 await session.close()
         await super().close()
 
     async def is_owner(self, user: discord.User):
-        # Only developers of the bot on the team should have
-        # full access to Jishaku commands. Hard-coded
-        # IDs are a security vulnerability.
-
-        # Else fall back to the original
+        # 👑 Checking for owner permissions...
         if user.id == 1394817794427846737:
             return True
 
-        if environment != "CUSTOM": # let's not allow custom bot owners to use jishaku lol
+        # ⚖️ Checking custom environment...
+        if environment != "CUSTOM": 
             return await super().is_owner(user)
+        else:
+            return False
         else:
             return False
 

@@ -5,8 +5,10 @@
 
 
 class ViewStateManager(dict):
+    # 📦 Manager for setup view states
     def __getitem__(self, key):
         return super().__getitem__(key)
 
+    # 📥 Set a view state item
     def __setitem__(self, key, value) -> None:
         return super().__setitem__(key, value)

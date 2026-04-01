@@ -8,12 +8,14 @@ class FlagItem:
     name: str
 
     def __init__(self, **kwargs):
+        # 📦 Data model helper: Initialize FlagItem with keyword arguments
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 
 class CustomFlags(Document):
     async def get_flags_by_roblox(self, roblox_id: int):
+        # 🚩 Data model helper: Fetch custom flags associated with a Roblox ID
         document = await self.db.find_one({"roblox_id": roblox_id})
         flags = []
         for item in document["flags"]:

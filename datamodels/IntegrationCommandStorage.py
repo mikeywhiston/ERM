@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class IntegrationCommandStorage(Document):
+    # 📥 Data model for internal integration command storage
     pass

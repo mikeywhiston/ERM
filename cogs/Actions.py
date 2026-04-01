@@ -15,17 +15,20 @@ from utils.utils import get_prefix, interpret_content, interpret_embed, log_comm
 
 class Actions(commands.Cog):
     def __init__(self, bot: commands.Bot):
+        # 🏗️ Initialize the Actions cog...
         self.bot: commands.Bot = bot
 
     @commands.hybrid_group(
         name="actions", description="Manage your ERM Actions easily."
     )
     async def actions(self, ctx: commands.Context):
+        # 📂 Base actions group command...
         pass
 
     @actions.command(name="manage", description="Manage your ERM Actions easily.")
     @is_admin()
     async def actions_manage(self, ctx: commands.Context):
+        # 🛠️ Manage server-wide actions...
         await log_command_usage(self.bot, ctx.guild, ctx.author, f"Actions Manage")
         actions = [i async for i in self.bot.db.actions.find({"Guild": ctx.guild.id})]
 
@@ -80,7 +83,7 @@ class Actions(commands.Cog):
     @is_staff()
     @app_commands.autocomplete(action=action_autocomplete)
     async def action_execute(self, ctx: commands.Context, *, action: str):
-
+        # 🚀 Manually execute an action...
         verbose = False
         dnr = False
         if "--verbose" in action:
@@ -187,6 +190,7 @@ class Actions(commands.Cog):
 
     @staticmethod
     async def add_role(bot: commands.Bot, guild_id: int, context, role_id: int):
+        # ➕ Add role integration for actions...
         try:
             guild = await bot.fetch_guild(guild_id)
             role = guild.get_role(role_id)
@@ -202,7 +206,8 @@ class Actions(commands.Cog):
             return 1
 
     @staticmethod
-    async def remove_role(bot: commands.Bot, guild_id: int, context, role_id: int):
+    asyn# ➖ Remove role integration for actions...
+        c def remove_role(bot: commands.Bot, guild_id: int, context, role_id: int):
         try:
             guild = await bot.fetch_guild(guild_id)
             role = guild.get_role(role_id)
@@ -219,6 +224,7 @@ class Actions(commands.Cog):
 
     @staticmethod
     async def execute_custom_command(
+        # 📟 Execute custom command action...
         bot, guild_id: int, context, custom_command_name: str
     ):
         Data = await bot.custom_commands.find_by_id(guild_id)
@@ -304,7 +310,8 @@ class Actions(commands.Cog):
         )
         await bot.ics.update_by_id(doc)
         return 0
-
+# ⏸️ Pause reminder action...
+        
     @staticmethod
     async def pause_reminder(bot, guild_id: int, context, reminder_name: str):
         reminder_data = await bot.reminders.find_by_id(guild_id) or []
@@ -323,7 +330,8 @@ class Actions(commands.Cog):
                     return 0
 
         return 1
-
+# 🛑 Force staff off duty action...
+        
     @staticmethod
     async def force_off_duty(bot, guild_id: int, context):
         docs = [
@@ -345,6 +353,7 @@ class Actions(commands.Cog):
             bot.dispatch("shift_end", id)
             if context.verbose:
                 await context.send(item)
+        # 🎮 Send ER:LC command via API...
         return 0
 
     @staticmethod
@@ -366,6 +375,7 @@ class Actions(commands.Cog):
             return 0
 
         if command_response[0] != 429:
+        # 💬 Send ER:LC message via API...
             return 1
 
     @staticmethod
@@ -388,6 +398,7 @@ class Actions(commands.Cog):
         if command_response[0] == 200:
             return 0
 
+        # ⚙️ Execute internal ERM command...
         if command_response[0] != 429:
             return 1
         
@@ -403,6 +414,7 @@ class Actions(commands.Cog):
         message.guild = guild
         try:
             await bot.process_commands(message)
+        # 💡 Send ER:LC hint via API...
         except:
             return 1
         return 0
@@ -424,7 +436,8 @@ class Actions(commands.Cog):
         command_response = await bot.prc_api.run_command(guild_id, f":h {hint}")
         if command_response[0] == 200:
             return 0
-
+ ⏳ Delay integration for actions...
+        #
         if command_response[0] != 429:
             return 1
 
@@ -432,6 +445,7 @@ class Actions(commands.Cog):
     async def delay(bot, guild_id, context, timer: int):
         ## FOR THIS EXAMPLE, WE DO NOT NEED BOT AND GUILD ID
         try:
+    # 🔩 Register Actions cog...
             await asyncio.sleep(int(timer))
         except:
             return 1

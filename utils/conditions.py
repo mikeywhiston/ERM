@@ -2,6 +2,7 @@ import asyncio
 from utils.prc_api import Player, ResponseFailure
 from discord.ext import commands
 
+# 🔄 Run a coroutine in the current event loop
 def run_coroutine_in_loop(coro):
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
@@ -41,10 +42,12 @@ NOTABLE DESIGN LIMITATIONS
 """
 
 
+# 🔢 Get the number of arguments for a function
 def function_argument_count(func):
     return func.__code__.co_argcount
 
 
+# 📛 Get the names of the arguments for a function
 def argument_names(func):
     return func.__code__.co_varnames
 
@@ -55,6 +58,7 @@ PREDETERMINED FUTURE FUNCTIONS
 """
 
 
+# 📥 Fetch ERLC server queue status
 async def get_queue(api_client, guild_id):
     try:
         queue = await api_client.get_server_queue(guild_id)
@@ -62,6 +66,8 @@ async def get_queue(api_client, guild_id):
         queue = []
 
 
+# 🕰️ Fetch online shifts for a guild
+# 📡 Fetch online shifts for a guild
 async def online_shifts(bot, guild_id):
     return [
         i
@@ -71,6 +77,7 @@ async def online_shifts(bot, guild_id):
     ]
 
 
+# 🚗 Fetch spawned vehicles in ERLC server
 async def get_vehicles(api_client, guild_id):
     try:
         vehicles = await api_client.get_server_vehicles(guild_id)
@@ -85,18 +92,22 @@ CUSTOM FUNCTIONS
 """
 
 
+# 📊 Count ERLC players
 def count_erlc_players(players: list[Player]):
     return len(players)
 
 
+# 🛡️ Count ERLC moderators
 def count_erlc_moderators(players: list[Player]):
     return len(list(filter(lambda x: x.permission == "Server Moderator", players)))
 
 
+# 👮 Count ERLC admins
 def count_erlc_admins(players: list[Player]):
     return len(list(filter(lambda x: x.permission == "Server Administrator", players)))
 
 
+# 👑 Count ERLC owners
 def count_erlc_owners(players: list[Player]):
     return len(
         list(
@@ -109,44 +120,54 @@ def count_erlc_owners(players: list[Player]):
     )
 
 
+# 🚶 Count ERLC queue size
 def count_erlc_queue(
     queue: list[Player],
 ):  # this one isnt supported for maple county yet
     return len(queue)
 
 
+# 🚓 Count players on Police team
 def count_erlc_police(players: list[Player]):
     return len(list(filter(lambda x: x.team == "Police", players)))
 
 
+# 🏔️ Count players on Sheriff team
 def count_erlc_sheriff(players: list[Player]):
     return len(list(filter(lambda x: x.team == "Sheriff", players)))
 
 
+# 🚒 Count players on Fire team
 def count_erlc_fire(players: list[Player]):
     return len(list(filter(lambda x: x.team == "Fire", players)))
 
 
+# 🏗️ Count players on DOT team
 def count_erlc_dot(players: list[Player]):
     return len(list(filter(lambda x: x.team == "DOT", players)))
 
 
+# 🏘️ Count players on Civilian team
 def count_erlc_civilian(players: list[Player]):
     return len(list(filter(lambda x: x.team == "Civilian", players)))
 
 
+# ⛓️ Count players on Jail team
 def count_erlc_jail(players: list[Player]):
     return len(list(filter(lambda x: x.team == "Jail", players)))
 
 
+# 🚘 Count spawned vehicles
 def count_erlc_vehicles(vehicles: list):
     return len(vehicles)
 
 
+# 🔍 Check if a specific player is in-game
 def x_ingame(players: list[Player], player: str):
     return int(player.lower() in [p.username.lower() for p in players])
 
 
+# 🧹 Filter online status (incomplete)
 def filter_online(shifts: list):
     return len(list(filter))
 
@@ -157,26 +178,32 @@ Comparison Operators
 """
 
 
+# ⚖️ Equals comparison
 def equals_operator(v1: int, v2: int):
     return v1 == v2
 
 
+# 📉 Less than comparison
 def less_than_operator(v1: int, v2: int):
     return v1 < v2
 
 
+# 📉 Less than or equal comparison
 def less_than_or_equals_to_operator(v1: int, v2: int):
     return v1 <= v2
 
 
+# 📈 More than comparison
 def more_than_operator(v1: int, v2: int):
     return v1 > v2
 
 
+# 📈 More than or equal comparison
 def more_than_or_equals_to_operator(v1: int, v2: int):
     return v1 >= v2
 
 
+# 🚫 Not equals comparison
 def not_equals_to(v1: int, v2: int):
     return v1 != v2
 

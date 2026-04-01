@@ -10,6 +10,7 @@ import utils.prc_api
 from erm import Bot
 
 
+# 🚜 Autocomplete for shift types
 async def shift_type_autocomplete(
     interaction: discord.Interaction, _: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -30,6 +31,7 @@ async def shift_type_autocomplete(
         return [app_commands.Choice(name="Default", value="Default")]
 
 
+# 🎮 Autocomplete for ERLC players
 async def erlc_players_autocomplete(
    interaction: discord.Interaction, incomplete: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -57,6 +59,8 @@ async def erlc_players_autocomplete(
 
     return defaults[:25]
 
+
+# 👥 Autocomplete for ERLC groups
 async def erlc_group_autocomplete(
     interaction: discord.Interaction, incomplete: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -90,6 +94,7 @@ async def erlc_group_autocomplete(
     return defaults[:25]
 
 
+# 🚜 Autocomplete for all shift types including 'All'
 async def all_shift_type_autocomplete(
     interaction: discord.Interaction, _: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -109,6 +114,7 @@ async def all_shift_type_autocomplete(
         return [app_commands.Choice(name="Default", value="Default")]
 
 
+# 🔨 Autocomplete for custom actions
 async def action_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -138,6 +144,7 @@ async def action_autocomplete(
     return commandList[:24]
 
 
+# ⌨️ Autocomplete for custom commands
 async def command_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -187,6 +194,7 @@ async def command_autocomplete(
         return commandList
 
 
+# ⚖️ Autocomplete for punishments
 async def punishment_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -222,6 +230,8 @@ async def punishment_autocomplete(
             for item in ndt + filtered_punishments
         ]
 
+
+# 👤 Autocomplete for Roblox users
 async def user_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> typing.List[app_commands.Choice[str]]:
@@ -271,6 +281,7 @@ async def user_autocomplete(
     return choices
 
 
+# 🚨 Autocomplete for infraction types
 async def infraction_type_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> typing.List[app_commands.Choice[str]]:

@@ -24,11 +24,13 @@ default_emojis = {
 
 
 class EmojiController:
+    # 🎨 Controller for application emojis
     def __init__(self, bot):
         self.environment = bot.environment
         self.bot = bot
         self.emojis = {}
 
+    # 📥 Fetch and create missing emojis
     async def prefetch_emojis(self):
 
         application_emojis = await self.bot.fetch_application_emojis()
@@ -45,6 +47,7 @@ class EmojiController:
         for emoji in new_application_emojis:
             self.emojis[emoji.name] = emoji.id
 
+    # 🖼️ Get emoji string by name
     def get_emoji(self, emoji_name):
         if not self.emojis:
             asyncio.run(self.prefetch_emojis())

@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class CustomCommands(Document):
+    # ⚙️ Data model for custom guild commands
     pass

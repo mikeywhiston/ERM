@@ -10,10 +10,12 @@ from utils.utils import error_gen
 
 
 class OnError(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener("on_error")
+    # ❌ Handling error event...
     async def on_error(self, error):
         bot = self.bot
         error_id = error_gen()
@@ -44,6 +46,7 @@ class OnError(commands.Cog):
             )
 
             capture_exception(error)
+# 🚀 Setting up cog...
 
 
 async def setup(bot):

@@ -4,18 +4,21 @@ import aiohttp
 
 
 class Bloxlink:
+    # 🔗 Bloxlink API integration
     def __init__(self, bot: commands.Bot, key: str):
         self.api_key = key
         self.session = aiohttp.ClientSession()
         bot.external_http_sessions.append(self.session)
         self.bot = bot
 
+    # 📡 Send internal HTTP request
     async def _send_request(self, method, url, params=None, body=None):
         async with self.session.request(
             method, url, params=params, headers={"Authorization": self.api_key}
         ) as resp:
             return (resp, await resp.json())
 
+    # 🔍 Find Roblox ID from Discord ID
     async def find_roblox(self, user_id: int):
         doc = await self.bot.oauth2_users.db.find_one({"discord_id": user_id})
         if doc:
@@ -30,6 +33,7 @@ class Bloxlink:
         else:
             return resp_json
 
+    # ℹ️ Get Roblox user information
     async def get_roblox_info(self, user_id: int):
         if not user_id:
             return {}

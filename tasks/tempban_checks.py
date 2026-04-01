@@ -10,6 +10,7 @@ import pytz
 
 @tasks.loop(minutes=10, reconnect=True)
 async def tempban_checks(bot):
+    # 🚫 Checking temporary bans...
     # This will check for expired time bans
     # and for servers which have this feature enabled
     # to automatically remove the ban in-game

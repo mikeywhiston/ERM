@@ -8,10 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 class OnInfractionRevoke(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # 🔓 Handling infraction revoke event...
     async def on_infraction_revoke(self, infraction):
         try:
             guild = self.bot.get_guild(infraction["guild_id"])

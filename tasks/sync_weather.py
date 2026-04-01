@@ -37,6 +37,7 @@ WMO_TO_ERLC = {
 
 # Open-Meteo hour (0-23) -> ERLC :time command value
 def hour_to_erlc_time(hour: int) -> str:
+    # 🕒 Converting hour to ERLC time...
     if 5 <= hour < 7:
         return "Morning"
     elif 7 <= hour < 12:
@@ -50,6 +51,7 @@ def hour_to_erlc_time(hour: int) -> str:
 
 
 async def geocode_location(session: aiohttp.ClientSession, location: str) -> tuple[float, float, str] | None:
+    # 📍 Geocoding location...
     """Convert a location name to lat/lon + timezone using Open-Meteo geocoding API."""
     try:
         async with session.get(
@@ -70,6 +72,7 @@ async def geocode_location(session: aiohttp.ClientSession, location: str) -> tup
 
 
 async def fetch_weather(session: aiohttp.ClientSession, lat: float, lon: float, timezone: str) -> dict | None:
+    # 🌤️ Fetching weather data...
     """Fetch current weather code and local hour from Open-Meteo."""
     try:
         async with session.get(
@@ -108,6 +111,7 @@ async def fetch_weather(session: aiohttp.ClientSession, lat: float, lon: float, 
 
 @tasks.loop(minutes=2, reconnect=True)
 async def sync_weather(bot):
+    # ☁️ Syncing weather across servers...
     chosen_filter = {
         "CUSTOM": {"_id": int(config("CUSTOM_GUILD_ID", default=0))},
         "_": {

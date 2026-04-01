@@ -29,11 +29,13 @@ from utils.utils import (
 
 
 class CustomCommands(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot):
         self.bot = bot
 
     @commands.hybrid_group(name="custom")
     @is_admin()
+    # 🛠️ Custom command group
     async def custom(self, ctx):
         pass
 
@@ -44,6 +46,7 @@ class CustomCommands(commands.Cog):
         extras={"category": "Custom Commands"},
     )
     @is_admin()
+    # ⚙️ Manage custom commands
     async def custom_manage(self, ctx):
         bot = self.bot
         Data = await bot.custom_commands.find_by_id(ctx.guild.id)
@@ -277,6 +280,7 @@ class CustomCommands(commands.Cog):
     @app_commands.describe(
         channel="Where do you want this custom command's output to go? (e.g. #general)"
     )
+    # 🏃 Run custom command
     async def run(self, ctx, command: str, channel: discord.TextChannel = None):
         bot = self.bot
         Data = await bot.custom_commands.find_by_id(ctx.guild.id)

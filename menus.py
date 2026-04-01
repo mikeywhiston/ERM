@@ -47,6 +47,7 @@ REQUIREMENTS = ["gspread", "oauth2client"]
 
 class Setup(discord.ui.View):
     def __init__(self, user_id):
+        # 🏗️ Initializing Setup view...
         super().__init__(timeout=600.0)
         self.value = None
         self.user_id = user_id
@@ -56,6 +57,7 @@ class Setup(discord.ui.View):
     # We also send the user an ephemeral message that we're confirming their choice.
     @discord.ui.button(label="All", style=discord.ButtonStyle.green)
     async def all(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # ✅ Handling 'All' button press...
         if interaction.user.id != self.user_id:
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
@@ -69,6 +71,7 @@ class Setup(discord.ui.View):
     async def punishments(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        # ⚖️ Handling 'Punishments' button press...
         if interaction.user.id != self.user_id:
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
@@ -81,6 +84,7 @@ class Setup(discord.ui.View):
     async def staff_management(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        # 👥 Handling 'Staff Management' button press...
         if interaction.user.id != self.user_id:
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
@@ -93,10 +97,12 @@ class Setup(discord.ui.View):
     async def shift_management(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        # ⏱️ Handling 'Shift Management' button press...
         if interaction.user.id != self.user_id:
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
 
+        # 📄 Finalizing selection...
         await interaction.response.defer()
         self.value = "shift management"
         self.stop()
@@ -104,6 +110,7 @@ class Setup(discord.ui.View):
 
 class Dropdown(discord.ui.Select):
     def __init__(self, user_id):
+        # 🏗️ Initializing Dropdown...
         self.user_id = user_id
         options = [
             discord.SelectOption(
@@ -163,25 +170,26 @@ class Dropdown(discord.ui.Select):
             ),
         ]
 
-        # The placeholder is what will be shown when no option is chosen
-        # The min and max values indicate we can only pick one of the three options
-        # The options parameter defines the dropdown options. We defined this above
+        # 🔘 Configuring select menu...
         super().__init__(
             placeholder="Select a category", min_values=1, max_values=1, options=options
         )
 
     async def callback(self, interaction: discord.Interaction):
+        # 🔄 Handling dropdown selection...
         if interaction.user.id == self.user_id:
             await interaction.response.defer()
             self.view.value = self.values[0]
             self.view.stop()
         else:
+            # ⚠️ Handling unauthorized interaction...
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
 
 
 class ShiftModificationDropdown(discord.ui.Select):
     def __init__(self, user_id, other=False):
+        # 🕒 Initializing Shift Modification Dropdown...
         self.user_id = user_id
         if other is False:
             options = [
@@ -225,14 +233,13 @@ class ShiftModificationDropdown(discord.ui.Select):
                 ),
             ]
 
-        # The placeholder is what will be shown when no option is chosen
-        # The min and max values indicate we can only pick one of the three options
-        # The options parameter defines the dropdown options. We defined this above
+        # 🔘 Configuring select menu...
         super().__init__(
             placeholder="Select an option", min_values=1, max_values=1, options=options
         )
 
     async def callback(self, interaction: discord.Interaction):
+        # 🔄 Handling shift status change...
         if interaction.user.id == self.user_id:
             await interaction.response.defer()
             self.view.value = self.values[0]
@@ -241,15 +248,18 @@ class ShiftModificationDropdown(discord.ui.Select):
                 if option.value == self.values[0]:
                     option.default = True
 
+            # 📄 Updating message view...
             await interaction.message.edit(view=self.view)
             self.view.stop()
         else:
+            # ⚠️ Handling unauthorized interaction...
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
 
 
 class AdministrativeActionsDropdown(discord.ui.Select):
     def __init__(self, user_id):
+        # 🛠️ Initializing Administrative Actions Dropdown...
         self.user_id = user_id
         options = [
             discord.SelectOption(
@@ -274,9 +284,7 @@ class AdministrativeActionsDropdown(discord.ui.Select):
             ),
         ]
 
-        # The placeholder is what will be shown when no option is chosen
-        # The min and max values indicate we can only pick one of the three options
-        # The options parameter defines the dropdown options. We defined this above
+        # 🔘 Configuring select menu...
         super().__init__(
             placeholder="Administrative Actions",
             min_values=1,
@@ -285,6 +293,7 @@ class AdministrativeActionsDropdown(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        # 🔄 Handling administrative action...
         if interaction.user.id == self.user_id:
             await interaction.response.defer()
             self.view.admin_value = self.values[0]
@@ -293,6 +302,7 @@ class AdministrativeActionsDropdown(discord.ui.Select):
                 if option.value == self.values[0]:
                     option.default = True
 
+            # 🛠️ Disabling other selection menus...
             for item in self.view.children:
                 if isinstance(item, discord.ui.Select):
                     if item is not self:
@@ -301,15 +311,18 @@ class AdministrativeActionsDropdown(discord.ui.Select):
             await interaction.message.edit(view=self.view)
             self.view.stop()
         else:
+            # ⚠️ Handling unauthorized interaction...
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
 
 
 class CustomDropdown(discord.ui.Select):
     def __init__(self, user_id, options: list, limit=1):
+        # 🎨 Initializing Custom Dropdown...
         self.user_id = user_id
         optionList = []
 
+        # 🧩 Processing option list...
         for option in options:
             if isinstance(option, str):
                 optionList.append(
@@ -320,9 +333,6 @@ class CustomDropdown(discord.ui.Select):
             elif isinstance(option, discord.SelectOption):
                 optionList.append(option)
 
-        # The placeholder is what will be shown when no option is chosen
-        # The min and max values indicate we can only pick one of the three options
-        # The options parameter defines the dropdown options. We defined this above
         super().__init__(
             placeholder="Select an option",
             min_values=1,
@@ -331,6 +341,7 @@ class CustomDropdown(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        # 🔄 Handling custom selection...
         if interaction.user.id == self.user_id:
             await interaction.response.defer()
             if len(self.values) == 1:
@@ -339,16 +350,19 @@ class CustomDropdown(discord.ui.Select):
                 self.view.value = self.values
             self.view.stop()
         else:
+            # ⚠️ Handling unauthorized interaction...
             await interaction.response.defer(ephemeral=True, thinking=True)
             return await generalised_interaction_check_failure(interaction.followup)
 
 
 class MultiPaginatorDropdown(discord.ui.Select):
     def __init__(self, user_id, options: list, pages: dict, limit=1):
+        # 📖 Initializing Multi-Paginator Dropdown...
         self.user_id = user_id
         self.pages = pages
         optionList = []
 
+        # 🧩 Processing options...
         for option in options:
             if isinstance(option, str):
                 optionList.append(
@@ -359,9 +373,6 @@ class MultiPaginatorDropdown(discord.ui.Select):
             elif isinstance(option, discord.SelectOption):
                 optionList.append(option)
 
-        # The placeholder is what will be shown when no option is chosen
-        # The min and max values indicate we can only pick one of the three options
-        # The options parameter defines the dropdown options. We defined this above
         super().__init__(
             placeholder="Select an option",
             min_values=1,
@@ -370,6 +381,7 @@ class MultiPaginatorDropdown(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        # 🔄 Changing page on selection...
         if interaction.user.id == self.user_id:
             await interaction.response.defer()
             await interaction.message.edit(
@@ -377,6 +389,7 @@ class MultiPaginatorDropdown(discord.ui.Select):
                 embed=self.pages.get(self.values[0]),
             )
         else:
+            # ⚠️ Handling unauthorized interaction...
             await interaction.response.defer(ephemeral=True, thinking=True)
             await generalised_interaction_check_failure(interaction.followup)
             return
@@ -385,6 +398,7 @@ class MultiPaginatorDropdown(discord.ui.Select):
 # noinspection PyUnresolvedReferences
 class MultiDropdown(discord.ui.Select):
     def __init__(self, user_id, options: list):
+        # 🧩 Initializing Multi-Dropdown...
         self.user_id = user_id
         optionList = []
 
@@ -398,11 +412,6 @@ class MultiDropdown(discord.ui.Select):
             elif isinstance(option, discord.SelectOption):
                 optionList.append(option)
 
-        # # # # print(t(t(t(t(optionList)
-
-        # The placeholder is what will be shown when no option is chosen
-        # The min and max values indicate we can only pick one of the three options
-        # The options parameter defines the dropdown options. We defined this above
         super().__init__(
             placeholder="Select an option",
             max_values=len(optionList),
@@ -410,6 +419,7 @@ class MultiDropdown(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        # 🔄 Handling multiple selections...
         if interaction.user.id == self.user_id:
             await interaction.response.defer()
             if len(self.values) == 1:
@@ -418,6 +428,7 @@ class MultiDropdown(discord.ui.Select):
                 self.view.value = self.values
             self.view.stop()
         else:
+            # ⚠️ Handling unauthorized interaction...
             await interaction.response.defer(ephemeral=True, thinking=True)
             await generalised_interaction_check_failure(interaction.followup)
             return
@@ -425,6 +436,7 @@ class MultiDropdown(discord.ui.Select):
 
 class SettingsSelectMenu(discord.ui.View):
     def __init__(self, user_id):
+        # ⚙️ Initializing Settings Select Menu...
         super().__init__(timeout=600.0)
         self.value = None
         self.user_id = user_id
@@ -434,6 +446,7 @@ class SettingsSelectMenu(discord.ui.View):
 
 class ModificationSelectMenu(discord.ui.View):
     def __init__(self, user_id):
+        # 🕒 Initializing Modification Select Menu...
         super().__init__(timeout=600.00)
         self.value = None
         self.user_id = user_id
@@ -443,17 +456,20 @@ class ModificationSelectMenu(discord.ui.View):
 
 class AdministrativeSelectMenu(discord.ui.View):
     def __init__(self, user_id):
+        # 🛠️ Initializing Administrative Select Menu...
         super().__init__(timeout=600.00)
         self.value = None
         self.admin_value = None
         self.user_id = user_id
 
+        # ➕ Adding dropdowns...
         self.add_item(ShiftModificationDropdown(self.user_id, other=True))
         self.add_item(AdministrativeActionsDropdown(self.user_id))
 
 
 class YesNoMenu(discord.ui.View):
     def __init__(self, user_id):
+        # ❓ Initializing Yes/No Menu...
         super().__init__(timeout=600.0)
         self.value = None
         self.user_id = user_id
@@ -463,11 +479,13 @@ class YesNoMenu(discord.ui.View):
     # We also send the user an ephemeral message that we're confirming their choice.
     @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # ✅ Handling affirmative response...
         if interaction.user.id != self.user_id:
             await interaction.response.defer(ephemeral=True, thinking=True)
             await generalised_interaction_check_failure(interaction.followup)
             return
         await interaction.response.defer()
+        # 🔒 Disabling inputs...
         for item in self.children:
             item.disabled = True
         self.value = True
@@ -477,11 +495,13 @@ class YesNoMenu(discord.ui.View):
     # This one is similar to the confirmation button except sets the inner value to `False`
     @discord.ui.button(label="No", style=discord.ButtonStyle.danger)
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # ❌ Handling negative response...
         if interaction.user.id != self.user_id:
             await interaction.response.defer(ephemeral=True, thinking=True)
             await generalised_interaction_check_failure(interaction.followup)
             return
         await interaction.response.defer()
+        # 🔒 Disabling inputs...
         for item in self.children:
             item.disabled = True
         self.value = False
@@ -491,10 +511,12 @@ class YesNoMenu(discord.ui.View):
 
 class AcknowledgeMenu(discord.ui.View):
     def __init__(self, user_id, note: str):
+        # 📢 Initializing Acknowledge Menu...
         super().__init__(timeout=600.0)
         self.value = None
         self.user_id = user_id
         if note:
+            # ✍️ Setting note label...
             for child in self.children:
                 if child.label == "NOTE":
                     child.label = note

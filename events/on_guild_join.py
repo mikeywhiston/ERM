@@ -5,10 +5,12 @@ from discord.ext import commands
 
 
 class OnGuildJoin(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener("on_guild_join")
+    # 📥 Handling guild join event...
     async def on_guild_join(self, guild: discord.Guild):
         bot = self.bot
         if self.bot.environment != "CUSTOM":
@@ -27,6 +29,7 @@ class OnGuildJoin(commands.Cog):
                 pass
             await channel.send(embed=embed)
             logging.info("Server has been sent welcome sequence.")
+# 🚀 Setting up cog...
 
 
 async def setup(bot):

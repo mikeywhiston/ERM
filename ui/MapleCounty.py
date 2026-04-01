@@ -7,6 +7,7 @@ import discord
 
 class CustomModal(discord.ui.Modal, title="Edit Reason"):
     def __init__(self, title, options, epher_args: dict = None):
+        # 🏗️ Initializing Custom Modal...
         super().__init__(title=title)
         if epher_args is None:
             epher_args = {}
@@ -14,19 +15,23 @@ class CustomModal(discord.ui.Modal, title="Edit Reason"):
         self.epher_args = epher_args
         self.interaction = None
 
+        # 🧩 Adding items to modal...
         for name, option in options:
             self.add_item(option)
             self.saved_items[name] = option
 
     async def on_submit(self, interaction: discord.Interaction):
+        # 📤 Handling modal submission...
         for key, item in self.saved_items.items():
             setattr(self, key, item)
         self.interaction = interaction
+        # ⏳ Deferring response...
         await interaction.response.defer(**self.epher_args)
         self.stop()
 
 class MapleCountyConfiguration(discord.ui.View):
     def __init__(self, bot: commands.Bot, user_id: int, settings: dict = None):
+        # ⚙️ Initializing Maple County Configuration view...
         super().__init__(timeout=None)
         self.bot = bot
         self.user_id = user_id
@@ -34,6 +39,7 @@ class MapleCountyConfiguration(discord.ui.View):
 
     @discord.ui.button(label="Automatic Discord Checks", style=discord.ButtonStyle.secondary)
     async def automatic_discord_checks(self, interaction: Interaction, button: discord.ui.Button):
+        # 🔍 Opening automatic discord checks configuration...
         sett = await self.bot.settings.find_by_id(interaction.guild.id)
         if not sett:
             sett = {"_id": interaction.guild.id}
@@ -41,9 +47,8 @@ class MapleCountyConfiguration(discord.ui.View):
         view = MCDiscordCheckConfig(self.bot, interaction.user.id, sett)
         
         discord_checks = sett.get('MC', {}).get('discord_checks', {})
-        enabled = discord_checks.get('enabled', False)
-        channel_id = discord_checks.get('channel_id')
         
+        # 📄 Sending configuration message...
         embed = discord.Embed(
             title="Automatic Discord Checks",
             description=(
@@ -64,16 +69,18 @@ class MapleCountyConfiguration(discord.ui.View):
 
 class MCDiscordCheckConfig(discord.ui.View):
     def __init__(self, bot: commands.Bot, user_id: int, settings: dict = None):
+        # 🛠️ Initializing MC Discord Check Config view...
         super().__init__(timeout=None)
         self.bot = bot
         self.user_id = user_id
         self.settings = settings or {}
         
-        # Add the select dropdown and channel select
+        # ➕ Adding dropdowns to view...
         self.add_item(self.create_select())
         self.add_item(self.create_channel_select())
     
     def create_select(self):
+        # 🔘 Creating enable/disable selection dropdown...
         select = discord.ui.Select(
             placeholder="Enable/Disable Discord Checks",
             options=[
@@ -94,6 +101,7 @@ class MCDiscordCheckConfig(discord.ui.View):
         return select
     
     def create_channel_select(self):
+        # 📺 Creating channel selection dropdown...
         current_channel_id = self.settings.get('MC', {}).get('discord_checks', {}).get('channel_id')
         default_values = [discord.Object(id=current_channel_id)] if current_channel_id else None
         
@@ -108,6 +116,7 @@ class MCDiscordCheckConfig(discord.ui.View):
         return channel_select
     
     async def select_callback(self, interaction: Interaction):
+        # 🔄 Handling status selection change...
         if interaction.user.id != self.user_id:
             await interaction.response.send_message(
                 "You are not permitted to interact with this dropdown.",
@@ -127,6 +136,7 @@ class MCDiscordCheckConfig(discord.ui.View):
             if "discord_checks" not in sett["MC"]:
                 sett["MC"]["discord_checks"] = {"enabled": False}
             
+            # 💾 Updating status in database...
             if selected_value == "enable":
                 sett["MC"]["discord_checks"]["enabled"] = True
                 status = "enabled"
@@ -136,6 +146,7 @@ class MCDiscordCheckConfig(discord.ui.View):
             
             await self.bot.settings.upsert(sett)
             
+            # 📝 Logging update...
             await config_change_log(
                 self.bot, 
                 interaction.guild, 
@@ -151,6 +162,7 @@ class MCDiscordCheckConfig(discord.ui.View):
             await interaction.response.send_message("No option selected.", ephemeral=True)
 
     async def channel_select_callback(self, interaction: Interaction):
+        # 📡 Handling alert channel selection change...
         if interaction.user.id != self.user_id:
             await interaction.response.send_message(
                 "You are not permitted to interact with this dropdown.",
@@ -175,10 +187,12 @@ class MCDiscordCheckConfig(discord.ui.View):
         if "discord_checks" not in sett["MC"]:
             sett["MC"]["discord_checks"] = {"enabled": False}
 
+        # 💾 Updating channel in database...
         sett["MC"]["discord_checks"]["channel_id"] = channel_id
 
         await self.bot.settings.upsert(sett)
 
+        # 📝 Logging update...
         await config_change_log(
             self.bot,
             interaction.guild,

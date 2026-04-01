@@ -23,6 +23,7 @@ from utils.prc_api import ServerStatus, Player
 
 
 class ArgumentMockingInstance:
+    # 🎭 Mocking instance for argument simulation
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -40,12 +41,14 @@ error_gen = ZUID(prefix="error_", length=10)
 system_code_gen = ZUID(prefix="erm-systems-", length=7)
 
 
+# ✂️ Remove suffix from string (backport for older Python)
 def removesuffix(input_string: str, suffix: str):
     if suffix and input_string.endswith(suffix):
         return input_string[: -len(suffix)]
     return input_string
 
 
+# 🖼️ Get guild icon URL or fallback to bot avatar
 def get_guild_icon(
     bot: typing.Union[commands.Bot, commands.AutoShardedBot], guild: discord.Guild
 ):
@@ -55,6 +58,7 @@ def get_guild_icon(
         return guild.icon.url
 
 
+# 🚫 Standardized response for interaction check failures
 async def generalised_interaction_check_failure(
     responder: InteractionResponse | Webhook | typing.Callable,
 ):
@@ -80,6 +84,7 @@ async def generalised_interaction_check_failure(
         )
 
 
+# 🏷️ Check if a guild has whitelabeling enabled
 async def has_whitelabel(bot, guild_id: int) -> bool:
     if (item := await bot.whitelabel.db.find_one({"GuildID": str(guild_id)})) is not None and config("ENVIRONMENT") not in ["ALPHA", "DEVELOPMENT"]:
         guild = bot.get_guild(guild_id)
@@ -95,6 +100,7 @@ async def has_whitelabel(bot, guild_id: int) -> bool:
         return True
     return False
 
+# 🕵️ Get Roblox user profile by username or mention
 async def get_roblox_by_username(user: str, bot, ctx: commands.Context):
     if "<@" in user:
         try:
@@ -119,6 +125,7 @@ async def get_roblox_by_username(user: str, bot, ctx: commands.Context):
         return await bot.bloxlink.get_roblox_info(roblox_user.id)
 
 
+# 🛡️ Check if a member has staff permissions
 async def staff_check(bot_obj, guild, member):
     guild_settings = await bot_obj.settings.find_by_id(guild.id)
     member_role_ids = [r.id for r in member.roles]
@@ -140,6 +147,7 @@ async def staff_check(bot_obj, guild, member):
     return False
 
 
+# 👑 Check if a member has admin permissions
 async def admin_check(bot_obj, guild, member):
     guild_settings = await bot_obj.settings.find_by_id(guild.id)
     member_role_ids = [r.id for r in member.roles]
@@ -172,6 +180,7 @@ async def admin_check(bot_obj, guild, member):
 
     
 
+# ⏱️ Convert human-readable time strings to seconds
 def time_converter(parameter: str) -> int:
     conversions = {
         ("s", "seconds", " seconds"): 1,
@@ -203,6 +212,7 @@ class GuildCheckFailure(commands.CheckFailure):
     pass
 
 
+# ⚙️ Check if a guild has settings configured
 def require_settings():
     async def predicate(ctx: commands.Context):
         if ctx.guild is None:
@@ -216,6 +226,7 @@ def require_settings():
     return commands.check(predicate)
 
 
+# 🔄 Update Integration Command Storage (ICS) data
 async def update_ics(bot, ctx, channel, return_val: dict, ics_id: int):
     try:
         status: ServerStatus = await bot.prc_api.get_server_status(ctx.guild.id)
@@ -273,6 +284,7 @@ async def update_ics(bot, ctx, channel, return_val: dict, ics_id: int):
     return return_val
 
 
+# 🎨 Interpret and variable-substitute an embed dictionary
 async def interpret_embed(bot, ctx, channel, embed: dict, ics_id: int):
     embed = discord.Embed.from_dict(embed)
     try:
@@ -309,11 +321,13 @@ async def interpret_embed(bot, ctx, channel, embed: dict, ics_id: int):
     return await update_ics(bot, ctx, channel, embed, ics_id)
 
 
+# 📝 Interpret and variable-substitute text content
 async def interpret_content(bot, ctx, channel, content: str, ics_id):
     await update_ics(bot, ctx, channel, content, ics_id)
     return await sub_vars(bot, ctx, channel, content)
 
 
+# 🔄 Substitute template variables in a string
 async def sub_vars(bot, ctx: commands.Context, channel, string, **kwargs):
     try:
         string = string.replace("{user}", ctx.author.mention)
@@ -370,6 +384,7 @@ async def sub_vars(bot, ctx: commands.Context, channel, string, **kwargs):
         return string
 
 
+# ⏱️ Get elapsed time for a shift, excluding breaks
 def get_elapsed_time(document):
     from datamodels.ShiftManagement import ShiftItem
 
@@ -411,6 +426,7 @@ def get_elapsed_time(document):
     return total_seconds
 
 
+# ⌨️ Get command prefix for a guild
 async def get_prefix(bot, message):
     if not message.guild:
         return commands.when_mentioned_or(">")(bot, message)
@@ -424,6 +440,7 @@ async def get_prefix(bot, message):
     return commands.when_mentioned_or(prefix)(bot, message)
 
 
+# ✅ Send an "invisible" success embed
 async def invis_embed(ctx: commands.Context, content: str, **kwargs) -> discord.Message:
     msg = await ctx.send(
         content=f"<:ERMCheck:1111089850720976906>  **{ctx.author.name}**, {content}",
@@ -432,6 +449,7 @@ async def invis_embed(ctx: commands.Context, content: str, **kwargs) -> discord.
     return msg
 
 
+# ❌ Send a failure embed
 async def failure_embed(
     ctx: commands.Context, content: str, **kwargs
 ) -> discord.Message:
@@ -442,6 +460,7 @@ async def failure_embed(
     return msg
 
 
+# 📁 Send a new failure embed with title and description
 async def new_failure_embed(
     ctx: commands.Context, title: str, description: str, **kwargs
 ) -> discord.Message:
@@ -451,6 +470,7 @@ async def new_failure_embed(
     return msg
 
 
+# 👤 Get Roblox player avatar URL
 async def get_player_avatar_url(player_id):
     url = f"https://thumbnails.roblox.com/v1/users/avatar?userIds={player_id}&size=180x180&format=Png&isCircular=false"
     async with aiohttp.ClientSession() as session:
@@ -459,6 +479,7 @@ async def get_player_avatar_url(player_id):
             return data["data"][0]["imageUrl"]
 
 
+# 🏃 Run an API command (e.g., :pm) in ERLC server
 async def run_command(bot, guild_id, username, message):
     while True:
         command = f":pm {username} {message}"
@@ -475,6 +496,7 @@ async def run_command(bot, guild_id, username, message):
             break
 
 
+# 🚙 Check if a vehicle is whitelisted
 def is_whitelisted(vehicle_name, whitelisted_vehicle):
     vehicle_year_match = re.search(r"\d{4}$", vehicle_name)
     whitelisted_year_match = re.search(r"\d{4}$", whitelisted_vehicle)
@@ -493,6 +515,7 @@ def is_whitelisted(vehicle_name, whitelisted_vehicle):
     return False
 
 
+# 🚫 Send interaction-based failure response
 async def int_failure_embed(interaction, content, **kwargs):
     try:
         await interaction.response.send_message(
@@ -506,6 +529,7 @@ async def int_failure_embed(interaction, content, **kwargs):
         )
 
 
+# ⏳ Send interaction-based pending response
 async def int_pending_embed(interaction, content, **kwargs):
     try:
         await interaction.response.send_message(
@@ -519,6 +543,7 @@ async def int_pending_embed(interaction, content, **kwargs):
         )
 
 
+# ⌛ Send context-based pending response
 async def pending_embed(
     ctx: commands.Context, content: str, **kwargs
 ) -> discord.Message:
@@ -529,6 +554,7 @@ async def pending_embed(
     return msg
 
 
+# ✅ Send interaction-based "invisible" success response
 async def int_invis_embed(interaction, content, **kwargs):
     try:
         await interaction.response.send_message(

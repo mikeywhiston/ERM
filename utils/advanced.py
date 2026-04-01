@@ -1,6 +1,7 @@
 import discord
 
 class FakeMessage:
+    # 📝 Mock Discord message for utility testing
     def __init__(self, content, author, channel, state):
         self.content = content
         self.author = author  

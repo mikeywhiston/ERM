@@ -10,6 +10,7 @@ on init and the document to create an instance on and boom
 
 
 class Document:
+    # 🗄️ Helper class for MongoDB document operations
     def __init__(self, connection, document_name):
         """
         Our init function, sets up the conenction to the specified document
@@ -21,24 +22,28 @@ class Document:
         self.logger = logging.getLogger(__name__)
 
     # <-- Pointer Methods -->
+    # ⬆️ Wrapper for update_by_id
     async def update(self, dict):
         """
         For simpler calls, points to self.update_by_id
         """
         await self.update_by_id(dict)
 
+    # 🔍 Wrapper for find_by_id
     async def get_by_id(self, id):
         """
         This is essentially find_by_id so point to that
         """
         return await self.find_by_id(id)
 
+    # 🔎 Wrapper for find_by_id
     async def find(self, id):
         """
         For simpler calls, points to self.find_by_id
         """
         return await self.find_by_id(id)
 
+    # 🗑️ Wrapper for delete_by_id
     async def delete(self, id):
         """
         For simpler calls, points to self.delete_by_id
@@ -46,6 +51,7 @@ class Document:
         await self.delete_by_id(id)
 
     # <-- Actual Methods -->
+    # 🆔 Find a document by its ID
     async def find_by_id(self, id):
         """
         Returns the data found under `id`
@@ -57,6 +63,7 @@ class Document:
         """
         return await self.db.find_one({"_id": id})
 
+    # ❌ Delete a document by its ID
     async def delete_by_id(self, id):
         """
         Deletes all items found with _id: `id`
@@ -68,6 +75,7 @@ class Document:
 
         await self.db.delete_many({"_id": id})
 
+    # ➕ Insert a new document
     async def insert(self, dict):
         """
         insert something into the db
@@ -84,6 +92,7 @@ class Document:
 
         await self.db.insert_one(dict)
 
+    # 🔄 Update or insert a document
     async def upsert(self, dict):
         """
         Makes a new item in the document, if it already exists
@@ -99,6 +108,7 @@ class Document:
         else:
             await self.db.insert_one(dict)
 
+    # 📝 Update an existing document by ID
     async def update_by_id(self, dict):
         """
         For when a document already exists in the data
@@ -123,6 +133,7 @@ class Document:
         dict.pop("_id")
         await self.db.update_one({"_id": id}, {"$set": dict})
 
+    # 📭 Remove a field from a document
     async def unset(self, dict):
         """
         For when you want to remove a field from
@@ -147,6 +158,7 @@ class Document:
         dict.pop("_id")
         await self.db.update_one({"_id": id}, {"$unset": dict})
 
+    # ➕ Increment a numeric field
     async def increment(self, id, amount, field):
         """
         Increment a given `field` by `amount`
@@ -160,6 +172,7 @@ class Document:
 
         await self.db.update_one({"_id": id}, {"$inc": {field: amount}})
 
+    # 📚 Get all documents in the collection
     async def get_all(self):
         """
         Returns a list of all data in the document
@@ -170,6 +183,7 @@ class Document:
         return data
 
     # <-- Private methods -->
+    # 🕵️ Get raw data for a document
     async def __get_raw(self, id):
         """
         An internal private method used to eval certain checks

@@ -31,10 +31,12 @@ import typing
 
 class ERLC(commands.Cog):
     def __init__(self, bot: commands.Bot):
+        # 🚓 Initialize the ERLC cog...
         self.bot = bot
 
     @staticmethod
     def is_server_linked():
+        # 🔗 Check if server is linked...
         async def predicate(ctx: commands.Context):
             guild_id = ctx.guild.id
             command_group = ctx.command.full_parent_name
@@ -63,21 +65,25 @@ class ERLC(commands.Cog):
         command_string: str,
         attempted: bool = False,
     ):
+        # 🛡️ Log server actions securely...
         await secure_logging(
             self.bot, guild_id, author_id, interpret_type, command_string, attempted
         )
 
     @commands.hybrid_group(name="erlc")
     async def server(self, ctx: commands.Context):
+        # 🏢 Base ERLC group command...
         pass
 
     @commands.hybrid_group(name="mc")  # hmmmm...
     async def mc(self, ctx: commands.Context):
+        # 🍁 Base Maple County group command...
         pass
 
     @mc.command(name="link", description="Link your Maple County server with ERM!")
     @is_management()
     async def mc_link(self, ctx: commands.Context, *, server_name: str):
+        # 🔗 Link Maple County server...
         # get the linked roblox user
         roblox_id = 0
         oauth2_user = (
@@ -121,11 +127,13 @@ class ERLC(commands.Cog):
 
     @mc.command(
         name="info",
-        description="Get information about the current players in your Maple County server.",
-    )
-    @is_server_linked()
-    async def mc_info(self, ctx: commands.Context):
+        # ℹ️ Display Maple County server info...
         guild_id = ctx.guild.id
+
+        async def operate_and_reload_serverinfo(
+            msg: discord.Message | None, guild_id: str
+        ):
+            # 🔄 Reload server info logic...ild_id = ctx.guild.id
 
         async def operate_and_reload_serverinfo(
             msg: discord.Message | None, guild_id: str
@@ -178,9 +186,11 @@ class ERLC(commands.Cog):
             else:
                 await msg.edit(embed=embed1)
 
-        await operate_and_reload_serverinfo(None, guild_id)
+        # 📖 View Maple County logs...
+        guild_id = ctx.guild.id
 
-    @mc.command(name="logs", description="See the Command Logs of your server.")
+        async def operate_and_reload_commandlogs(msg, guild_id: str):
+            # 🔄 Reload command logs logic...r server.")
     @is_staff()
     @is_server_linked()
     async def mc_logs(self, ctx: commands.Context):
@@ -229,6 +239,7 @@ class ERLC(commands.Cog):
     @is_server_linked()
     async def mc_bans(
         self,
+        # 🔨 Filter Maple County bans...
         ctx: commands.Context,
         username: typing.Optional[str],
         user_id: typing.Optional[int],
@@ -287,7 +298,8 @@ class ERLC(commands.Cog):
         else:
             await ctx.send(embed=embed)
 
-    @mc.command(name="players", description="See all players in the server.")
+    @mc.# 👥 View Maple County players...
+        command(name="players", description="See all players in the server.")
     @is_server_linked()
     async def mc_players(
         self, ctx: commands.Context, filter: typing.Optional[str] = None
@@ -357,12 +369,7 @@ class ERLC(commands.Cog):
         name="panel",
         description="Open a panel that allows you to manage a player in your server.",
         aliases=["playerpanel", "manage"],
-    )
-    @app_commands.autocomplete(target=erlc_players_autocomplete)
-    @app_commands.describe(target="Who would you like to manage?")
-    @is_staff()
-    @is_server_linked()
-    async def erlc_panel(self, ctx: commands.Context, target: str):
+    )# 📟 Open ERLC moderation panel...
         target = await get_roblox_by_username(target, self.bot, ctx)
         if not target or target.get("errors") is not None:
             return await ctx.send(
@@ -428,6 +435,7 @@ class ERLC(commands.Cog):
         newline = "\n" # backwards python compatibility
 
         async def view_kills_callback(interaction: discord.Interaction, button: discord.ui.Button):
+            # 👁️ View kill logs for player...
             if not matching_kill_logs:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -455,6 +463,7 @@ class ERLC(commands.Cog):
             )
 
         async def view_commands_callback(interaction: discord.Interaction, button: discord.ui.Button):
+            # 👁️ View command logs for player...
             if not matching_command_logs:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -476,6 +485,13 @@ class ERLC(commands.Cog):
                 )
             )
 
+            await interaction.response.send_message(
+                view=discord.ui.LayoutView().add_item(commandsContainer),
+                ephemeral=True
+            )
+
+        async def view_modcalls_callback(interaction: discord.Interaction, button: discord.ui.Button):
+            # 👁️ View modcalls for player...
             await interaction.response.send_message(
                 view=discord.ui.LayoutView().add_item(commandsContainer),
                 ephemeral=True
@@ -791,6 +807,7 @@ class ERLC(commands.Cog):
         filter="Filter the modcalls by a specific username or user ID."
     )
     async def erlc_modcalls(self, ctx: commands.Context, filter: typing.Optional[str] = None):
+        # 👁️ View ERLC moderator calls...
         guild_id = ctx.guild.id
         modcalls = await self.bot.prc_api.get_mod_calls(guild_id)
 
@@ -843,7 +860,8 @@ class ERLC(commands.Cog):
     @app_commands.describe(
         filter="Filter the permissions by a specific role, username or user ID."
     )
-    async def erlc_permissions(self, ctx: commands.Context, filter: typing.Optional[str] = None):
+    async 👁️ View ERLC server permissions...
+        # def erlc_permissions(self, ctx: commands.Context, filter: typing.Optional[str] = None):
         # use SelectPagination - sort by Server Co-Owner, Server Administrator, Server Moderator
         pages = []
         server_staff = await self.bot.prc_api.get_server_staff(ctx.guild.id)
@@ -889,7 +907,8 @@ class ERLC(commands.Cog):
         message="What would you like to send?",
     )
     @is_staff()
-    async def erlc_pm(self, ctx: commands.Context, target: str, *, message: str):
+    asyn# 📨 Send ERLC private message...
+        c def erlc_pm(self, ctx: commands.Context, target: str, *, message: str):
         guild_id = ctx.guild.id
         special_selections = ["moderators", "admins", "players", "staff"]
         selected = []
@@ -943,7 +962,8 @@ class ERLC(commands.Cog):
         name="message", description="Send a Message to your ER:LC server with ERM!"
     )
     @is_staff()
-    @is_server_linked()
+    @is_# 📢 Send ERLC server message...
+        server_linked()
     async def erlc_message(self, ctx: commands.Context, *, message: str):
         guild_id = ctx.guild.id
 
@@ -971,7 +991,8 @@ class ERLC(commands.Cog):
         name="hint", description="Send a Hint to your ER:LC server with ERM!"
     )
     @is_staff()
-    @is_server_linked()
+    @is_# 💡 Send ERLC server hint...
+        server_linked()
     async def erlc_hint(self, ctx: commands.Context, *, hint: str):
         guild_id = ctx.guild.id
 
@@ -1002,6 +1023,7 @@ class ERLC(commands.Cog):
     )
     @is_management()
     @app_commands.describe(
+        # 🔗 Link ERLC server...
         key="Your PRC Server Key - check your server settings for details"
     )
     async def server_link(self, ctx: commands.Context, key: str):
@@ -1039,7 +1061,8 @@ class ERLC(commands.Cog):
     @server.command(
         name="unlink",
         description="Unlink your ER:LC server from ERM!",
-    )
+    )# 🔌 Unlink ERLC server...
+        
     @is_management()
     @is_server_linked()
     async def server_unlink(self, ctx: commands.Context):
@@ -1058,7 +1081,8 @@ class ERLC(commands.Cog):
         description='Send a direct command to your ER:LC server, under "Remote Server Management"',
         extras={"ephemeral": True},
     )
-    @app_commands.describe(command="The command to send to your ER:LC server")
+    @app# ⌨️ Send direct ERLC command...
+        _commands.describe(command="The command to send to your ER:LC server")
     @is_management()
     @is_server_linked()
     async def server_send_command(self, ctx: commands.Context, *, command: str):
@@ -1135,11 +1159,13 @@ class ERLC(commands.Cog):
             )
 
     @server.command(
-        name="info",
-        description="Get information about the current players in your ER:LC server.",
-    )
-    @is_server_linked()
-    async def server_info(self, ctx: commands.Context):
+        # ℹ️ View ERLC server info...
+        guild_id = ctx.guild.id
+
+        async def operate_and_reload_serverinfo(
+            msg: discord.Message | None, guild_id: str
+        ):
+            # 🔄 Reload server info logic...def server_info(self, ctx: commands.Context):
         guild_id = ctx.guild.id
 
         async def operate_and_reload_serverinfo(
@@ -1199,7 +1225,8 @@ class ERLC(commands.Cog):
 
         await operate_and_reload_serverinfo(None, guild_id)
 
-    @server.command(
+    @ser# 🛡️ View online server staff...
+        ver.command(
         name="staff", description="See the online staff members in your ER:LC server!"
     )
     @is_staff()
@@ -1243,9 +1270,11 @@ class ERLC(commands.Cog):
                 )
 
         if len(embed2.fields) == 0:
-            embed2.description = "> There are no online staff members."
-        await ctx.send(embed=embed2)
+        # 💀 View server kill logs...
+        guild_id = ctx.guild.id
 
+        async def operate_and_reload_kills(msg, guild_id: str):
+            # 🔄 Reload kill logs logic...
     @server.command(name="kills", description="See the Kill Logs of your server.")
     @is_staff()
     @is_server_linked()
@@ -1285,9 +1314,11 @@ class ERLC(commands.Cog):
             else:
                 await msg.edit(embed=embed)
 
-        await operate_and_reload_kills(None, guild_id)
+        # ⏲️ View player join/leave logs...
+        guild_id = ctx.guild.id
 
-    @server.command(
+        async def operate_and_reload_playerlogs(msg, guild_id: str):
+            # 🔄 Reload player logs logic...
         name="playerlogs", description="See the Join and Leave logs of your server."
     )
     @is_staff()
@@ -1381,7 +1412,8 @@ class ERLC(commands.Cog):
 
         await operate_and_reload_commandlogs(None, guild_id)
 
-    @server.command(name="bans", description="Filter the bans of your server.")
+    @ser# 🔨 Filter server bans...
+        ver.command(name="bans", description="Filter the bans of your server.")
     @is_staff()
     @is_server_linked()
     async def bans(
@@ -1439,6 +1471,7 @@ class ERLC(commands.Cog):
                 for i in range(0, len(embeds) - 1)
             ]
             paginator = SelectPagination(self.bot, ctx.author.id, pages)
+        # 👥 View online server players...
             await ctx.send(embed=embeds[0], view=paginator.get_current_view())
             return
         else:
@@ -1804,4 +1837,5 @@ class ERLC(commands.Cog):
 
 
 async def setup(bot):
+    # 🔩 Register ERLC cog...
     await bot.add_cog(ERLC(bot))

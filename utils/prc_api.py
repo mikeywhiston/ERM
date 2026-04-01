@@ -17,10 +17,12 @@ class ResponseFailure(Exception):
     status_code: int
     json_data: dict
 
+    # ❗ Exception for failed API responses
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    # 📝 String representation of ResponseFailure
     def __repr__(self):
         return f"{self.status_code}: {self.json_data}"
 
@@ -44,6 +46,7 @@ class JoinLeaveLog(BaseDataClass):
     username: str
     user_id: int
 
+    # ⚖️ Compare logs by timestamp
     def __lt__(self, other):
         return self.timestamp < other.timestamp
 
@@ -55,6 +58,7 @@ class KillLog(BaseDataClass):
     killed_username: str
     killed_user_id: int
 
+    # ⚖️ Compare kill logs by timestamp
     def __lt__(self, other):
         return self.timestamp < other.timestamp
 
@@ -99,6 +103,7 @@ class ActiveVehicle(BaseDataClass):
 
 
 class ServerLinkNotFound(commands.CheckFailure):
+    # ❌ Exception for when a server link is not found
     def __init__(self, platform: typing.Optional[str]):
         self.platform = platform
         super().__init__()
@@ -108,6 +113,7 @@ class ServerLinkNotFound(commands.CheckFailure):
 
 
 class PRCApiClient:
+    # 🌩️ Client for interacting with the PRC (ERLC) API
     def __init__(self, bot, base_url: str, api_key: str):
         self.bot = bot
         self.session = aiohttp.ClientSession()
@@ -116,11 +122,13 @@ class PRCApiClient:
 
         bot.external_http_sessions.append(self.session)
 
+    # 🔑 Get server key for a guild
     async def get_server_key(self, guild_id: int) -> ServerKey:
         return await self.bot.server_keys.get_server_key(
             guild_id
         ) 
 
+    # 📡 Send internal API request to PRC
     async def _send_api_request(
         self,
         method: typing.Literal["GET", "POST"],
@@ -183,6 +191,7 @@ class PRCApiClient:
                 await response.json() if response.content_type != "text/html" else {}
             )
 
+    # 🌐 Get ERLC server status
     async def get_server_status(self, guild_id: int):
         status_code, response_json = await self._send_api_request(
             "GET", "/server", guild_id
@@ -201,6 +210,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 🧪 Send test request to verify server key
     async def send_test_request(self, server_key: str) -> int | ServerStatus:
         code, response_json = await self._send_api_request(
             "GET", "/server", 0, None, server_key
@@ -220,6 +230,7 @@ class PRCApiClient:
             )
         )
 
+    # 👥 Get list of players in ERLC server
     async def get_server_players(self, guild_id: int) -> list:
         status_code, response_json = await self._send_api_request(
             "GET", "/server/players", guild_id
@@ -241,6 +252,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 📞 Get active moderator calls
     async def get_mod_calls(self, guild_id: int) -> list:
         status_code, response_json = await self._send_api_request(
             "GET", "/server/modcalls", guild_id
@@ -259,6 +271,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 🛠️ Get list of staff currently in ERLC server
     async def get_server_staff(self, guild_id: int) -> list:
         status_code, response_json = await self._send_api_request(
             "GET", "/server/staff", guild_id
@@ -282,6 +295,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 🚘 Get list of spawned vehicles
     async def get_server_vehicles(self, guild_id: int) -> list:
         status_code, response_json = await self._send_api_request(
             "GET", "/server/vehicles", guild_id
@@ -298,6 +312,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 🚶 Get current ERLC server queue
     async def get_server_queue(self, guild_id: int, minimal: bool = False) -> list:
         status_code, response_json = await self._send_api_request(
             "GET", "/server/queue", guild_id
@@ -313,6 +328,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 📜 Fetch ERLC server command logs
     async def fetch_server_logs(self, guild_id: int):
         status_code, response_json = await self._send_api_request(
             "GET", "/server/commandlogs", guild_id
@@ -339,6 +355,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 💀 Fetch ERLC server kill logs
     async def fetch_kill_logs(self, guild_id: int):
         status_code, response_json = await self._send_api_request(
             "GET", "/server/killlogs", guild_id
@@ -361,6 +378,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 🚫 Fetch list of banned players
     async def fetch_bans(self, guild_id: int):
         status_code, response_json = await self._send_api_request(
             "GET", "/server/bans", guild_id
@@ -378,6 +396,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # 🚪 Fetch player join/leave logs
     async def fetch_player_logs(self, guild_id: int):
         status_code, response_json = await self._send_api_request(
             "GET", "/server/joinlogs", guild_id
@@ -399,6 +418,7 @@ class PRCApiClient:
         else:
             raise ResponseFailure(status_code=status_code, json_data=response_json)
 
+    # ⌨️ Execute a command in ERLC server
     async def run_command(self, guild_id: int, command: str):
         status_code, response_json = await self._send_api_request(
             "POST", "/server/command", guild_id, data={"command": command}
@@ -408,6 +428,7 @@ class PRCApiClient:
             return await self.run_command(guild_id, command)
         return status_code, response_json
 
+    # 🔓 Unban a user from ERLC server
     async def unban_user(self, guild_id: int, user_id: int):
         status_code = 0
         while status_code != 200:

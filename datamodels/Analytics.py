@@ -4,4 +4,5 @@ from utils.mongo import Document
 
 
 class Analytics(Document):
+    # 📊 Data model for bot analytics
     pass

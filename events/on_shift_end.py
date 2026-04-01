@@ -12,10 +12,12 @@ from decouple import config
 
 
 class OnShiftEnd(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
+    # ⏹️ Handling shift end event...
     async def on_shift_end(self, object_id: ObjectId):
 
         document = await self.bot.shift_management.shifts.find_by_id(object_id)
@@ -28,6 +30,7 @@ class OnShiftEnd(commands.Cog):
 
         guild_id = document["Guild"]
         
+        # 🔄 Syncing end shift with APIs...
         async def sync_end_with_apis():
             async with aiohttp.ClientSession() as session:
                 tasks = []

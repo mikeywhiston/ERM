@@ -19,6 +19,7 @@ from utils.utils import (
 
 
 class ActivityMonitoring(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -27,6 +28,7 @@ class ActivityMonitoring(commands.Cog):
         description="Monitor activity across an entire Staff Team effectively.",
         extras={"category": "Activity Management"},
     )
+    # 📊 Activity command group
     async def activity(self, ctx: commands.Context):
         pass
 
@@ -38,6 +40,7 @@ class ActivityMonitoring(commands.Cog):
     )
     @is_management()
     @require_settings()
+    # 📉 Show activity report
     async def activity_show(
         self,
         ctx: commands.Context,
@@ -173,9 +176,11 @@ class ActivityMonitoring(commands.Cog):
                 actual_loas.append(loa_item)
 
         async def interaction_callback(interaction: discord.Interaction, _):
+            # 🖱️ Interaction callback for activity report
             if interaction.user.id != ctx.author.id:
                 return await generalised_interaction_check_failure(interaction.response)
 
+            # 🛠️ Setup embed for activity notices
             def setup_embed() -> discord.Embed:
                 embed = discord.Embed(title="Activity Notices", color=BLANK_COLOR)
                 embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon)
@@ -249,5 +254,6 @@ class ActivityMonitoring(commands.Cog):
         )
 
 
+# 🛠️ Cog setup
 async def setup(bot):
     await bot.add_cog(ActivityMonitoring(bot))

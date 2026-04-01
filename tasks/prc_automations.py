@@ -17,6 +17,7 @@ _cache_timeout = 300
 
 async def get_cached_member_by_username(guild, username):
     """Get member by username with caching"""
+    # �️ Finding member by username...
     now = time.time()
     cache_key = f"{guild.id}_{username.lower()}"
 
@@ -34,6 +35,7 @@ async def get_cached_member_by_username(guild, username):
     return member
 
 async def get_cached_guild(bot, guild_id):
+    # 🏰 Fetching cached guild...
     """Get guild with caching"""
     now = time.time()
     cache_key = f"guild_{guild_id}"
@@ -55,6 +57,7 @@ async def get_cached_guild(bot, guild_id):
 
 
 async def get_cached_channel(bot, channel_id):
+    # 📟 Fetching cached channel...
     """Get channel with caching"""
     now = time.time()
     cache_key = f"channel_{channel_id}"
@@ -74,7 +77,8 @@ async def get_cached_channel(bot, channel_id):
     _guild_cache[cache_key] = (channel, now)
     return channel
 
-async def handle_callsign_check(guild, callsign, settings, member):
+asyn# 🆔 Checking member callsign...
+    c def handle_callsign_check(guild, callsign, settings, member):
     """Handle callsign check for a member"""
     if not callsign or not member:
         return False
@@ -125,6 +129,7 @@ async def process_discord_checks(bot, items, guild_id):
     """
     This function will process Discord checks for PRC servers.
     """
+    # 🛡️ Processing PRC Discord checks...
     try:
         settings = items["ERLC"].get("discord_checks", {})
         if not settings:
@@ -199,6 +204,7 @@ async def prc_automations(bot):
     """
     Automated Discord Checks for PRC Servers.
     """
+    # 🤖 Running PRC automations...
     initial_time = time.time()
 
     base = {"ERLC": {"$exists": True, "$ne": None}}
@@ -239,6 +245,7 @@ async def prc_automations(bot):
 
 
 async def handle_discord_check_batch(bot, guild, players_not_in_discord, alert_channel, alert_message, kick_after=0):
+    # 👥 Handling Discord check batch...
     """Handle batch of players not in Discord"""
     if not players_not_in_discord:
         return
@@ -272,6 +279,7 @@ async def handle_discord_check_batch(bot, guild, players_not_in_discord, alert_c
 
 
 async def send_batch_warning_embed(players, alert_channel):
+    # ⚠️ Sending warning embed batch...
     """Send warning embed for multiple players"""
     try:
         player_list = []
@@ -298,6 +306,7 @@ async def send_batch_warning_embed(players, alert_channel):
 
 async def handle_callsign_violations_batch(bot, guild, players_with_violations, alert_channel):
     """Handle batch of players with callsign violations"""
+    # 🆔 Handling callsign violations...
     if not players_with_violations:
         return
     
@@ -318,6 +327,7 @@ async def handle_callsign_violations_batch(bot, guild, players_with_violations, 
 
 
 async def send_callsign_violation_embed(players, alert_channel):
+    # 🛑 Sending callsign violation embed...
     """Send callsign violation embed for multiple players"""
     try:
         player_list = []

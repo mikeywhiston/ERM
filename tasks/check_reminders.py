@@ -15,6 +15,7 @@ from utils.utils import has_whitelabel
 
 
 async def iterate_reminder(bot, guildObj): # TODO: do a refactor of this.. this is abundantly terrible programming.
+    # ⏰ Iterating through guild reminders...
     if await has_whitelabel(bot, guildObj["_id"]):
         return
 
@@ -151,7 +152,7 @@ async def iterate_reminder(bot, guildObj): # TODO: do a refactor of this.. this 
 
 @tasks.loop(minutes=1)
 async def check_reminders(bot):
-
+    # 🔔 Checking for due reminders...
     if bot.environment == "PRODUCTION":
         try:
             async for guildObj in bot.reminders.db.find({}):

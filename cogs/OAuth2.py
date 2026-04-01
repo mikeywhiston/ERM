@@ -8,6 +8,7 @@ import time
 
 
 class OAuth2(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot):
         self.bot = bot
 
@@ -16,6 +17,7 @@ class OAuth2(commands.Cog):
         description="Link your Roblox account with ERM.",
         extras={"ephemeral": True},
     )
+    # 🔗 Link Roblox account
     async def link_roblox(self, ctx: commands.Context):
         msg = None
         linked_account = await self.bot.oauth2_users.db.find_one(
@@ -90,6 +92,7 @@ class OAuth2(commands.Cog):
                         break
                 else:
                     linked_account = None
+# 🛠️ Cog setup
 
 
 async def setup(bot):

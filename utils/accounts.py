@@ -2,13 +2,16 @@ import discord
 
 
 class Accounts:
+    # 👥 Roblox and Discord account management
     def __init__(self, bot):
         self.bot = bot
 
+    # 🔢 Batch get Roblox user IDs from usernames
     async def batch_user_ids(self, usernames: list):
         roblox_users = await self.bot.roblox.get_users_by_usernames(usernames, expand=False)
         return [user.id for user in roblox_users if user]
 
+    # 🔗 Convert Roblox username to Discord member
     async def roblox_to_discord(self, guild: discord.Guild, username: str, roles: list[int] = None, roblox_user_id=None):
         bot = self.bot
 
@@ -42,6 +45,7 @@ class Accounts:
         # if no roles specified OR no member with roles, return the first member found
         return members[0] if members else None
 
+    # 🔗 Convert Discord user ID to Roblox username
     async def discord_to_roblox(self, guild: discord.Guild, user_id: int):
         bot = self.bot
 

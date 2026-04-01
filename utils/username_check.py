@@ -2,6 +2,7 @@ from typing import Dict, Set
 
 
 class UsernameChecker:
+    # 🕵️ Utility to check for unrealistic or problematic usernames
     def __init__(self):
         self.similar_chars: Dict[str, str] = {
             "l": "I1|",  # lowercase L, uppercase i, one, pipe
@@ -11,6 +12,7 @@ class UsernameChecker:
         }
         self.confused_chars: Set[str] = set("Il1|O0")
 
+    # 🧐 Check if a username is likely problematic
     def is_unrealistic(self, username: str) -> bool:
         """
         Check if a username appears to be unrealistic/problematic.

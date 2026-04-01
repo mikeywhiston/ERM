@@ -9,6 +9,7 @@ from utils.utils import interpret_content, interpret_embed
 
 @tasks.loop(minutes=15, reconnect=True)
 async def iterate_ics(bot):
+    # 📦 Updating Integration Command Storage...
     # This will aim to constantly update the Integration Command Storage
     # and the relevant storage data.
 

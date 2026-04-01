@@ -6,10 +6,12 @@ from decouple import config
 
 
 class OnMemberUpdate(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener("on_member_update")
+    # 🔄 Handling member update event...
     async def on_member_update(self, before, after):
         if before.roles != after.roles:
             # Roles have been changed
@@ -52,5 +54,6 @@ class OnMemberUpdate(commands.Cog):
                     pass
 
 
+# 🚀 Setting up cog...
 async def setup(bot):
     await bot.add_cog(OnMemberUpdate(bot))

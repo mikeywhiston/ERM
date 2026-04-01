@@ -7,10 +7,12 @@ on_ready = False
 
 
 class OnReady(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener("on_ready")
+    # 🏁 Handling ready event...
     async def on_ready(self):
         global on_ready
         if on_ready:
@@ -18,7 +20,9 @@ class OnReady(commands.Cog):
             on_ready = False
 
     @commands.Cog.listener("on_shard_connect")
+    # 💎 Handling shard connect event...
     async def on_shard_connect(self, sid: int):
+        # 📞 Shard connection callback...
         async def callback():
             try:
                 channel = await self.bot.fetch_channel(1193390631192641687)
@@ -37,7 +41,9 @@ class OnReady(commands.Cog):
         await callback()
 
     @commands.Cog.listener("on_shard_disconnect")
+    # 🔌 Handling shard disconnect event...
     async def on_shard_disconnect(self, sid: int):
+        # 📞 Shard disconnection callback...
         async def callback():
             try:
                 channel = await self.bot.fetch_channel(1193390631192641687)
@@ -56,5 +62,6 @@ class OnReady(commands.Cog):
         await callback()
 
 
+# 🚀 Setting up cog...
 async def setup(bot):
     await bot.add_cog(OnReady(bot))

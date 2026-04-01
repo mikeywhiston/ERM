@@ -18,10 +18,12 @@ from utils.prc_api import ServerLinkNotFound, ResponseFailure
 
 
 class OnCommandError(commands.Cog):
+    # ⚙️ Initializing cog...
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener("on_command_error")
+    # ⚠️ Handling command error event...
     async def on_command_error(self, ctx, error):
         ctx.bot.internal_command_storage.pop(ctx, None)
         do_not_send = getattr(ctx, "dnr", False)

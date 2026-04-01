@@ -36,6 +36,7 @@ from utils.utils import require_settings, generator, log_command_usage
 
 
 class Configuration(commands.Cog):
+    # ⚙️ Cog initialization
     def __init__(self, bot):
         self.bot = bot
 
@@ -46,6 +47,7 @@ class Configuration(commands.Cog):
         extras={"category": "Configuration"},
     )
     @is_management()
+    # 🚀 Setup the bot
     async def _setup(self, ctx: commands.Context):
         await log_command_usage(self.bot, ctx.guild, ctx.author, f"Setup")
         bot = self.bot
@@ -113,17 +115,21 @@ class Configuration(commands.Cog):
 
         secret_key = next(generator)
 
+        # 🔍 Get active view state
         def get_active_view_state() -> discord.ui.View | None:
             return self.bot.view_state_manager.get(secret_key)
 
+        # 💾 Set active view state
         def set_active_view_state(view: discord.ui.View):
             self.bot.view_state_manager[secret_key] = view
 
+        # 🔓 Discard unlock override
         async def discard_unlock_override(interaction: discord.Interaction):
             if interaction.user != ctx.author:
                 return
             await interaction.response.defer()
 
+        # ✅ Check unlock override
         async def check_unlock_override(interaction: discord.Interaction):
             view = get_active_view_state()
             if interaction.user != ctx.author:
@@ -173,6 +179,7 @@ class Configuration(commands.Cog):
                         buttons[0].disabled = True
                         await interaction.message.edit(view=view)
 
+        # 📞 Callback override
         async def callback_override(interaction: discord.Interaction, *args, **kwargs):
             await interaction.response.defer()
 
@@ -224,6 +231,7 @@ class Configuration(commands.Cog):
         prefix.placeholder = "Prefix"
         prefix.callback = check_unlock_override
 
+        # 🛑 Stop override
         async def stop_override(interaction: discord.Interaction):
             if interaction.user != ctx.author:
                 return

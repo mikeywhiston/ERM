@@ -7,6 +7,7 @@ from utils.constants import BLANK_COLOR
 
 class Privacy(commands.Cog):
     def __init__(self, bot):
+        # 🛡️ Initialize the Privacy cog...
         self.bot = bot
 
     @commands.guild_only()
@@ -16,6 +17,7 @@ class Privacy(commands.Cog):
         extras={"category": "Privacy"},
     )
     async def consent(self, ctx: commands.Context):
+        # 🔐 Manage user privacy consent...
         bot = self.bot
         punishments_enabled = True
         ai_enabled = True
@@ -60,6 +62,7 @@ class Privacy(commands.Cog):
         async def punishment_alerts(
             interaction: discord.Interaction, button: discord.ui.Button
         ):
+            # 🔔 Toggle punishment alerts...
             nonlocal selected
             nonlocal punishments_enabled
             if interaction.user.id == ctx.author.id:
@@ -158,7 +161,8 @@ class Privacy(commands.Cog):
 
         async def shift_reports(
             interaction: discord.Interaction, button: discord.ui.Button
-        ):
+        ):# 📋 Toggle shift reports...
+            
             if interaction.user.id == ctx.author.id:
                 nonlocal selected
                 nonlocal shift_reports_enabled
@@ -255,6 +259,7 @@ class Privacy(commands.Cog):
                 )
 
         async def automatic_shifts(
+            # 🕒 Toggle automatic shifts...
             interaction: discord.Interaction, button: discord.ui.Button
         ):
             if interaction.user.id == ctx.author.id:
@@ -390,6 +395,7 @@ class Privacy(commands.Cog):
 
         await ctx.reply(embed=embed, view=custom_view)
 
-
+# 🔩 Register Privacy cog...
+    
 async def setup(bot):
     await bot.add_cog(Privacy(bot))

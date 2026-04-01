@@ -17,6 +17,7 @@ _cache_timeout = 300
 
 async def get_cached_member_by_username(bot, guild, username):
     """Get member by username with caching"""
+    # 🔍 Finding member by username...
     now = time.time()
     cache_key = f"{guild.id}_{username.lower()}"
 
@@ -32,6 +33,7 @@ async def get_cached_member_by_username(bot, guild, username):
 
 async def get_cached_guild(bot, guild_id):
     """Get guild with caching"""
+    # 🏰 Getting cached guild...
     now = time.time()
     cache_key = f"guild_{guild_id}"
 
@@ -52,6 +54,7 @@ async def get_cached_guild(bot, guild_id):
 
 
 async def get_cached_channel(bot, channel_id):
+    # 📺 Getting cached channel...
     """Get channel with caching"""
     now = time.time()
     cache_key = f"channel_{channel_id}"
@@ -75,6 +78,7 @@ async def get_cached_channel(bot, channel_id):
 @tasks.loop(minutes=10, reconnect=True)
 async def mc_discord_checks(bot):
     """
+    # 🛡️ Running MC Discord checks...
     Automated Discord Checks for MC Servers.
     """
     initial_time = time.time()
@@ -160,6 +164,7 @@ async def mc_discord_checks(bot):
 
 async def handle_discord_check_batch(bot, guild, players_not_in_discord, alert_channel):
     """Handle batch of players not in Discord"""
+    # 👥 Handling Discord check batch...
     if not players_not_in_discord:
         return
     
@@ -172,6 +177,7 @@ async def handle_discord_check_batch(bot, guild, players_not_in_discord, alert_c
 
 
 async def send_batch_warning_embed(players, alert_channel):
+    # ⚠️ Sending batch warning embed...
     """Send warning embed for multiple players"""
     try:
         player_list = []
