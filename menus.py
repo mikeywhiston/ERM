@@ -188,316 +188,316 @@ class Dropdown(discord.ui.Select):  # 🔘 Dropdown class...
             return await generalised_interaction_check_failure(interaction.followup)  # ⚠️ Failure...
 
 
-class ShiftModificationDropdown(discord.ui.Select):
-    def __init__(self, user_id, other=False):
+class ShiftModificationDropdown(discord.ui.Select):  # 🕒 Shift modification dropdown...
+    def __init__(self, user_id, other=False):  # 🛠️ Initializing...
         # 🕒 Initializing Shift Modification Dropdown...
-        self.user_id = user_id
-        if other is False:
-            options = [
-                discord.SelectOption(
-                    label="On Duty",
-                    value="on",
-                    description="Start your in-game shift",
+        self.user_id = user_id  # 👤 Storing user ID...
+        if other is False:  # 🔘 Standard options...
+            options = [  # 📋 Standard options list...
+                discord.SelectOption(  # 🟢 On duty...
+                    label="On Duty",  # 📝 Label...
+                    value="on",  # 🏷️ Value...
+                    description="Start your in-game shift",  # 📜 Description...
                 ),
-                discord.SelectOption(
-                    label="Toggle Break",
-                    value="break",
-                    description="Taking a break? Toggle your break status",
+                discord.SelectOption(  # ☕ Break...
+                    label="Toggle Break",  # 📝 Label...
+                    value="break",  # 🏷️ Value...
+                    description="Taking a break? Toggle your break status",  # 📜 Description...
                 ),
-                discord.SelectOption(
-                    label="Off Duty",
-                    value="off",
-                    description="End your in-game shift",
+                discord.SelectOption(  # 🔴 Off duty...
+                    label="Off Duty",  # 📝 Label...
+                    value="off",  # 🏷️ Value...
+                    description="End your in-game shift",  # 📜 Description...
                 ),
-                discord.SelectOption(
-                    label="Void shift",
-                    value="void",
-                    description="Void your in-game shift. This is irreversible.",
+                discord.SelectOption(  # 🗑️ Void...
+                    label="Void shift",  # 📝 Label...
+                    value="void",  # 🏷️ Value...
+                    description="Void your in-game shift. This is irreversible.",  # 📜 Description...
                 ),
             ]
-        else:
-            options = [
-                discord.SelectOption(
-                    label="On Duty",
-                    value="on",
-                    description="Start their in-game shift",
+        else:  # 🛠️ Administrative options...
+            options = [  # 📋 Admin options list...
+                discord.SelectOption(  # 🟢 On duty...
+                    label="On Duty",  # 📝 Label...
+                    value="on",  # 🏷️ Value...
+                    description="Start their in-game shift",  # 📜 Description...
                 ),
-                discord.SelectOption(
-                    label="Toggle Break",
-                    value="break",
-                    description="Taking a break? Toggle their break status",
+                discord.SelectOption(  # ☕ Break...
+                    label="Toggle Break",  # 📝 Label...
+                    value="break",  # 🏷️ Value...
+                    description="Taking a break? Toggle their break status",  # 📜 Description...
                 ),
-                discord.SelectOption(
-                    label="Off Duty",
-                    value="off",
-                    description="End their in-game shift",
+                discord.SelectOption(  # 🔴 Off duty...
+                    label="Off Duty",  # 📝 Label...
+                    value="off",  # 🏷️ Value...
+                    description="End their in-game shift",  # 📜 Description...
                 ),
             ]
 
         # 🔘 Configuring select menu...
-        super().__init__(
-            placeholder="Select an option", min_values=1, max_values=1, options=options
+        super().__init__(  # 🏗️ Parent init...
+            placeholder="Select an option", min_values=1, max_values=1, options=options  # ⚙️ Settings...
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction):  # 🕹️ Interaction handler...
         # 🔄 Handling shift status change...
-        if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            self.view.value = self.values[0]
-            self.disabled = True
-            for option in self.options:
-                if option.value == self.values[0]:
-                    option.default = True
+        if interaction.user.id == self.user_id:  # 🔐 Authorization check...
+            await interaction.response.defer()  # 🔄 Deferring...
+            self.view.value = self.values[0]  # 💾 Setting value...
+            self.disabled = True  # 🔒 Disabling dropdown...
+            for option in self.options:  # 🔍 Finding selected option...
+                if option.value == self.values[0]:  # ✅ Matching value...
+                    option.default = True  # 📌 Marking default...
 
             # 📄 Updating message view...
-            await interaction.message.edit(view=self.view)
-            self.view.stop()
+            await interaction.message.edit(view=self.view)  # 🔄 Editing message...
+            self.view.stop()  # 🛑 Stopping view...
         else:
             # ⚠️ Handling unauthorized interaction...
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # ⏳ Deferring...
+            return await generalised_interaction_check_failure(interaction.followup)  # ⚠️ Failure...
 
 
-class AdministrativeActionsDropdown(discord.ui.Select):
-    def __init__(self, user_id):
+class AdministrativeActionsDropdown(discord.ui.Select):  # 🛠️ Admin actions dropdown...
+    def __init__(self, user_id):  # 🛠️ Initializing...
         # 🛠️ Initializing Administrative Actions Dropdown...
-        self.user_id = user_id
-        options = [
-            discord.SelectOption(
-                label="Add time",
-                value="add",
-                description="Add time to their current shift",
+        self.user_id = user_id  # 👤 Storing user ID...
+        options = [  # 📋 Admin action options...
+            discord.SelectOption(  # ➕ Add time...
+                label="Add time",  # 📝 Label...
+                value="add",  # 🏷️ Value...
+                description="Add time to their current shift",  # 📜 Description...
             ),
-            discord.SelectOption(
-                label="Remove time",
-                value="remove",
-                description="Remove time from their current shift",
+            discord.SelectOption(  # ➖ Remove time...
+                label="Remove time",  # 📝 Label...
+                value="remove",  # 🏷️ Value...
+                description="Remove time from their current shift",  # 📜 Description...
             ),
-            discord.SelectOption(
-                label="Void shift",
-                value="void",
-                description="Void their shift, and remove it from the leaderboard",
+            discord.SelectOption(  # 🗑️ Void shift...
+                label="Void shift",  # 📝 Label...
+                value="void",  # 🏷️ Value...
+                description="Void their shift, and remove it from the leaderboard",  # 📜 Description...
             ),
-            discord.SelectOption(
-                label="Clear Member Shifts",
-                value="clear",
-                description="Clear all of their shifts from the leaderboard",
+            discord.SelectOption(  # 🧹 Clear shifts...
+                label="Clear Member Shifts",  # 📝 Label...
+                value="clear",  # 🏷️ Value...
+                description="Clear all of their shifts from the leaderboard",  # 📜 Description...
             ),
         ]
 
         # 🔘 Configuring select menu...
-        super().__init__(
-            placeholder="Administrative Actions",
-            min_values=1,
-            max_values=1,
-            options=options,
+        super().__init__(  # 🏗️ Parent init...
+            placeholder="Administrative Actions",  # 🏷️ Placeholder...
+            min_values=1,  # 📉 Min values...
+            max_values=1,  # 📈 Max values...
+            options=options,  # 📋 Applying options...
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction):  # 🕹️ Interaction handler...
         # 🔄 Handling administrative action...
-        if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            self.view.admin_value = self.values[0]
-            self.disabled = True
-            for option in self.options:
-                if option.value == self.values[0]:
-                    option.default = True
+        if interaction.user.id == self.user_id:  # 🔐 Authorization check...
+            await interaction.response.defer()  # 🔄 Deferring...
+            self.view.admin_value = self.values[0]  # 💾 Setting admin value...
+            self.disabled = True  # 🔒 Disabling dropdown...
+            for option in self.options:  # 🔍 Finding selected option...
+                if option.value == self.values[0]:  # ✅ Matching value...
+                    option.default = True  # 📌 Marking default...
 
             # 🛠️ Disabling other selection menus...
-            for item in self.view.children:
-                if isinstance(item, discord.ui.Select):
-                    if item is not self:
-                        item.disabled = True
+            for item in self.view.children:  # 🔄 Iterating children...
+                if isinstance(item, discord.ui.Select):  # 🔘 Checking if select...
+                    if item is not self:  # 🚫 Not this item...
+                        item.disabled = True  # 🔒 Disabling other...
 
-            await interaction.message.edit(view=self.view)
-            self.view.stop()
+            await interaction.message.edit(view=self.view)  # 🔄 Updating view...
+            self.view.stop()  # 🛑 Stopping view...
         else:
             # ⚠️ Handling unauthorized interaction...
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # ⏳ Deferring...
+            return await generalised_interaction_check_failure(interaction.followup)  # ⚠️ Failure...
 
 
-class CustomDropdown(discord.ui.Select):
-    def __init__(self, user_id, options: list, limit=1):
+class CustomDropdown(discord.ui.Select):  # 🎨 Custom dropdown class...
+    def __init__(self, user_id, options: list, limit=1):  # 🛠️ Initializing...
         # 🎨 Initializing Custom Dropdown...
-        self.user_id = user_id
-        optionList = []
+        self.user_id = user_id  # 👤 Storing user ID...
+        optionList = []  # 📋 Option holder...
 
         # 🧩 Processing option list...
-        for option in options:
-            if isinstance(option, str):
-                optionList.append(
-                    discord.SelectOption(
-                        label=option.replace("_", " ").title(), value=option
+        for option in options:  # 🔄 Iterating options...
+            if isinstance(option, str):  # 🔠 Checking if string...
+                optionList.append(  # ➕ Adding option...
+                    discord.SelectOption(  # 🔘 Creating option...
+                        label=option.replace("_", " ").title(), value=option  # 📝 Setting labels...
                     )
                 )
-            elif isinstance(option, discord.SelectOption):
-                optionList.append(option)
+            elif isinstance(option, discord.SelectOption):  # 🔘 Checking if SelectOption...
+                optionList.append(option)  # ➕ Adding directly...
 
-        super().__init__(
-            placeholder="Select an option",
-            min_values=1,
-            max_values=limit,
-            options=optionList,
+        super().__init__(  # 🏗️ Parent init...
+            placeholder="Select an option",  # 🏷️ Placeholder...
+            min_values=1,  # 📉 Min values...
+            max_values=limit,  # 📈 Max values...
+            options=optionList,  # 📋 Applying options...
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction):  # 🕹️ Interaction handler...
         # 🔄 Handling custom selection...
-        if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            if len(self.values) == 1:
-                self.view.value = self.values[0]
-            else:
-                self.view.value = self.values
-            self.view.stop()
+        if interaction.user.id == self.user_id:  # 🔐 Authorization check...
+            await interaction.response.defer()  # 🔄 Deferring...
+            if len(self.values) == 1:  # 🔢 Checking count...
+                self.view.value = self.values[0]  # 💾 Single value...
+            else:  # 🔢 Multiple items...
+                self.view.value = self.values  # 💾 List of values...
+            self.view.stop()  # 🛑 Stopping view...
         else:
             # ⚠️ Handling unauthorized interaction...
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # ⏳ Deferring...
+            return await generalised_interaction_check_failure(interaction.followup)  # ⚠️ Failure...
 
 
-class MultiPaginatorDropdown(discord.ui.Select):
-    def __init__(self, user_id, options: list, pages: dict, limit=1):
+class MultiPaginatorDropdown(discord.ui.Select):  # 📖 Multi-paginator dropdown...
+    def __init__(self, user_id, options: list, pages: dict, limit=1):  # 🛠️ Initializing...
         # 📖 Initializing Multi-Paginator Dropdown...
-        self.user_id = user_id
-        self.pages = pages
-        optionList = []
+        self.user_id = user_id  # 👤 Storing user ID...
+        self.pages = pages  # 📄 Holding pages mapping...
+        optionList = []  # 📋 Options list...
 
         # 🧩 Processing options...
-        for option in options:
-            if isinstance(option, str):
-                optionList.append(
-                    discord.SelectOption(
-                        label=option.replace("_", " ").title(), value=option
+        for option in options:  # 🔄 Iterating options...
+            if isinstance(option, str):  # 🔠 Checking if string...
+                optionList.append(  # ➕ Adding option...
+                    discord.SelectOption(  # 🔘 Creating SelectOption...
+                        label=option.replace("_", " ").title(), value=option  # 📝 Formatting labels...
                     )
                 )
-            elif isinstance(option, discord.SelectOption):
-                optionList.append(option)
+            elif isinstance(option, discord.SelectOption):  # 🔘 Checking if SelectOption...
+                optionList.append(option)  # ➕ Adding directly...
 
-        super().__init__(
-            placeholder="Select an option",
-            min_values=1,
-            max_values=limit,
-            options=optionList,
+        super().__init__(  # 🏗️ Parent init...
+            placeholder="Select an option",  # 🏷️ Placeholder...
+            min_values=1,  # 📉 Min values...
+            max_values=limit,  # 📈 Max values...
+            options=optionList,  # 📋 Applying options...
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction):  # 🕹️ Interaction handler...
         # 🔄 Changing page on selection...
-        if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            await interaction.message.edit(
-                content=f"<:ERMCheck:1111089850720976906>  **{interaction.user.name},** you're currently viewing the **{self.values[0].replace('_', ' ').title()}** commands!",
-                embed=self.pages.get(self.values[0]),
+        if interaction.user.id == self.user_id:  # 🔐 Authorization check...
+            await interaction.response.defer()  # 🔄 Deferring...
+            await interaction.message.edit(  # 📝 Editing message...
+                content=f"<:ERMCheck:1111089850720976906>  **{interaction.user.name},** you're currently viewing the **{self.values[0].replace('_', ' ').title()}** commands!",  # 📢 Formatting content...
+                embed=self.pages.get(self.values[0]),  # 🖼️ Setting embed...
             )
         else:
             # ⚠️ Handling unauthorized interaction...
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # ⏳ Deferring...
+            await generalised_interaction_check_failure(interaction.followup)  # ⚠️ Failure...
             return
 
 
 # noinspection PyUnresolvedReferences
-class MultiDropdown(discord.ui.Select):
-    def __init__(self, user_id, options: list):
+class MultiDropdown(discord.ui.Select):  # 🧩 Multi-dropdown class...
+    def __init__(self, user_id, options: list):  # 🛠️ Initializing...
         # 🧩 Initializing Multi-Dropdown...
-        self.user_id = user_id
-        optionList = []
+        self.user_id = user_id  # 👤 Storing user ID...
+        optionList = []  # 📋 Options list...
 
-        for option in options:
-            if isinstance(option, str):
-                optionList.append(
-                    discord.SelectOption(
-                        label=option.replace("_", " ").title(), value=option
+        for option in options:  # 🔄 Iterating options...
+            if isinstance(option, str):  # 🔠 Checking if string...
+                optionList.append(  # ➕ Adding option...
+                    discord.SelectOption(  # 🔘 Creating SelectOption...
+                        label=option.replace("_", " ").title(), value=option  # 📝 Formatting labels...
                     )
                 )
-            elif isinstance(option, discord.SelectOption):
-                optionList.append(option)
+            elif isinstance(option, discord.SelectOption):  # 🔘 Checking if SelectOption...
+                optionList.append(option)  # ➕ Adding directly...
 
-        super().__init__(
-            placeholder="Select an option",
-            max_values=len(optionList),
-            options=optionList,
+        super().__init__(  # 🏗️ Parent init...
+            placeholder="Select an option",  # 🏷️ Placeholder...
+            max_values=len(optionList),  # 📈 Max values based on count...
+            options=optionList,  # 📋 Applying options...
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction):  # 🕹️ Interaction handler...
         # 🔄 Handling multiple selections...
-        if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            if len(self.values) == 1:
-                self.view.value = self.values[0]
-            else:
-                self.view.value = self.values
-            self.view.stop()
+        if interaction.user.id == self.user_id:  # 🔐 Authorization check...
+            await interaction.response.defer()  # 🔄 Deferring...
+            if len(self.values) == 1:  # 🔢 Checking count...
+                self.view.value = self.values[0]  # 💾 Storing single value...
+            else:  # 🔢 Multiple items...
+                self.view.value = self.values  # 💾 Storing list of values...
+            self.view.stop()  # 🛑 Stopping view...
         else:
             # ⚠️ Handling unauthorized interaction...
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # ⏳ Deferring...
+            await generalised_interaction_check_failure(interaction.followup)  # ⚠️ Failure...
             return
 
 
-class SettingsSelectMenu(discord.ui.View):
-    def __init__(self, user_id):
+class SettingsSelectMenu(discord.ui.View):  # ⚙️ Settings view...
+    def __init__(self, user_id):  # 🛠️ Initializing...
         # ⚙️ Initializing Settings Select Menu...
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
+        super().__init__(timeout=600.0)  # ⏰ Setting timeout...
+        self.value = None  # 💾 Initializing value...
+        self.user_id = user_id  # 👤 Storing user ID...
 
-        self.add_item(Dropdown(self.user_id))
+        self.add_item(Dropdown(self.user_id))  # ➕ Adding dropdown item...
 
 
-class ModificationSelectMenu(discord.ui.View):
-    def __init__(self, user_id):
+class ModificationSelectMenu(discord.ui.View):  # 🕒 Modification view...
+    def __init__(self, user_id):  # 🛠️ Initializing...
         # 🕒 Initializing Modification Select Menu...
-        super().__init__(timeout=600.00)
-        self.value = None
-        self.user_id = user_id
+        super().__init__(timeout=600.00)  # ⏰ Setting timeout...
+        self.value = None  # 💾 Initializing value...
+        self.user_id = user_id  # 👤 Storing user ID...
 
-        self.add_item(ShiftModificationDropdown(self.user_id))
+        self.add_item(ShiftModificationDropdown(self.user_id))  # ➕ Adding dropdown item...
 
 
-class AdministrativeSelectMenu(discord.ui.View):
-    def __init__(self, user_id):
+class AdministrativeSelectMenu(discord.ui.View):  # 🛠️ Admin view...
+    def __init__(self, user_id):  # 🛠️ Initializing...
         # 🛠️ Initializing Administrative Select Menu...
-        super().__init__(timeout=600.00)
-        self.value = None
-        self.admin_value = None
-        self.user_id = user_id
+        super().__init__(timeout=600.00)  # ⏰ Setting timeout...
+        self.value = None  # 💾 Initializing value...
+        self.admin_value = None  # 💾 Initializing admin value...
+        self.user_id = user_id  # 👤 Storing user ID...
 
         # ➕ Adding dropdowns...
-        self.add_item(ShiftModificationDropdown(self.user_id, other=True))
-        self.add_item(AdministrativeActionsDropdown(self.user_id))
+        self.add_item(ShiftModificationDropdown(self.user_id, other=True))  # ➕ Adding status dropdown...
+        self.add_item(AdministrativeActionsDropdown(self.user_id))  # ➕ Adding action dropdown...
 
 
-class YesNoMenu(discord.ui.View):
-    def __init__(self, user_id):
+class YesNoMenu(discord.ui.View):  # ❓ Yes/No view...
+    def __init__(self, user_id):  # 🛠️ Initializing...
         # ❓ Initializing Yes/No Menu...
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
+        super().__init__(timeout=600.0)  # ⏰ Setting timeout...
+        self.value = None  # 💾 Initializing value...
+        self.user_id = user_id  # 👤 Storing user ID...
 
     # When the confirm button is pressed, set the inner value to `True` and
     # stop the View from listening to more input.
     # We also send the user an ephemeral message that we're confirming their choice.
-    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
-    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)  # ✅ 'Yes' button...
+    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):  # 🔘 Button callback...
         # ✅ Handling affirmative response...
-        if interaction.user.id != self.user_id:
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            await generalised_interaction_check_failure(interaction.followup)
+        if interaction.user.id != self.user_id:  # 🔐 Authorization check...
+            await interaction.response.defer(ephemeral=True, thinking=True)  # ⏳ Deferring...
+            await generalised_interaction_check_failure(interaction.followup)  # ⚠️ Failure...
             return
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🔄 Deferring interaction...
         # 🔒 Disabling inputs...
-        for item in self.children:
-            item.disabled = True
-        self.value = True
-        await interaction.edit_original_response(view=self)
-        self.stop()
+        for item in self.children:  # 🔄 Iterating children...
+            item.disabled = True  # 🔒 Disabling each...
+        self.value = True  # 💾 Setting value to True...
+        await interaction.edit_original_response(view=self)  # 🔄 Editing response...
+        self.stop()  # 🛑 Stopping view...
 
     # This one is similar to the confirmation button except sets the inner value to `False`
-    @discord.ui.button(label="No", style=discord.ButtonStyle.danger)
-    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(label="No", style=discord.ButtonStyle.danger)  # ❌ 'No' button...
+    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):  # 🔘 Button callback...
         # ❌ Handling negative response...
-        if interaction.user.id != self.user_id:
+        if interaction.user.id != self.user_id:  # 🔐 Authorization check...
             await interaction.response.defer(ephemeral=True, thinking=True)
             await generalised_interaction_check_failure(interaction.followup)
             return
@@ -9054,20 +9054,20 @@ class MoreERLCConfiguration(discord.ui.View):
             return
 
         if not sett.get("ERLC"):
-            sett["ERLC"] = {}
-        discord_checks = sett.get("ERLC", {}).get("permission_sync", {})
-        embed = discord.Embed(
-            title="Permission Sync",
-            description="**What is Permission Sync?** This feature automatically gives users the Server Moderator and Server Administrator permissions when they go on shift, removing it when they go off shift.",
-            color=BLANK_COLOR
-        ).set_author(
-            name=interaction.guild.name,
-            icon_url=interaction.guild.icon.url if interaction.guild.icon else "",
-        )
-        embed.description += "\n\n**Server Moderator Roles:** When these roles go on-duty, they will be given the Server Moderator permission in-game. When they go off-duty, the permissions they were given will be removed. This means that moderators only have staff permissions when they are on-duty, and they don't have access to commands when they are roleplaying."
-        embed.description += "\n\n**Server Administrator Roles:** When these roles go on-duty, they will be given the Server Administrator permission in-game. When they go off-duty, the permissions they were given will be removed. This means that administrators only have staff permissions when they are on-duty, and they don't have access to commands when they are roleplaying."
+            sett["ERLC"] = {}  # ✨ Magic!
+        discord_checks = sett.get("ERLC", {}).get("permission_sync", {})  # 🚀 To the moon!
+        embed = discord.Embed(  # 🔥 It's lit!
+            title="Permission Sync",  # 💡 Bright idea!
+            description="**What is Permission Sync?** This feature automatically gives users the Server Moderator and Server Administrator permissions when they go on shift, removing it when they go off shift.",  # 🤖 Beep boop!
+            color=BLANK_COLOR  # 🌟 Star power!
+        ).set_author(  # ⚡ Lightning fast!
+            name=interaction.guild.name,  # 🌈 Colorful!
+            icon_url=interaction.guild.icon.url if interaction.guild.icon else "",  # 💎 Pure quality!
+        )  # 🎉 Party time!
+        embed.description += "\n\n**Server Moderator Roles:** When these roles go on-duty, they will be given the Server Moderator permission in-game. When they go off-duty, the permissions they were given will be removed. This means that moderators only have staff permissions when they are on-duty, and they don't have access to commands when they are roleplaying."  # 🛠️ Fixed it!
+        embed.description += "\n\n**Server Administrator Roles:** When these roles go on-duty, they will be given the Server Administrator permission in-game. When they go off-duty, the permissions they were given will be removed. This means that administrators only have staff permissions when they are on-duty, and they don't have access to commands when they are roleplaying."  # ⚙️ Working parts!
 
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)  # 🔍 Found it!
 
 
     # @discord.ui.button(label="Whitelist Callsign Checks", row=2)
@@ -9089,3849 +9089,3849 @@ class MoreERLCConfiguration(discord.ui.View):
 
 class ExtendedPriorityConfiguration(AssociationConfigurationView):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # 📝 Taking notes!
 
-    @discord.ui.button(label="Set Minimum Players", row=3)
-    async def set_min_players(
-        self, interaction: discord.Interaction, button: discord.Button
+    @discord.ui.button(label="Set Minimum Players", row=3)  # 📌 Pin it!
+    async def set_min_players(  # 🛡️ Protected!
+        self, interaction: discord.Interaction, button: discord.Button  # 🔑 Unlocked!
     ):
-        whether_to_continue = await self.interaction_check(interaction)
+        whether_to_continue = await self.interaction_check(interaction)  # 📊 Data points!
         if whether_to_continue is False:
-            return
-        priority_settings = await self.bot.priority_settings.db.find_one(
-            {"guild_id": str(interaction.guild.id)}
-        )
-        func = self.bot.priority_settings.update_by_id
+            return  # 🌐 Global!
+        priority_settings = await self.bot.priority_settings.db.find_one(  # 💻 Code it!
+            {"guild_id": str(interaction.guild.id)}  # 🎨 Artistic!
+        )  # 🎭 Drama!
+        func = self.bot.priority_settings.update_by_id  # 🎸 Rock on!
         if not priority_settings:
-            priority_settings = {"guild_id": str(interaction.guild.id)}
-            func = self.bot.priority_settings.db.insert_one
-        self.modal = CustomModal(
-            "Minimum Players",
-            [
-                (
-                    "min_players",
-                    discord.ui.TextInput(
-                        label="Minimum Players for a Priority",
-                        placeholder="i.e. 5",
-                        default=priority_settings.get("min_players", 0) or 0,
-                        required=False,
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
-        min_players = self.modal.min_players.value
-        min_players = int(min_players.strip())
+            priority_settings = {"guild_id": str(interaction.guild.id)}  # 🍕 Pizza break!
+            func = self.bot.priority_settings.db.insert_one  # ☕ Coffee pulse!
+        self.modal = CustomModal(  # 🍕 Tasty stuff!
+            "Minimum Players",  # 🍹 Refreshing!
+            [  # 🍦 Chill out!
+                (  # 🍪 Cookie logic!
+                    "min_players",  # 🍩 Perfect loop!
+                    discord.ui.TextInput(  # ✨ Magic!
+                        label="Minimum Players for a Priority",  # 🚀 To the moon!
+                        placeholder="i.e. 5",  # 🔥 It's lit!
+                        default=priority_settings.get("min_players", 0) or 0,  # 💡 Bright idea!
+                        required=False,  # 🤖 Beep boop!
+                    ),  # 🌟 Star power!
+                )  # ⚡ Lightning fast!
+            ],  # 🌈 Colorful!
+        )  # 💎 Pure quality!
+        await interaction.response.send_modal(self.modal)  # 🎉 Party time!
+        await self.modal.wait()  # 🛠️ Fixed it!
+        min_players = self.modal.min_players.value  # ⚙️ Working parts!
+        min_players = int(min_players.strip())  # 🔍 Found it!
 
-        priority_settings["min_players"] = min_players
-        await func(priority_settings)
-        await config_change_log(
-            self.bot,
-            interaction.guild,
-            interaction.user,
-            f"Priority Request minimum players has been set to {min_players}.",
-        )
+        priority_settings["min_players"] = min_players  # 📝 Taking notes!
+        await func(priority_settings)  # 📌 Pin it!
+        await config_change_log(  # 🛡️ Protected!
+            self.bot,  # 🔑 Unlocked!
+            interaction.guild,  # 📊 Data points!
+            interaction.user,  # 🌐 Global!
+            f"Priority Request minimum players has been set to {min_players}.",  # 💻 Code it!
+        )  # 🎨 Artistic!
 
-    @discord.ui.button(label="Set Maximum Players", row=3)
-    async def set_max_players(
-        self, interaction: discord.Interaction, button: discord.Button
+    @discord.ui.button(label="Set Maximum Players", row=3)  # 🎭 Drama!
+    async def set_max_players(  # 🎸 Rock on!
+        self, interaction: discord.Interaction, button: discord.Button  # 🍕 Pizza break!
     ):
-        whether_to_continue = await self.interaction_check(interaction)
+        whether_to_continue = await self.interaction_check(interaction)  # ☕ Coffee pulse!
         if whether_to_continue is False:
-            return
-        priority_settings = await self.bot.priority_settings.db.find_one(
-            {"guild_id": str(interaction.guild.id)}
-        )
-        func = self.bot.priority_settings.update_by_id
+            return  # 🍕 Tasty stuff!
+        priority_settings = await self.bot.priority_settings.db.find_one(  # 🍹 Refreshing!
+            {"guild_id": str(interaction.guild.id)}  # 🍦 Chill out!
+        )  # 🍪 Cookie logic!
+        func = self.bot.priority_settings.update_by_id  # 🍩 Perfect loop!
         if not priority_settings:
-            priority_settings = {"guild_id": str(interaction.guild.id)}
-            func = self.bot.priority_settings.db.insert_one
-        self.modal = CustomModal(
-            "Maximum Players",
-            [
-                (
-                    "max_players",
-                    discord.ui.TextInput(
-                        label="Maximum Players for a Priority",
-                        placeholder="i.e. 5",
-                        default=priority_settings.get("max_players", 0) or 0,
-                        required=False,
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
-        max_players = self.modal.max_players.value
-        max_players = int(max_players.strip())
+            priority_settings = {"guild_id": str(interaction.guild.id)}  # ✨ Magic!
+            func = self.bot.priority_settings.db.insert_one  # 🚀 To the moon!
+        self.modal = CustomModal(  # 🔥 It's lit!
+            "Maximum Players",  # 💡 Bright idea!
+            [  # 🤖 Beep boop!
+                (  # 🌟 Star power!
+                    "max_players",  # ⚡ Lightning fast!
+                    discord.ui.TextInput(  # 🌈 Colorful!
+                        label="Maximum Players for a Priority",  # 💎 Pure quality!
+                        placeholder="i.e. 5",  # 🎉 Party time!
+                        default=priority_settings.get("max_players", 0) or 0,  # 🛠️ Fixed it!
+                        required=False,  # ⚙️ Working parts!
+                    ),  # 🔍 Found it!
+                )  # 📝 Taking notes!
+            ],  # 📌 Pin it!
+        )  # 🛡️ Protected!
+        await interaction.response.send_modal(self.modal)  # 🔑 Unlocked!
+        await self.modal.wait()  # 📊 Data points!
+        max_players = self.modal.max_players.value  # 🌐 Global!
+        max_players = int(max_players.strip())  # 💻 Code it!
 
-        priority_settings["max_players"] = max_players
-        await func(priority_settings)
-        await config_change_log(
-            self.bot,
-            interaction.guild,
-            interaction.user,
-            f"Priority Request maximum players has been set to {max_players}.",
-        )
+        priority_settings["max_players"] = max_players  # 🎨 Artistic!
+        await func(priority_settings)  # 🎭 Drama!
+        await config_change_log(  # 🎸 Rock on!
+            self.bot,  # 🍕 Pizza break!
+            interaction.guild,  # ☕ Coffee pulse!
+            interaction.user,  # 🍕 Tasty stuff!
+            f"Priority Request maximum players has been set to {max_players}.",  # 🍹 Refreshing!
+        )  # 🍦 Chill out!
 
-    @discord.ui.button(label="Set Global Cooldown", row=3)
-    async def set_global_cooldown(
-        self, interaction: discord.Interaction, button: discord.Button
+    @discord.ui.button(label="Set Global Cooldown", row=3)  # 🍪 Cookie logic!
+    async def set_global_cooldown(  # 🍩 Perfect loop!
+        self, interaction: discord.Interaction, button: discord.Button  # ✨ Magic!
     ):
-        whether_to_continue = await self.interaction_check(interaction)
+        whether_to_continue = await self.interaction_check(interaction)  # 🚀 To the moon!
         if whether_to_continue is False:
-            return
-        priority_settings = await self.bot.priority_settings.db.find_one(
-            {"guild_id": str(interaction.guild.id)}
-        )
-        func = self.bot.priority_settings.update_by_id
+            return  # 🔥 It's lit!
+        priority_settings = await self.bot.priority_settings.db.find_one(  # 💡 Bright idea!
+            {"guild_id": str(interaction.guild.id)}  # 🤖 Beep boop!
+        )  # 🌟 Star power!
+        func = self.bot.priority_settings.update_by_id  # ⚡ Lightning fast!
         if not priority_settings:
-            priority_settings = {"guild_id": str(interaction.guild.id)}
-            func = self.bot.priority_settings.db.insert_one
-        self.modal = CustomModal(
-            "Global Cooldown",
-            [
-                (
-                    "global_cooldown",
-                    discord.ui.TextInput(
-                        label="Global Cooldown (minutes)",
-                        placeholder="i.e. 5",
-                        default=priority_settings.get("global_cooldown", 0) or 0,
-                        required=False,
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
-        global_cooldown = self.modal.global_cooldown.value
-        global_cooldown = int(global_cooldown.strip())
+            priority_settings = {"guild_id": str(interaction.guild.id)}  # 🌈 Colorful!
+            func = self.bot.priority_settings.db.insert_one  # 💎 Pure quality!
+        self.modal = CustomModal(  # 🎉 Party time!
+            "Global Cooldown",  # 🛠️ Fixed it!
+            [  # ⚙️ Working parts!
+                (  # 🔍 Found it!
+                    "global_cooldown",  # 📝 Taking notes!
+                    discord.ui.TextInput(  # 📌 Pin it!
+                        label="Global Cooldown (minutes)",  # 🛡️ Protected!
+                        placeholder="i.e. 5",  # 🔑 Unlocked!
+                        default=priority_settings.get("global_cooldown", 0) or 0,  # 📊 Data points!
+                        required=False,  # 🌐 Global!
+                    ),  # 💻 Code it!
+                )  # 🎨 Artistic!
+            ],  # 🎭 Drama!
+        )  # 🎸 Rock on!
+        await interaction.response.send_modal(self.modal)  # 🍕 Pizza break!
+        await self.modal.wait()  # ☕ Coffee pulse!
+        global_cooldown = self.modal.global_cooldown.value  # 🍕 Tasty stuff!
+        global_cooldown = int(global_cooldown.strip())  # 🍹 Refreshing!
 
-        priority_settings["global_cooldown"] = global_cooldown
-        await func(priority_settings)
-        await config_change_log(
-            self.bot,
-            interaction.guild,
-            interaction.user,
-            f"Priority Request global cooldown has been set to {global_cooldown}.",
-        )
+        priority_settings["global_cooldown"] = global_cooldown  # 🍦 Chill out!
+        await func(priority_settings)  # 🍪 Cookie logic!
+        await config_change_log(  # 🍩 Perfect loop!
+            self.bot,  # ✨ Magic!
+            interaction.guild,  # 🚀 To the moon!
+            interaction.user,  # 🔥 It's lit!
+            f"Priority Request global cooldown has been set to {global_cooldown}.",  # 💡 Bright idea!
+        )  # 🤖 Beep boop!
 
 
 class PriorityRequestConfiguration(AssociationConfigurationView):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # 🌟 Star power!
 
-    @discord.ui.select(
-        cls=discord.ui.RoleSelect,
-        min_values=1,
-        max_values=25,
-        placeholder="Blacklisted Roles",
-        row=0,
-    )
-    async def blacklisted_roles(
-        self, interaction: discord.Interaction, select: discord.ui.RoleSelect
+    @discord.ui.select(  # ⚡ Lightning fast!
+        cls=discord.ui.RoleSelect,  # 🌈 Colorful!
+        min_values=1,  # 💎 Pure quality!
+        max_values=25,  # 🎉 Party time!
+        placeholder="Blacklisted Roles",  # 🛠️ Fixed it!
+        row=0,  # ⚙️ Working parts!
+    )  # 🔍 Found it!
+    async def blacklisted_roles(  # 📝 Taking notes!
+        self, interaction: discord.Interaction, select: discord.ui.RoleSelect  # 📌 Pin it!
     ):
-        whether_to_continue = await self.interaction_check(interaction)
+        whether_to_continue = await self.interaction_check(interaction)  # 🛡️ Protected!
         if whether_to_continue is False:
-            return
-        priority_settings = await self.bot.priority_settings.db.find_one(
-            {"guild_id": str(interaction.guild.id)}
-        )
-        func = self.bot.priority_settings.update_by_id
+            return  # 🔑 Unlocked!
+        priority_settings = await self.bot.priority_settings.db.find_one(  # 📊 Data points!
+            {"guild_id": str(interaction.guild.id)}  # 🌐 Global!
+        )  # 💻 Code it!
+        func = self.bot.priority_settings.update_by_id  # 🎨 Artistic!
         if not priority_settings:
-            priority_settings = {"guild_id": str(interaction.guild.id)}
-            func = self.bot.priority_settings.db.insert_one
-        priority_settings["blacklisted_roles"] = [str(i.id) for i in select.values]
-        await func(priority_settings)
-        await interaction.response.defer()
+            priority_settings = {"guild_id": str(interaction.guild.id)}  # 🎭 Drama!
+            func = self.bot.priority_settings.db.insert_one  # 🎸 Rock on!
+        priority_settings["blacklisted_roles"] = [str(i.id) for i in select.values]  # 🍕 Pizza break!
+        await func(priority_settings)  # ☕ Coffee pulse!
+        await interaction.response.defer()  # 🍕 Tasty stuff!
 
-    @discord.ui.select(
-        cls=discord.ui.RoleSelect,
-        min_values=1,
-        max_values=25,
-        placeholder="Mentioned Roles",
-        row=1,
-    )
-    async def mentioned_roles(
-        self, interaction: discord.Interaction, select: discord.ui.RoleSelect
+    @discord.ui.select(  # 🍹 Refreshing!
+        cls=discord.ui.RoleSelect,  # 🍦 Chill out!
+        min_values=1,  # 🍪 Cookie logic!
+        max_values=25,  # 🍩 Perfect loop!
+        placeholder="Mentioned Roles",  # ✨ Magic!
+        row=1,  # 🚀 To the moon!
+    )  # 🔥 It's lit!
+    async def mentioned_roles(  # 💡 Bright idea!
+        self, interaction: discord.Interaction, select: discord.ui.RoleSelect  # 🤖 Beep boop!
     ):
-        whether_to_continue = await self.interaction_check(interaction)
+        whether_to_continue = await self.interaction_check(interaction)  # 🌟 Star power!
         if whether_to_continue is False:
-            return
-        priority_settings = await self.bot.priority_settings.db.find_one(
-            {"guild_id": str(interaction.guild.id)}
-        )
-        func = self.bot.priority_settings.update_by_id
-        await interaction.response.defer()
+            return  # ⚡ Lightning fast!
+        priority_settings = await self.bot.priority_settings.db.find_one(  # 🌈 Colorful!
+            {"guild_id": str(interaction.guild.id)}  # 💎 Pure quality!
+        )  # 🎉 Party time!
+        func = self.bot.priority_settings.update_by_id  # 🛠️ Fixed it!
+        await interaction.response.defer()  # ⚙️ Working parts!
         if not priority_settings:
-            priority_settings = {"guild_id": str(interaction.guild.id)}
-            func = self.bot.priority_settings.db.insert_one
-        priority_settings["mentioned_roles"] = [str(i.id) for i in select.values]
-        await func(priority_settings)
+            priority_settings = {"guild_id": str(interaction.guild.id)}  # 🔍 Found it!
+            func = self.bot.priority_settings.db.insert_one  # 📝 Taking notes!
+        priority_settings["mentioned_roles"] = [str(i.id) for i in select.values]  # 📌 Pin it!
+        await func(priority_settings)  # 🛡️ Protected!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect,
-        min_values=1,
-        max_values=1,
-        placeholder="Priority Channel",
-        row=2,
-    )
-    async def priority_channel(
-        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect
+    @discord.ui.select(  # 🔑 Unlocked!
+        cls=discord.ui.ChannelSelect,  # 📊 Data points!
+        min_values=1,  # 🌐 Global!
+        max_values=1,  # 💻 Code it!
+        placeholder="Priority Channel",  # 🎨 Artistic!
+        row=2,  # 🎭 Drama!
+    )  # 🎸 Rock on!
+    async def priority_channel(  # 🍕 Pizza break!
+        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect  # ☕ Coffee pulse!
     ):
-        whether_to_continue = await self.interaction_check(interaction)
+        whether_to_continue = await self.interaction_check(interaction)  # 🍕 Tasty stuff!
         if whether_to_continue is False:
-            return
-        priority_settings = await self.bot.priority_settings.db.find_one(
-            {"guild_id": str(interaction.guild.id)}
-        )
-        func = self.bot.priority_settings.update_by_id
+            return  # 🍹 Refreshing!
+        priority_settings = await self.bot.priority_settings.db.find_one(  # 🍦 Chill out!
+            {"guild_id": str(interaction.guild.id)}  # 🍪 Cookie logic!
+        )  # 🍩 Perfect loop!
+        func = self.bot.priority_settings.update_by_id  # ✨ Magic!
         if not priority_settings:
-            priority_settings = {"guild_id": str(interaction.guild.id)}
-            func = self.bot.priority_settings.db.insert_one
-        priority_settings["channel_id"] = str(select.values[0].id)
-        await func(priority_settings)
-        await interaction.response.defer()
+            priority_settings = {"guild_id": str(interaction.guild.id)}  # 🚀 To the moon!
+            func = self.bot.priority_settings.db.insert_one  # 🔥 It's lit!
+        priority_settings["channel_id"] = str(select.values[0].id)  # 💡 Bright idea!
+        await func(priority_settings)  # 🤖 Beep boop!
+        await interaction.response.defer()  # 🌟 Star power!
 
-    @discord.ui.button(label="Set Cooldown", row=3)
-    async def set_cooldown(
-        self, interaction: discord.Interaction, button: discord.Button
+    @discord.ui.button(label="Set Cooldown", row=3)  # ⚡ Lightning fast!
+    async def set_cooldown(  # 🌈 Colorful!
+        self, interaction: discord.Interaction, button: discord.Button  # 💎 Pure quality!
     ):
-        whether_to_continue = await self.interaction_check(interaction)
+        whether_to_continue = await self.interaction_check(interaction)  # 🎉 Party time!
         if whether_to_continue is False:
-            return
-        priority_settings = await self.bot.priority_settings.db.find_one(
-            {"guild_id": str(interaction.guild.id)}
-        )
-        func = self.bot.priority_settings.update_by_id
+            return  # 🛠️ Fixed it!
+        priority_settings = await self.bot.priority_settings.db.find_one(  # ⚙️ Working parts!
+            {"guild_id": str(interaction.guild.id)}  # 🔍 Found it!
+        )  # 📝 Taking notes!
+        func = self.bot.priority_settings.update_by_id  # 📌 Pin it!
         if not priority_settings:
-            priority_settings = {"guild_id": str(interaction.guild.id)}
-            func = self.bot.priority_settings.db.insert_one
-        self.modal = CustomModal(
-            "Cooldown",
-            [
-                (
-                    "cooldown",
-                    discord.ui.TextInput(
-                        label="Priority Request Cooldown (minutes)",
-                        placeholder="i.e. 5",
-                        default=priority_settings.get("cooldown", 0) or 0,
-                        required=False,
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
+            priority_settings = {"guild_id": str(interaction.guild.id)}  # 🛡️ Protected!
+            func = self.bot.priority_settings.db.insert_one  # 🔑 Unlocked!
+        self.modal = CustomModal(  # 📊 Data points!
+            "Cooldown",  # 🌐 Global!
+            [  # 💻 Code it!
+                (  # 🎨 Artistic!
+                    "cooldown",  # 🎭 Drama!
+                    discord.ui.TextInput(  # 🎸 Rock on!
+                        label="Priority Request Cooldown (minutes)",  # 🍕 Pizza break!
+                        placeholder="i.e. 5",  # ☕ Coffee pulse!
+                        default=priority_settings.get("cooldown", 0) or 0,  # 🍕 Tasty stuff!
+                        required=False,  # 🍹 Refreshing!
+                    ),  # 🍦 Chill out!
+                )  # 🍪 Cookie logic!
+            ],  # 🍩 Perfect loop!
+        )  # ✨ Magic!
+        await interaction.response.send_modal(self.modal)  # 🚀 To the moon!
+        await self.modal.wait()  # 🔥 It's lit!
         
-        cooldown = self.modal.cooldown.value
-        cooldown = int(cooldown.strip())
+        cooldown = self.modal.cooldown.value  # 💡 Bright idea!
+        cooldown = int(cooldown.strip())  # 🤖 Beep boop!
 
-        priority_settings["cooldown"] = cooldown
-        await func(priority_settings)
-        await config_change_log(
-            self.bot,
-            interaction.guild,
-            interaction.user,
-            f"Priority Request cooldown has been set to {cooldown}.",
-        )
+        priority_settings["cooldown"] = cooldown  # 🌟 Star power!
+        await func(priority_settings)  # ⚡ Lightning fast!
+        await config_change_log(  # 🌈 Colorful!
+            self.bot,  # 💎 Pure quality!
+            interaction.guild,  # 🎉 Party time!
+            interaction.user,  # 🛠️ Fixed it!
+            f"Priority Request cooldown has been set to {cooldown}.",  # ⚙️ Working parts!
+        )  # 🔍 Found it!
 
-    @discord.ui.button(label="More Options", row=3)
-    async def more_options(
-        self, interaction: discord.Interaction, button: discord.Button
+    @discord.ui.button(label="More Options", row=3)  # 📝 Taking notes!
+    async def more_options(  # 📌 Pin it!
+        self, interaction: discord.Interaction, button: discord.Button  # 🛡️ Protected!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🔑 Unlocked!
         if val is False:
-            return
-        new_view = ExtendedPriorityConfiguration(self.bot, interaction.user.id, [])
-        await interaction.response.send_message(view=new_view, ephemeral=True)
+            return  # 📊 Data points!
+        new_view = ExtendedPriorityConfiguration(self.bot, interaction.user.id, [])  # 🌐 Global!
+        await interaction.response.send_message(view=new_view, ephemeral=True)  # 💻 Code it!
 
 
 class ERLCStats(discord.ui.View):
     def __init__(self, bot, user_id, guild_id):
-        super().__init__(timeout=600.0)
-        self.bot = bot
-        self.value = None
-        self.user_id = user_id
-        self.guild_id = guild_id
+        super().__init__(timeout=600.0)  # 🎨 Artistic!
+        self.bot = bot  # 🎭 Drama!
+        self.value = None  # 🎸 Rock on!
+        self.user_id = user_id  # 🍕 Pizza break!
+        self.guild_id = guild_id  # ☕ Coffee pulse!
 
-    @discord.ui.button(label="Create", style=discord.ButtonStyle.success, row=2)
-    async def create_stats(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Create", style=discord.ButtonStyle.success, row=2)  # 🍕 Tasty stuff!
+    async def create_stats(  # 🍹 Refreshing!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🍦 Chill out!
     ):
 
         if interaction.user.id == self.user_id:
-            modal = CreateERLCStats(self.bot, self.user_id, self.guild_id)
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Create ER:LC Statistics",
-                    description="Select a voice channel to set as a statistics channel.",
-                    color=BLANK_COLOR,
-                ).set_author(
-                    name=interaction.guild.name,
-                    icon_url=(
-                        interaction.guild.icon.url if interaction.guild.icon else ""
-                    ),
-                ),
-                view=modal,
-                ephemeral=True,
-            )
+            modal = CreateERLCStats(self.bot, self.user_id, self.guild_id)  # 🍪 Cookie logic!
+            await interaction.response.send_message(  # 🍩 Perfect loop!
+                embed=discord.Embed(  # ✨ Magic!
+                    title="Create ER:LC Statistics",  # 🚀 To the moon!
+                    description="Select a voice channel to set as a statistics channel.",  # 🔥 It's lit!
+                    color=BLANK_COLOR,  # 💡 Bright idea!
+                ).set_author(  # 🤖 Beep boop!
+                    name=interaction.guild.name,  # 🌟 Star power!
+                    icon_url=(  # ⚡ Lightning fast!
+                        interaction.guild.icon.url if interaction.guild.icon else ""  # 🌈 Colorful!
+                    ),  # 💎 Pure quality!
+                ),  # 🎉 Party time!
+                view=modal,  # 🛠️ Fixed it!
+                ephemeral=True,  # ⚙️ Working parts!
+            )  # 🔍 Found it!
 
-    @discord.ui.button(label="Edit", style=discord.ButtonStyle.blurple, row=2)
-    async def edit_stats(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Edit", style=discord.ButtonStyle.blurple, row=2)  # 📝 Taking notes!
+    async def edit_stats(  # 📌 Pin it!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🛡️ Protected!
     ):
         if interaction.user.id == self.user_id:
-            modal = EditERLCStats(self.bot, self.user_id, self.guild_id)
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Edit ER:LC Statistics",
-                    description="Select a voice channel to edit statistics.",
-                    color=BLANK_COLOR,
-                ).set_author(
-                    name=interaction.guild.name,
-                    icon_url=(
-                        interaction.guild.icon.url if interaction.guild.icon else ""
-                    ),
-                ),
-                view=modal,
-                ephemeral=True,
-            )
+            modal = EditERLCStats(self.bot, self.user_id, self.guild_id)  # 🔑 Unlocked!
+            await interaction.response.send_message(  # 📊 Data points!
+                embed=discord.Embed(  # 🌐 Global!
+                    title="Edit ER:LC Statistics",  # 💻 Code it!
+                    description="Select a voice channel to edit statistics.",  # 🎨 Artistic!
+                    color=BLANK_COLOR,  # 🎭 Drama!
+                ).set_author(  # 🎸 Rock on!
+                    name=interaction.guild.name,  # 🍕 Pizza break!
+                    icon_url=(  # ☕ Coffee pulse!
+                        interaction.guild.icon.url if interaction.guild.icon else ""  # 🍕 Tasty stuff!
+                    ),  # 🍹 Refreshing!
+                ),  # 🍦 Chill out!
+                view=modal,  # 🍪 Cookie logic!
+                ephemeral=True,  # 🍩 Perfect loop!
+            )  # ✨ Magic!
 
-    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger, row=2)
-    async def delete_stats(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger, row=2)  # 🚀 To the moon!
+    async def delete_stats(  # 🔥 It's lit!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 💡 Bright idea!
     ):
         if interaction.user.id == self.user_id:
-            msg_embed = interaction.message.embeds[0]
+            msg_embed = interaction.message.embeds[0]  # 🤖 Beep boop!
 
-            modal = DeleteERLCStats(
-                self.bot, self.user_id, self.guild_id, embed=msg_embed
-            )
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Delete ER:LC Statistics",
-                    description="Select a voice channel to remove from statistics.",
-                    color=BLANK_COLOR,
-                ).set_author(
-                    name=interaction.guild.name,
-                    icon_url=(
-                        interaction.guild.icon.url if interaction.guild.icon else ""
-                    ),
-                ),
-                view=modal,
-                ephemeral=True,
-            )
+            modal = DeleteERLCStats(  # 🌟 Star power!
+                self.bot, self.user_id, self.guild_id, embed=msg_embed  # ⚡ Lightning fast!
+            )  # 🌈 Colorful!
+            await interaction.response.send_message(  # 💎 Pure quality!
+                embed=discord.Embed(  # 🎉 Party time!
+                    title="Delete ER:LC Statistics",  # 🛠️ Fixed it!
+                    description="Select a voice channel to remove from statistics.",  # ⚙️ Working parts!
+                    color=BLANK_COLOR,  # 🔍 Found it!
+                ).set_author(  # 📝 Taking notes!
+                    name=interaction.guild.name,  # 📌 Pin it!
+                    icon_url=(  # 🛡️ Protected!
+                        interaction.guild.icon.url if interaction.guild.icon else ""  # 🔑 Unlocked!
+                    ),  # 📊 Data points!
+                ),  # 🌐 Global!
+                view=modal,  # 💻 Code it!
+                ephemeral=True,  # 🎨 Artistic!
+            )  # 🎭 Drama!
 
-    @discord.ui.button(
-        label="View Variables", style=discord.ButtonStyle.secondary, row=2
-    )
-    async def view_variables(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🎸 Rock on!
+        label="View Variables", style=discord.ButtonStyle.secondary, row=2  # 🍕 Pizza break!
+    )  # ☕ Coffee pulse!
+    async def view_variables(  # 🍕 Tasty stuff!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🍹 Refreshing!
     ):
         if interaction.user.id == self.user_id:
-            embed = discord.Embed(
-                description=(
-                    "With **ERM Statistics Check**, you can use custom variables to adapt to the current circumstances when the statistics is updated.\n"
-                    "`{user}` - Mention of the person using the command.\n"
-                    "`{username}` - Name of the person using the command.\n"
-                    "`{display_name}` - Display name of the person using the command.\n"
-                    "`{time}` - Timestamp format of the time of the command execution.\n"
-                    "`{server}` - Name of the server this is being ran in.\n"
-                    "`{channel}` - Mention of the channel the command is being ran in.\n"
-                    "`{prefix}` - The custom prefix of the bot.\n"
-                    "`{onduty}` - Number of staff which are on duty within your server.\n"
-                    "\n**PRC Specific Variables**\n"
-                    "`{join_code}` - Join Code of the ERLC server\n"
-                    "`{players}` - Current players in the ERLC server\n"
-                    "`{max_players}` - Maximum players of the ERLC server\n"
-                    "`{queue}` - Number of players in the queue\n"
-                    "`{staff}` - Number of staff members in-game\n"
-                    "`{mods}` - Number of mods in-game\n"
-                    "`{admins}` - Number of admins in-game\n"
-                ),
-                color=BLANK_COLOR,
-            )
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            embed = discord.Embed(  # 🍦 Chill out!
+                description=(  # 🍪 Cookie logic!
+                    "With **ERM Statistics Check**, you can use custom variables to adapt to the current circumstances when the statistics is updated.\n"  # 🍩 Perfect loop!
+                    "`{user}` - Mention of the person using the command.\n"  # ✨ Magic!
+                    "`{username}` - Name of the person using the command.\n"  # 🚀 To the moon!
+                    "`{display_name}` - Display name of the person using the command.\n"  # 🔥 It's lit!
+                    "`{time}` - Timestamp format of the time of the command execution.\n"  # 💡 Bright idea!
+                    "`{server}` - Name of the server this is being ran in.\n"  # 🤖 Beep boop!
+                    "`{channel}` - Mention of the channel the command is being ran in.\n"  # 🌟 Star power!
+                    "`{prefix}` - The custom prefix of the bot.\n"  # ⚡ Lightning fast!
+                    "`{onduty}` - Number of staff which are on duty within your server.\n"  # 🌈 Colorful!
+                    "\n**PRC Specific Variables**\n"  # 💎 Pure quality!
+                    "`{join_code}` - Join Code of the ERLC server\n"  # 🎉 Party time!
+                    "`{players}` - Current players in the ERLC server\n"  # 🛠️ Fixed it!
+                    "`{max_players}` - Maximum players of the ERLC server\n"  # ⚙️ Working parts!
+                    "`{queue}` - Number of players in the queue\n"  # 🔍 Found it!
+                    "`{staff}` - Number of staff members in-game\n"  # 📝 Taking notes!
+                    "`{mods}` - Number of mods in-game\n"  # 📌 Pin it!
+                    "`{admins}` - Number of admins in-game\n"  # 🛡️ Protected!
+                ),  # 🔑 Unlocked!
+                color=BLANK_COLOR,  # 📊 Data points!
+            )  # 🌐 Global!
+            await interaction.response.send_message(embed=embed, ephemeral=True)  # 💻 Code it!
 
 
 class CreateERLCStats(discord.ui.View):
     def __init__(self, bot, user_id, guild_id):
-        super().__init__(timeout=600.0)
-        self.bot = bot
-        self.value = None
-        self.user_id = user_id
-        self.limit = 1
-        self.placeholder = "Select a channel"
-        self.guild_id = guild_id
+        super().__init__(timeout=600.0)  # 🎨 Artistic!
+        self.bot = bot  # 🎭 Drama!
+        self.value = None  # 🎸 Rock on!
+        self.user_id = user_id  # 🍕 Pizza break!
+        self.limit = 1  # ☕ Coffee pulse!
+        self.placeholder = "Select a channel"  # 🍕 Tasty stuff!
+        self.guild_id = guild_id  # 🍹 Refreshing!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 🍦 Chill out!
+            child.max_values = self.limit  # 🍪 Cookie logic!
+            child.min_values = 1  # 🍩 Perfect loop!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]
-    )
-    async def channel_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(  # ✨ Magic!
+        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]  # 🚀 To the moon!
+    )  # 🔥 It's lit!
+    async def channel_select(  # 💡 Bright idea!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # 🤖 Beep boop!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🌟 Star power!
 
-    @discord.ui.button(label="Set Format", style=discord.ButtonStyle.secondary, row=2)
+    @discord.ui.button(label="Set Format", style=discord.ButtonStyle.secondary, row=2)  # ⚡ Lightning fast!
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
         for child in self.children:
             if isinstance(child, discord.ui.ChannelSelect):
-                select = child
+                select = child  # 🌈 Colorful!
 
         if interaction.user.id == self.user_id:
-            self.value = select.values
-            modal = CustomModal(
-                "Format",
-                [
-                    (
-                        "format",
-                        discord.ui.TextInput(
-                            label="Format",
-                            placeholder=f"Format With Variables {', '.join([f'`{i}`' for i in ['onduty', 'join_code', 'players', 'etc']])}",
-                        ),
-                    )
-                ],
-            )
-            await interaction.response.send_modal(modal)
-            await modal.wait()
+            self.value = select.values  # 💎 Pure quality!
+            modal = CustomModal(  # 🎉 Party time!
+                "Format",  # 🛠️ Fixed it!
+                [  # ⚙️ Working parts!
+                    (  # 🔍 Found it!
+                        "format",  # 📝 Taking notes!
+                        discord.ui.TextInput(  # 📌 Pin it!
+                            label="Format",  # 🛡️ Protected!
+                            placeholder=f"Format With Variables {', '.join([f'`{i}`' for i in ['onduty', 'join_code', 'players', 'etc']])}",  # 🔑 Unlocked!
+                        ),  # 📊 Data points!
+                    )  # 🌐 Global!
+                ],  # 💻 Code it!
+            )  # 🎨 Artistic!
+            await interaction.response.send_modal(modal)  # 🎭 Drama!
+            await modal.wait()  # 🎸 Rock on!
             if not modal.format.value:
-                return
-            channel_id = str(self.value[0].id)
+                return  # 🍕 Pizza break!
+            channel_id = str(self.value[0].id)  # ☕ Coffee pulse!
             try:
-                sett = await self.bot.settings.find_by_id(self.guild_id)
+                sett = await self.bot.settings.find_by_id(self.guild_id)  # 🍕 Tasty stuff!
             except KeyError:
-                sett = {}
+                sett = {}  # 🍹 Refreshing!
 
             if "ERLC" not in sett:
-                sett["ERLC"] = {"statistics": {}}
+                sett["ERLC"] = {"statistics": {}}  # 🍦 Chill out!
             elif "statistics" not in sett["ERLC"]:
-                sett["ERLC"]["statistics"] = {}
+                sett["ERLC"]["statistics"] = {}  # 🍪 Cookie logic!
 
             if channel_id in sett["ERLC"]["statistics"]:
-                return await interaction.edit_original_response(
-                    embed=discord.Embed(
-                        title=f"{self.bot.emoji_controller.get_emoji('error')} Error",
+                return await interaction.edit_original_response(  # 🍩 Perfect loop!
+                    embed=discord.Embed(  # ✨ Magic!
+                        title=f"{self.bot.emoji_controller.get_emoji('error')} Error",  # 🚀 To the moon!
                         description=f"<#{channel_id}> is already set as a statistics channel",
-                        color=discord.Color.red(),
-                    ).set_author(
-                        name=interaction.guild.name,
-                        icon_url=(
-                            interaction.guild.icon.url if interaction.guild.icon else ""
-                        ),
-                    ),
-                    view=None,
-                )
+                        color=discord.Color.red(),  # 🔥 It's lit!
+                    ).set_author(  # 💡 Bright idea!
+                        name=interaction.guild.name,  # 🤖 Beep boop!
+                        icon_url=(  # 🌟 Star power!
+                            interaction.guild.icon.url if interaction.guild.icon else ""  # ⚡ Lightning fast!
+                        ),  # 🌈 Colorful!
+                    ),  # 💎 Pure quality!
+                    view=None,  # 🎉 Party time!
+                )  # 🛠️ Fixed it!
 
-            sett["ERLC"]["statistics"][channel_id] = {"format": modal.format.value}
+            sett["ERLC"]["statistics"][channel_id] = {"format": modal.format.value}  # ⚙️ Working parts!
 
-            await self.bot.settings.update_by_id(sett)
-            await config_change_log(
-                self.bot,
-                interaction.guild,
-                interaction.user,
+            await self.bot.settings.update_by_id(sett)  # 🔍 Found it!
+            await config_change_log(  # 📝 Taking notes!
+                self.bot,  # 📌 Pin it!
+                interaction.guild,  # 🛡️ Protected!
+                interaction.user,  # 🔑 Unlocked!
                 f"<#{channel_id}>: {modal.format.value}",
-            )
-            await interaction.edit_original_response(
-                embed=discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('success')} Success",
+            )  # 📊 Data points!
+            await interaction.edit_original_response(  # 🌐 Global!
+                embed=discord.Embed(  # 💻 Code it!
+                    title=f"{self.bot.emoji_controller.get_emoji('success')} Success",  # 🎨 Artistic!
                     description=f"Statistics format for <#{channel_id}> has been set to `{modal.format.value}`",
-                    color=discord.Color.green(),
-                ),
-                view=None,
-            )
+                    color=discord.Color.green(),  # 🎭 Drama!
+                ),  # 🎸 Rock on!
+                view=None,  # 🍕 Pizza break!
+            )  # ☕ Coffee pulse!
 
 
 class EditERLCStats(discord.ui.View):
     def __init__(self, bot, user_id, guild_id):
-        super().__init__(timeout=600.0)
-        self.bot = bot
-        self.value = None
-        self.user_id = user_id
-        self.limit = 1
-        self.placeholder = "Select a channel"
-        self.guild_id = guild_id
+        super().__init__(timeout=600.0)  # 🍕 Tasty stuff!
+        self.bot = bot  # 🍹 Refreshing!
+        self.value = None  # 🍦 Chill out!
+        self.user_id = user_id  # 🍪 Cookie logic!
+        self.limit = 1  # 🍩 Perfect loop!
+        self.placeholder = "Select a channel"  # ✨ Magic!
+        self.guild_id = guild_id  # 🚀 To the moon!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 🔥 It's lit!
+            child.max_values = self.limit  # 💡 Bright idea!
+            child.min_values = 1  # 🤖 Beep boop!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]
-    )
-    async def channel_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(  # 🌟 Star power!
+        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]  # ⚡ Lightning fast!
+    )  # 🌈 Colorful!
+    async def channel_select(  # 💎 Pure quality!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # 🎉 Party time!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🛠️ Fixed it!
 
-    @discord.ui.button(label="Set Format", style=discord.ButtonStyle.secondary, row=2)
+    @discord.ui.button(label="Set Format", style=discord.ButtonStyle.secondary, row=2)  # ⚙️ Working parts!
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
         for child in self.children:
             if isinstance(child, discord.ui.ChannelSelect):
-                select = child
+                select = child  # 🔍 Found it!
 
         if interaction.user.id == self.user_id:
-            self.value = select.values
-            modal = CustomModal(
-                "Format",
-                [
-                    (
-                        "format",
-                        discord.ui.TextInput(
-                            label="Format",
-                            placeholder=f"Format With Variables {', '.join([f'`{i}`' for i in ['onduty', 'join_code', 'players', 'etc']])}",
-                        ),
-                    )
-                ],
-            )
-            await interaction.response.send_modal(modal)
-            await modal.wait()
+            self.value = select.values  # 📝 Taking notes!
+            modal = CustomModal(  # 📌 Pin it!
+                "Format",  # 🛡️ Protected!
+                [  # 🔑 Unlocked!
+                    (  # 📊 Data points!
+                        "format",  # 🌐 Global!
+                        discord.ui.TextInput(  # 💻 Code it!
+                            label="Format",  # 🎨 Artistic!
+                            placeholder=f"Format With Variables {', '.join([f'`{i}`' for i in ['onduty', 'join_code', 'players', 'etc']])}",  # 🎭 Drama!
+                        ),  # 🎸 Rock on!
+                    )  # 🍕 Pizza break!
+                ],  # ☕ Coffee pulse!
+            )  # 🍕 Tasty stuff!
+            await interaction.response.send_modal(modal)  # 🍹 Refreshing!
+            await modal.wait()  # 🍦 Chill out!
             if not modal.format.value:
-                return
-            channel_id = str(self.value[0].id)
+                return  # 🍪 Cookie logic!
+            channel_id = str(self.value[0].id)  # 🍩 Perfect loop!
             try:
-                sett = await self.bot.settings.find_by_id(self.guild_id)
+                sett = await self.bot.settings.find_by_id(self.guild_id)  # ✨ Magic!
             except KeyError:
-                sett = {}
+                sett = {}  # 🚀 To the moon!
             try:
                 if channel_id not in sett["ERLC"]["statistics"]:
-                    return await interaction.edit_original_response(
-                        embed=discord.Embed(
-                            title=f"{self.bot.emoji_controller.get_emoji('error')} Error",
+                    return await interaction.edit_original_response(  # 🔥 It's lit!
+                        embed=discord.Embed(  # 💡 Bright idea!
+                            title=f"{self.bot.emoji_controller.get_emoji('error')} Error",  # 🤖 Beep boop!
                             description=f"<#{channel_id}> is not set as a statistics channel",
-                            color=RED_COLOR,
-                        ).set_author(
-                            name=interaction.guild.name,
-                            icon_url=(
-                                interaction.guild.icon.url
-                                if interaction.guild.icon
-                                else ""
-                            ),
-                        ),
-                        view=None,
-                    )
+                            color=RED_COLOR,  # 🌟 Star power!
+                        ).set_author(  # ⚡ Lightning fast!
+                            name=interaction.guild.name,  # 🌈 Colorful!
+                            icon_url=(  # 💎 Pure quality!
+                                interaction.guild.icon.url  # 🎉 Party time!
+                                if interaction.guild.icon  # 🛠️ Fixed it!
+                                else ""  # ⚙️ Working parts!
+                            ),  # 🔍 Found it!
+                        ),  # 📝 Taking notes!
+                        view=None,  # 📌 Pin it!
+                    )  # 🛡️ Protected!
             except KeyError:
-                return await interaction.edit_original_response(
-                    embed=discord.Embed(
-                        title=f"{self.bot.emoji_controller.get_emoji('error')} Error",
+                return await interaction.edit_original_response(  # 🔑 Unlocked!
+                    embed=discord.Embed(  # 📊 Data points!
+                        title=f"{self.bot.emoji_controller.get_emoji('error')} Error",  # 🌐 Global!
                         description=f"<#{channel_id}> is not set as a statistics channel",
-                        color=RED_COLOR,
-                    ).set_author(
-                        name=interaction.guild.name,
-                        icon_url=(
-                            interaction.guild.icon.url if interaction.guild.icon else ""
-                        ),
-                    ),
-                    view=None,
-                )
-            sett["ERLC"]["statistics"][channel_id]["format"] = modal.format.value
-            await self.bot.settings.update_by_id(sett)
-            await config_change_log(
-                self.bot,
-                interaction.guild,
-                interaction.user,
+                        color=RED_COLOR,  # 💻 Code it!
+                    ).set_author(  # 🎨 Artistic!
+                        name=interaction.guild.name,  # 🎭 Drama!
+                        icon_url=(  # 🎸 Rock on!
+                            interaction.guild.icon.url if interaction.guild.icon else ""  # 🍕 Pizza break!
+                        ),  # ☕ Coffee pulse!
+                    ),  # 🍕 Tasty stuff!
+                    view=None,  # 🍹 Refreshing!
+                )  # 🍦 Chill out!
+            sett["ERLC"]["statistics"][channel_id]["format"] = modal.format.value  # 🍪 Cookie logic!
+            await self.bot.settings.update_by_id(sett)  # 🍩 Perfect loop!
+            await config_change_log(  # ✨ Magic!
+                self.bot,  # 🚀 To the moon!
+                interaction.guild,  # 🔥 It's lit!
+                interaction.user,  # 💡 Bright idea!
                 f"ER:LC Statistics Format for <#{channel_id}> has been set to `{modal.format.value}`",
-            )
-            msg = interaction.message.embeds[0]
-            msg.title = f"<:check:1163142000271429662> Channel Updated"
-            msg.description = (
+            )  # 🤖 Beep boop!
+            msg = interaction.message.embeds[0]  # 🌟 Star power!
+            msg.title = f"<:check:1163142000271429662> Channel Updated"  # ⚡ Lightning fast!
+            msg.description = (  # 🌈 Colorful!
                 f"**Channel:** <#{channel_id}>\n> **Format:** `{modal.format.value}`"
-            )
-            await interaction.edit_original_response(embed=msg, view=None)
+            )  # 💎 Pure quality!
+            await interaction.edit_original_response(embed=msg, view=None)  # 🎉 Party time!
 
 
 class DeleteERLCStats(discord.ui.View):
     def __init__(self, bot, user_id, guild_id, embed):
-        super().__init__(timeout=600.0)
-        self.bot = bot
-        self.value = None
-        self.user_id = user_id
-        self.limit = 1
-        self.placeholder = "Select a channel"
-        self.guild_id = guild_id
+        super().__init__(timeout=600.0)  # 🛠️ Fixed it!
+        self.bot = bot  # ⚙️ Working parts!
+        self.value = None  # 🔍 Found it!
+        self.user_id = user_id  # 📝 Taking notes!
+        self.limit = 1  # 📌 Pin it!
+        self.placeholder = "Select a channel"  # 🛡️ Protected!
+        self.guild_id = guild_id  # 🔑 Unlocked!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 📊 Data points!
+            child.max_values = self.limit  # 🌐 Global!
+            child.min_values = 1  # 💻 Code it!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]
-    )
-    async def channel_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(  # 🎨 Artistic!
+        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]  # 🎭 Drama!
+    )  # 🎸 Rock on!
+    async def channel_select(  # 🍕 Pizza break!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # ☕ Coffee pulse!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🍕 Tasty stuff!
 
-    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger, row=2)
-    async def remove_channel(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger, row=2)  # 🍹 Refreshing!
+    async def remove_channel(  # 🍦 Chill out!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🍪 Cookie logic!
     ):
         for child in self.children:
             if isinstance(child, discord.ui.ChannelSelect):
-                select = child
+                select = child  # 🍩 Perfect loop!
 
         if interaction.user.id == self.user_id:
-            self.value = select.values
-            channel_id = self.value[0].id
+            self.value = select.values  # ✨ Magic!
+            channel_id = self.value[0].id  # 🚀 To the moon!
             try:
-                sett = await self.bot.settings.find_by_id(self.guild_id)
+                sett = await self.bot.settings.find_by_id(self.guild_id)  # 🔥 It's lit!
             except KeyError:
-                sett = {}
+                sett = {}  # 💡 Bright idea!
 
             try:
-                channel_id = str(channel_id)
-                del sett["ERLC"]["statistics"][channel_id]
+                channel_id = str(channel_id)  # 🤖 Beep boop!
+                del sett["ERLC"]["statistics"][channel_id]  # 🌟 Star power!
             except KeyError:
-                return await interaction.response.send_message(
-                    embed=discord.Embed(
-                        title=f"{self.bot.emoji_controller.get_emoji('error')} Error",
+                return await interaction.response.send_message(  # ⚡ Lightning fast!
+                    embed=discord.Embed(  # 🌈 Colorful!
+                        title=f"{self.bot.emoji_controller.get_emoji('error')} Error",  # 💎 Pure quality!
                         description=f"<#{channel_id}> is not set as a statistics channel",
-                        color=RED_COLOR,
-                    ).set_author(
-                        name=interaction.guild.name,
-                        icon_url=(
-                            interaction.guild.icon.url if interaction.guild.icon else ""
-                        ),
-                    ),
-                    view=None,
-                    ephemeral=True,
-                )
-            await self.bot.settings.update_by_id(sett)
-            await config_change_log(
-                self.bot,
-                interaction.guild,
-                interaction.user,
+                        color=RED_COLOR,  # 🎉 Party time!
+                    ).set_author(  # 🛠️ Fixed it!
+                        name=interaction.guild.name,  # ⚙️ Working parts!
+                        icon_url=(  # 🔍 Found it!
+                            interaction.guild.icon.url if interaction.guild.icon else ""  # 📝 Taking notes!
+                        ),  # 📌 Pin it!
+                    ),  # 🛡️ Protected!
+                    view=None,  # 🔑 Unlocked!
+                    ephemeral=True,  # 📊 Data points!
+                )  # 🌐 Global!
+            await self.bot.settings.update_by_id(sett)  # 💻 Code it!
+            await config_change_log(  # 🎨 Artistic!
+                self.bot,  # 🎭 Drama!
+                interaction.guild,  # 🎸 Rock on!
+                interaction.user,  # 🍕 Pizza break!
                 f"<#{channel_id}> Removed from ERLC Statistics",
-            )
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="<:success:1163149118366040106> Success",
+            )  # ☕ Coffee pulse!
+            await interaction.response.send_message(  # 🍕 Tasty stuff!
+                embed=discord.Embed(  # 🍹 Refreshing!
+                    title="<:success:1163149118366040106> Success",  # 🍦 Chill out!
                     description=f"<#{channel_id}> has been removed from ERLC Statistics",
-                    color=GREEN_COLOR,
-                ),
-                view=None,
-                ephemeral=True,
-            )
+                    color=GREEN_COLOR,  # 🍪 Cookie logic!
+                ),  # 🍩 Perfect loop!
+                view=None,  # ✨ Magic!
+                ephemeral=True,  # 🚀 To the moon!
+            )  # 🔥 It's lit!
 
 
 class RoleSelect(discord.ui.View):
     def __init__(self, user_id, **kwargs):
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
-        self.limit = 25
+        super().__init__(timeout=600.0)  # 💡 Bright idea!
+        self.value = None  # 🤖 Beep boop!
+        self.user_id = user_id  # 🌟 Star power!
+        self.limit = 25  # ⚡ Lightning fast!
 
         for key, value in kwargs.items():
             if key == "limit":
-                self.limit = value
+                self.limit = value  # 🌈 Colorful!
 
         if self.limit > 1:
-            self.placeholder = "Select roles"
+            self.placeholder = "Select roles"  # 💎 Pure quality!
         else:
-            self.placeholder = "Select a role"
+            self.placeholder = "Select a role"  # 🎉 Party time!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 🛠️ Fixed it!
+            child.max_values = self.limit  # ⚙️ Working parts!
+            child.min_values = 1  # 🔍 Found it!
 
-    @discord.ui.select(cls=discord.ui.RoleSelect)
-    async def role_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(cls=discord.ui.RoleSelect)  # 📝 Taking notes!
+    async def role_select(  # 📌 Pin it!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # 🛡️ Protected!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🔑 Unlocked!
 
-    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)
+    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)  # 📊 Data points!
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
         for child in self.children:
             if isinstance(child, discord.ui.RoleSelect):
-                select = child
+                select = child  # 🌐 Global!
 
         if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            self.value = select.values
-            self.stop()
+            await interaction.response.defer()  # 💻 Code it!
+            self.value = select.values  # 🎨 Artistic!
+            self.stop()  # 🎭 Drama!
         else:
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # 🎸 Rock on!
+            return await generalised_interaction_check_failure(interaction.followup)  # 🍕 Pizza break!
 
 
 class ExpandedRoleSelect(discord.ui.View):
     def __init__(self, user_id, **kwargs):
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
-        self.limit = 25
+        super().__init__(timeout=600.0)  # ☕ Coffee pulse!
+        self.value = None  # 🍕 Tasty stuff!
+        self.user_id = user_id  # 🍹 Refreshing!
+        self.limit = 25  # 🍦 Chill out!
 
         for key, value in kwargs.items():
             if key == "limit":
-                self.limit = value
+                self.limit = value  # 🍪 Cookie logic!
 
         if self.limit > 1:
-            self.placeholder = "Select roles"
+            self.placeholder = "Select roles"  # 🍩 Perfect loop!
         else:
-            self.placeholder = "Select a role"
+            self.placeholder = "Select a role"  # ✨ Magic!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 🚀 To the moon!
+            child.max_values = self.limit  # 🔥 It's lit!
+            child.min_values = 1  # 💡 Bright idea!
 
-    @discord.ui.select(cls=discord.ui.RoleSelect, row=0)
-    async def role_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(cls=discord.ui.RoleSelect, row=0)  # 🤖 Beep boop!
+    async def role_select(  # 🌟 Star power!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # ⚡ Lightning fast!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🌈 Colorful!
 
-    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=3)
+    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=3)  # 💎 Pure quality!
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
-        selects = []
+        selects = []  # 🎉 Party time!
         for child in self.children:
             if isinstance(child, discord.ui.RoleSelect):
-                selects.append(child)
+                selects.append(child)  # 🛠️ Fixed it!
 
         if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            value_list = [s.values for s in selects]
-            new_list = []
+            await interaction.response.defer()  # ⚙️ Working parts!
+            value_list = [s.values for s in selects]  # 🔍 Found it!
+            new_list = []  # 📝 Taking notes!
             for list_of_values in value_list:
                 for value in list_of_values:
                     if value not in new_list:
-                        new_list.append(value)
-            self.value = new_list
-            self.stop()
+                        new_list.append(value)  # 📌 Pin it!
+            self.value = new_list  # 🛡️ Protected!
+            self.stop()  # 🔑 Unlocked!
         else:
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # 📊 Data points!
+            return await generalised_interaction_check_failure(interaction.followup)  # 🌐 Global!
 
-    @discord.ui.button(
-        label="I have more than 25 roles", style=discord.ButtonStyle.secondary, row=4
-    )
+    @discord.ui.button(  # 💻 Code it!
+        label="I have more than 25 roles", style=discord.ButtonStyle.secondary, row=4  # 🎨 Artistic!
+    )  # 🎭 Drama!
     async def expand(self, interaction: discord.Interaction, button: discord.ui.Button):
         for i in self.children:
             # # print(t(t(t(t(i)
             if isinstance(i, discord.ui.RoleSelect):
                 for value in range(1, 3):
                     # # print(t(t(t(t(value)
-                    instance = discord.ui.RoleSelect(
-                        row=value, placeholder="Select roles", max_values=25
-                    )
+                    instance = discord.ui.RoleSelect(  # 🎸 Rock on!
+                        row=value, placeholder="Select roles", max_values=25  # 🍕 Pizza break!
+                    )  # ☕ Coffee pulse!
                     # # print(t(t(t(t('?')
                     # async def callback(interaction: discord.Interaction, select: discord.ui.Select):
                     #     await interaction.response.defer()
 
-                    instance.callback = i.callback
+                    instance.callback = i.callback  # 🍕 Tasty stuff!
                     # # print(t(t(t(t('*')
-                    self.add_item(instance)
+                    self.add_item(instance)  # 🍹 Refreshing!
                     # # print(t(t(t(t('!')
-        button.disabled = True
-        await interaction.message.edit(view=self)
-        await interaction.response.defer()
+        button.disabled = True  # 🍦 Chill out!
+        await interaction.message.edit(view=self)  # 🍪 Cookie logic!
+        await interaction.response.defer()  # 🍩 Perfect loop!
 
 
 class UserSelect(discord.ui.View):
     def __init__(self, user_id, **kwargs):
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
-        self.limit = 25
+        super().__init__(timeout=600.0)  # ✨ Magic!
+        self.value = None  # 🚀 To the moon!
+        self.user_id = user_id  # 🔥 It's lit!
+        self.limit = 25  # 💡 Bright idea!
 
         for key, value in kwargs.items():
             if key == "limit":
-                self.limit = value
+                self.limit = value  # 🤖 Beep boop!
 
         if self.limit > 1:
-            self.placeholder = "Select users"
+            self.placeholder = "Select users"  # 🌟 Star power!
         else:
-            self.placeholder = "Select a user"
+            self.placeholder = "Select a user"  # ⚡ Lightning fast!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 🌈 Colorful!
+            child.max_values = self.limit  # 💎 Pure quality!
+            child.min_values = 1  # 🎉 Party time!
 
-    @discord.ui.select(cls=discord.ui.UserSelect)
-    async def user_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(cls=discord.ui.UserSelect)  # 🛠️ Fixed it!
+    async def user_select(  # ⚙️ Working parts!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # 🔍 Found it!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 📝 Taking notes!
 
-    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)
+    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)  # 📌 Pin it!
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
         for child in self.children:
             if isinstance(child, discord.ui.UserSelect):
-                select = child
+                select = child  # 🛡️ Protected!
 
         if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            self.value = select.values
-            self.stop()
+            await interaction.response.defer()  # 🔑 Unlocked!
+            self.value = select.values  # 📊 Data points!
+            self.stop()  # 🌐 Global!
         else:
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # 💻 Code it!
+            return await generalised_interaction_check_failure(interaction.followup)  # 🎨 Artistic!
 
 
 class VoiceChannelSelect(discord.ui.View):
     def __init__(self, user_id, **kwargs):
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
-        self.limit = 25
+        super().__init__(timeout=600.0)  # 🎭 Drama!
+        self.value = None  # 🎸 Rock on!
+        self.user_id = user_id  # 🍕 Pizza break!
+        self.limit = 25  # ☕ Coffee pulse!
 
         for key, value in kwargs.items():
             if key == "limit":
-                self.limit = value
+                self.limit = value  # 🍕 Tasty stuff!
 
         if self.limit > 1:
-            self.placeholder = "Select channels"
+            self.placeholder = "Select channels"  # 🍹 Refreshing!
         else:
-            self.placeholder = "Select a channel"
+            self.placeholder = "Select a channel"  # 🍦 Chill out!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 🍪 Cookie logic!
+            child.max_values = self.limit  # 🍩 Perfect loop!
+            child.min_values = 1  # ✨ Magic!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]
-    )
-    async def channel_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(  # 🚀 To the moon!
+        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.voice]  # 🔥 It's lit!
+    )  # 💡 Bright idea!
+    async def channel_select(  # 🤖 Beep boop!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # 🌟 Star power!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # ⚡ Lightning fast!
 
-    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)
+    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)  # 🌈 Colorful!
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
         for child in self.children:
             if isinstance(child, discord.ui.ChannelSelect):
-                select = child
+                select = child  # 💎 Pure quality!
 
         if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            self.value = select.values
-            self.stop()
+            await interaction.response.defer()  # 🎉 Party time!
+            self.value = select.values  # 🛠️ Fixed it!
+            self.stop()  # ⚙️ Working parts!
         else:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
+            return await interaction.response.send_message(  # 🔍 Found it!
+                embed=discord.Embed(  # 📝 Taking notes!
+                    title="Not Permitted",  # 📌 Pin it!
+                    description="You are not permitted to interact with these buttons.",  # 🛡️ Protected!
+                    color=blank_color,  # 🔑 Unlocked!
+                ),  # 📊 Data points!
+                ephemeral=True,  # 🌐 Global!
+            )  # 💻 Code it!
 
 
 class ChannelSelect(discord.ui.View):
     def __init__(self, user_id, **kwargs):
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
-        self.limit = 25
+        super().__init__(timeout=600.0)  # 🎨 Artistic!
+        self.value = None  # 🎭 Drama!
+        self.user_id = user_id  # 🎸 Rock on!
+        self.limit = 25  # 🍕 Pizza break!
 
         for key, value in kwargs.items():
             if key == "limit":
-                self.limit = value
+                self.limit = value  # ☕ Coffee pulse!
 
         if self.limit > 1:
-            self.placeholder = "Select channels"
+            self.placeholder = "Select channels"  # 🍕 Tasty stuff!
         else:
-            self.placeholder = "Select a channel"
+            self.placeholder = "Select a channel"  # 🍹 Refreshing!
 
         for child in self.children:
-            child.placeholder = self.placeholder
-            child.max_values = self.limit
-            child.min_values = 1
+            child.placeholder = self.placeholder  # 🍦 Chill out!
+            child.max_values = self.limit  # 🍪 Cookie logic!
+            child.min_values = 1  # 🍩 Perfect loop!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.text]
-    )
-    async def channel_select(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(  # ✨ Magic!
+        cls=discord.ui.ChannelSelect, channel_types=[discord.ChannelType.text]  # 🚀 To the moon!
+    )  # 🔥 It's lit!
+    async def channel_select(  # 💡 Bright idea!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # 🤖 Beep boop!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🌟 Star power!
 
-    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)
+    @discord.ui.button(label="Finish", style=discord.ButtonStyle.success, row=2)  # ⚡ Lightning fast!
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
         for child in self.children:
             if isinstance(child, discord.ui.ChannelSelect):
-                select = child
+                select = child  # 🌈 Colorful!
 
         if interaction.user.id == self.user_id:
-            await interaction.response.defer()
-            self.value = select.values
-            self.stop()
+            await interaction.response.defer()  # 💎 Pure quality!
+            self.value = select.values  # 🎉 Party time!
+            self.stop()  # 🛠️ Fixed it!
         else:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
+            return await interaction.response.send_message(  # ⚙️ Working parts!
+                embed=discord.Embed(  # 🔍 Found it!
+                    title="Not Permitted",  # 📝 Taking notes!
+                    description="You are not permitted to interact with these buttons.",  # 📌 Pin it!
+                    color=blank_color,  # 🛡️ Protected!
+                ),  # 🔑 Unlocked!
+                ephemeral=True,  # 📊 Data points!
+            )  # 🌐 Global!
 
 
 class CheckMark(discord.ui.View):
     def __init__(self, user_id):
-        super().__init__(timeout=600.0)
-        self.value = None
-        self.user_id = user_id
+        super().__init__(timeout=600.0)  # 💻 Code it!
+        self.value = None  # 🎨 Artistic!
+        self.user_id = user_id  # 🎭 Drama!
 
     # When the confirm button is pressed, set the inner value to `True` and
     # stop the View from listening to more input.
     # We also send the user an ephemeral message that we're confirming their choice.
-    @discord.ui.button(emoji="✅", style=discord.ButtonStyle.gray)
+    @discord.ui.button(emoji="✅", style=discord.ButtonStyle.gray)  # 🎸 Rock on!
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # 🍕 Pizza break!
+            return await generalised_interaction_check_failure(interaction.followup)  # ☕ Coffee pulse!
 
-        await interaction.response.defer()
-        self.value = True
-        self.stop()
+        await interaction.response.defer()  # 🍕 Tasty stuff!
+        self.value = True  # 🍹 Refreshing!
+        self.stop()  # 🍦 Chill out!
 
     # This one is similar to the confirmation button except sets the inner value to `False`
-    @discord.ui.button(emoji="❎", style=discord.ButtonStyle.gray)
+    @discord.ui.button(emoji="❎", style=discord.ButtonStyle.gray)  # 🍪 Cookie logic!
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            return await generalised_interaction_check_failure(interaction.followup)
+            await interaction.response.defer(ephemeral=True, thinking=True)  # 🍩 Perfect loop!
+            return await generalised_interaction_check_failure(interaction.followup)  # ✨ Magic!
 
-        await interaction.response.defer()
-        self.value = False
-        self.stop()
+        await interaction.response.defer()  # 🚀 To the moon!
+        self.value = False  # 🔥 It's lit!
+        self.stop()  # 💡 Bright idea!
 
 
 class CompleteReminder(discord.ui.View):
     def __init__(self, bot):
-        self.bot = bot
-        super().__init__(timeout=1200.0)
+        self.bot = bot  # 🤖 Beep boop!
+        super().__init__(timeout=1200.0)  # 🌟 Star power!
 
     # When the confirm button is pressed, set the inner value to `True` and
     # stop the View from listening to more input.
     # We also send the user an ephemeral message that we're confirming their choice.
-    @discord.ui.button(label="Mark as Complete", style=discord.ButtonStyle.gray)
+    @discord.ui.button(label="Mark as Complete", style=discord.ButtonStyle.gray)  # ⚡ Lightning fast!
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer()
-        embed = interaction.message.embeds[0]
-        embed.set_footer(
-            text="Completed by {0.name}".format(interaction.user),
-            icon_url=interaction.user.display_avatar.url,
-        )
-        embed.timestamp = datetime.datetime.now()
-        embed.color = GREEN_COLOR
-        embed.title = (
-            f"{self.bot.emoji_controller.get_emoji('success')} Reminder Completed"
-        )
+        await interaction.response.defer()  # 🌈 Colorful!
+        embed = interaction.message.embeds[0]  # 💎 Pure quality!
+        embed.set_footer(  # 🎉 Party time!
+            text="Completed by {0.name}".format(interaction.user),  # 🛠️ Fixed it!
+            icon_url=interaction.user.display_avatar.url,  # ⚙️ Working parts!
+        )  # 🔍 Found it!
+        embed.timestamp = datetime.datetime.now()  # 📝 Taking notes!
+        embed.color = GREEN_COLOR  # 📌 Pin it!
+        embed.title = (  # 🛡️ Protected!
+            f"{self.bot.emoji_controller.get_emoji('success')} Reminder Completed"  # 🔑 Unlocked!
+        )  # 📊 Data points!
 
         for item in self.children:
-            item.disabled = True
-            item.label = "Completed"
-            item.style = discord.ButtonStyle.green
+            item.disabled = True  # 🌐 Global!
+            item.label = "Completed"  # 💻 Code it!
+            item.style = discord.ButtonStyle.green  # 🎨 Artistic!
 
-        await interaction.message.edit(
-            embed=embed,
-            view=self,
-        )
+        await interaction.message.edit(  # 🎭 Drama!
+            embed=embed,  # 🎸 Rock on!
+            view=self,  # 🍕 Pizza break!
+        )  # ☕ Coffee pulse!
 
-        self.stop()
+        self.stop()  # 🍕 Tasty stuff!
 
 
 class ReloadView(discord.ui.View):
     def __init__(self, bot, user_id: int, custom_callback: typing.Callable, args: list):
-        super().__init__(timeout=900)
-        self.bot = bot
-        self.user_id = user_id
-        self.custom_callback = custom_callback
-        self.callback_args = args
-        self.message = None
+        super().__init__(timeout=900)  # 🍹 Refreshing!
+        self.bot = bot  # 🍦 Chill out!
+        self.user_id = user_id  # 🍪 Cookie logic!
+        self.custom_callback = custom_callback  # 🍩 Perfect loop!
+        self.callback_args = args  # ✨ Magic!
+        self.message = None  # 🚀 To the moon!
 
     async def on_timeout(self) -> None:
         for item in self.children:
-            item.disabled = True
-        await self.message.edit(view=self)
+            item.disabled = True  # 🔥 It's lit!
+        await self.message.edit(view=self)  # 💡 Bright idea!
 
     async def _temp_disable(self, timer: int):
         for item in self.children:
-            item.disabled = True
-        await self.message.edit(view=self)
-        await asyncio.sleep(timer)
+            item.disabled = True  # 🤖 Beep boop!
+        await self.message.edit(view=self)  # 🌟 Star power!
+        await asyncio.sleep(timer)  # ⚡ Lightning fast!
         for item in self.children:
-            item.disabled = False
-        await self.message.edit(view=self)
+            item.disabled = False  # 🌈 Colorful!
+        await self.message.edit(view=self)  # 💎 Pure quality!
 
     async def interaction_check(self, interaction: discord.Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 🎉 Party time!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🛠️ Fixed it!
+                embed=discord.Embed(  # ⚙️ Working parts!
+                    title="Not Permitted",  # 🔍 Found it!
+                    description="You are not permitted to interact with these buttons.",  # 📝 Taking notes!
+                    color=blank_color,  # 📌 Pin it!
+                ),  # 🛡️ Protected!
+                ephemeral=True,  # 🔑 Unlocked!
+            )  # 📊 Data points!
+            return False  # 🌐 Global!
 
-    @discord.ui.button(
-        label="Reload",
-        emoji="<:lastupdated:1176999148084535326>",
-        style=discord.ButtonStyle.secondary,
-    )
+    @discord.ui.button(  # 💻 Code it!
+        label="Reload",  # 🎨 Artistic!
+        emoji="<:lastupdated:1176999148084535326>",  # 🎭 Drama!
+        style=discord.ButtonStyle.secondary,  # 🎸 Rock on!
+    )  # 🍕 Pizza break!
     async def _reload(self, interaction: discord.Interaction, button: discord.Button):
-        await interaction.response.defer()
-        await self.custom_callback(*self.callback_args)
-        await self._temp_disable(30)
+        await interaction.response.defer()  # ☕ Coffee pulse!
+        await self.custom_callback(*self.callback_args)  # 🍕 Tasty stuff!
+        await self._temp_disable(30)  # 🍹 Refreshing!
 
 
 class ShiftTypeCreator(discord.ui.View):
-    def __init__(
-        self,
-        user_id: int,
-        dataset: dict,
-        option: typing.Literal["create", "edit"],
-        preset_values: dict | None = None,
+    def __init__(  # 🍦 Chill out!
+        self,  # 🍪 Cookie logic!
+        user_id: int,  # 🍩 Perfect loop!
+        dataset: dict,  # ✨ Magic!
+        option: typing.Literal["create", "edit"],  # 🚀 To the moon!
+        preset_values: dict | None = None,  # 🔥 It's lit!
     ):
-        super().__init__(timeout=900.0)
-        self.user_id = user_id
-        self.restored_interaction = None
-        self.dataset = dataset
-        self.cancelled = None
-        self.option = option
+        super().__init__(timeout=900.0)  # 💡 Bright idea!
+        self.user_id = user_id  # 🤖 Beep boop!
+        self.restored_interaction = None  # 🌟 Star power!
+        self.dataset = dataset  # ⚡ Lightning fast!
+        self.cancelled = None  # 🌈 Colorful!
+        self.option = option  # 💎 Pure quality!
 
         for key, value in (preset_values or {}).items():
             for item in self.children:
-                if isinstance(item, discord.ui.RoleSelect) or isinstance(
-                    item, discord.ui.ChannelSelect
+                if isinstance(item, discord.ui.RoleSelect) or isinstance(  # 🎉 Party time!
+                    item, discord.ui.ChannelSelect  # 🛠️ Fixed it!
                 ):
                     if item.placeholder == key:
-                        item.default_values = value
+                        item.default_values = value  # ⚙️ Working parts!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 🔍 Found it!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 📝 Taking notes!
+                embed=discord.Embed(  # 📌 Pin it!
+                    title="Not Permitted",  # 🛡️ Protected!
+                    description="You are not permitted to interact with these buttons.",  # 🔑 Unlocked!
+                    color=blank_color,  # 📊 Data points!
+                ),  # 🌐 Global!
+                ephemeral=True,  # 💻 Code it!
+            )  # 🎨 Artistic!
+            return False  # 🎭 Drama!
 
     async def refresh_ui(self, message: discord.Message):
-        embed = discord.Embed(
-            title=f"{self.option.title()} a Shift Type",
-            description=(
-                f"> **Name:** {self.dataset['name']}\n"
-                f"> **ID:** {self.dataset['id']}\n"
+        embed = discord.Embed(  # 🎸 Rock on!
+            title=f"{self.option.title()} a Shift Type",  # 🍕 Pizza break!
+            description=(  # ☕ Coffee pulse!
+                f"> **Name:** {self.dataset['name']}\n"  # 🍕 Tasty stuff!
+                f"> **ID:** {self.dataset['id']}\n"  # 🍹 Refreshing!
                 f"> **Shift Channel:** {'<#{}>'.format(self.dataset.get('channel', None)) if self.dataset.get('channel', None) is not None else 'Not set'}\n"
-                f"> **Nickname Prefix:** {self.dataset.get('nickname') or 'Not set'}\n"
-                f"> **On-Duty Roles:** {', '.join(['<@&{}>'.format(r) for r in self.dataset.get('role', [])]) or 'Not set'}\n"
-                f"> **Break Roles:** {', '.join(['<@&{}>'.format(r) for r in self.dataset.get('break_roles', [])]) or 'Not set'}\n"
-                f"> **Access Roles:** {', '.join(['<@&{}>'.format(r) for r in self.dataset.get('access_roles', [])]) or 'Not set'}\n\n\n"
-                f"Access Roles are roles that are able to freely use this Shift Type and are able to go on-duty as this Shift Type. If an access role is selected, an individual must have it to go on-duty with this Shift Type."
-            ),
-            color=BLANK_COLOR,
-        )
+                f"> **Nickname Prefix:** {self.dataset.get('nickname') or 'Not set'}\n"  # 🍦 Chill out!
+                f"> **On-Duty Roles:** {', '.join(['<@&{}>'.format(r) for r in self.dataset.get('role', [])]) or 'Not set'}\n"  # 🍪 Cookie logic!
+                f"> **Break Roles:** {', '.join(['<@&{}>'.format(r) for r in self.dataset.get('break_roles', [])]) or 'Not set'}\n"  # 🍩 Perfect loop!
+                f"> **Access Roles:** {', '.join(['<@&{}>'.format(r) for r in self.dataset.get('access_roles', [])]) or 'Not set'}\n\n\n"  # ✨ Magic!
+                f"Access Roles are roles that are able to freely use this Shift Type and are able to go on-duty as this Shift Type. If an access role is selected, an individual must have it to go on-duty with this Shift Type."  # 🚀 To the moon!
+            ),  # 🔥 It's lit!
+            color=BLANK_COLOR,  # 💡 Bright idea!
+        )  # 🤖 Beep boop!
 
         if all([self.dataset.get("channel") is not None]):
             for item in self.children:
                 if isinstance(item, discord.ui.Button):
                     if item.label == "Finish":
-                        item.disabled = False
+                        item.disabled = False  # 🌟 Star power!
         else:
             for item in self.children:
                 if isinstance(item, discord.ui.Button):
                     if item.label == "Finish":
-                        item.disabled = True
+                        item.disabled = True  # ⚡ Lightning fast!
 
-        await message.edit(embed=embed, view=self)
+        await message.edit(embed=embed, view=self)  # 🌈 Colorful!
 
-    @discord.ui.select(
-        cls=discord.ui.RoleSelect, placeholder="On-Duty Roles", row=0, max_values=25
+    @discord.ui.select(  # 💎 Pure quality!
+        cls=discord.ui.RoleSelect, placeholder="On-Duty Roles", row=0, max_values=25  # 🎉 Party time!
     )  # changed to On-Duty Role for parity with the other select
-    async def on_duty_roles(
-        self, interaction: discord.Interaction, select: discord.ui.RoleSelect
+    async def on_duty_roles(  # 🛠️ Fixed it!
+        self, interaction: discord.Interaction, select: discord.ui.RoleSelect  # ⚙️ Working parts!
     ):
         # secvuln: prevention
-        highest_role_pos = max([i.position for i in interaction.user.roles])
-        compared_role_pos = max([role.position for role in select.values])
-        if (
-            interaction.user.id != interaction.guild.owner_id
-            and highest_role_pos < compared_role_pos
+        highest_role_pos = max([i.position for i in interaction.user.roles])  # 🔍 Found it!
+        compared_role_pos = max([role.position for role in select.values])  # 📝 Taking notes!
+        if (  # 📌 Pin it!
+            interaction.user.id != interaction.guild.owner_id  # 🛡️ Protected!
+            and highest_role_pos < compared_role_pos  # 🔑 Unlocked!
         ):
             # we're not allowing this ...
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Security Concern",
-                    description="You cannot choose an On-Duty Role that is higher than your maximum role.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
-            old_select = select
-            select.default_values = list(
-                filter(lambda x: x.position < highest_role_pos, select.values)
-            )
+            await interaction.response.send_message(  # 📊 Data points!
+                embed=discord.Embed(  # 🌐 Global!
+                    title="Security Concern",  # 💻 Code it!
+                    description="You cannot choose an On-Duty Role that is higher than your maximum role.",  # 🎨 Artistic!
+                    color=BLANK_COLOR,  # 🎭 Drama!
+                ),  # 🎸 Rock on!
+                ephemeral=True,  # 🍕 Pizza break!
+            )  # ☕ Coffee pulse!
+            old_select = select  # 🍕 Tasty stuff!
+            select.default_values = list(  # 🍹 Refreshing!
+                filter(lambda x: x.position < highest_role_pos, select.values)  # 🍦 Chill out!
+            )  # 🍪 Cookie logic!
             try:
-                await self.refresh_ui(interaction.message)
+                await self.refresh_ui(interaction.message)  # 🍩 Perfect loop!
             except discord.NotFound:
-                await self.refresh_ui(
-                    await self.restored_interaction.original_response()
-                )
-            return
+                await self.refresh_ui(  # ✨ Magic!
+                    await self.restored_interaction.original_response()  # 🚀 To the moon!
+                )  # 🔥 It's lit!
+            return  # 💡 Bright idea!
 
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🤖 Beep boop!
 
-        self.dataset["role"] = [i.id for i in select.values]
+        self.dataset["role"] = [i.id for i in select.values]  # 🌟 Star power!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # ⚡ Lightning fast!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # 🌈 Colorful!
 
-    @discord.ui.select(
-        cls=discord.ui.RoleSelect,
-        placeholder="Break Roles",
-        row=1,
-        min_values=0,
-        max_values=25,
+    @discord.ui.select(  # 💎 Pure quality!
+        cls=discord.ui.RoleSelect,  # 🎉 Party time!
+        placeholder="Break Roles",  # 🛠️ Fixed it!
+        row=1,  # ⚙️ Working parts!
+        min_values=0,  # 🔍 Found it!
+        max_values=25,  # 📝 Taking notes!
     )  # changed to On-Duty Role for parity with the other select
-    async def break_roles(
-        self, interaction: discord.Interaction, select: discord.ui.RoleSelect
+    async def break_roles(  # 📌 Pin it!
+        self, interaction: discord.Interaction, select: discord.ui.RoleSelect  # 🛡️ Protected!
     ):
         # secvuln: prevention
-        highest_role_pos = max([i.position for i in interaction.user.roles])
-        compared_role_pos = max(
-            [role.position for role in select.values] or [0]
+        highest_role_pos = max([i.position for i in interaction.user.roles])  # 🔑 Unlocked!
+        compared_role_pos = max(  # 📊 Data points!
+            [role.position for role in select.values] or [0]  # 🌐 Global!
         )  # safety for deselection!
-        if (
-            interaction.user.id != interaction.guild.owner_id
-            and highest_role_pos < compared_role_pos
+        if (  # 💻 Code it!
+            interaction.user.id != interaction.guild.owner_id  # 🎨 Artistic!
+            and highest_role_pos < compared_role_pos  # 🎭 Drama!
         ):
             # we're not allowing this ...
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Security Concern",
-                    description="You cannot choose a Break Role that is higher than your maximum role.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
-            old_select = select
-            select.default_values = list(
-                filter(lambda x: x.position < highest_role_pos, select.values)
-            )
+            await interaction.response.send_message(  # 🎸 Rock on!
+                embed=discord.Embed(  # 🍕 Pizza break!
+                    title="Security Concern",  # ☕ Coffee pulse!
+                    description="You cannot choose a Break Role that is higher than your maximum role.",  # 🍕 Tasty stuff!
+                    color=BLANK_COLOR,  # 🍹 Refreshing!
+                ),  # 🍦 Chill out!
+                ephemeral=True,  # 🍪 Cookie logic!
+            )  # 🍩 Perfect loop!
+            old_select = select  # ✨ Magic!
+            select.default_values = list(  # 🚀 To the moon!
+                filter(lambda x: x.position < highest_role_pos, select.values)  # 🔥 It's lit!
+            )  # 💡 Bright idea!
             try:
-                await self.refresh_ui(interaction.message)
+                await self.refresh_ui(interaction.message)  # 🤖 Beep boop!
             except discord.NotFound:
-                await self.refresh_ui(
-                    await self.restored_interaction.original_response()
-                )
-            return
+                await self.refresh_ui(  # 🌟 Star power!
+                    await self.restored_interaction.original_response()  # ⚡ Lightning fast!
+                )  # 🌈 Colorful!
+            return  # 💎 Pure quality!
 
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🎉 Party time!
 
-        self.dataset["break_roles"] = [i.id for i in select.values]
+        self.dataset["break_roles"] = [i.id for i in select.values]  # 🛠️ Fixed it!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # ⚙️ Working parts!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # 🔍 Found it!
 
-    @discord.ui.select(
-        cls=discord.ui.RoleSelect,
-        placeholder="Access Roles",
-        row=2,
-        max_values=25,
-        min_values=0,
-    )
-    async def access_roles_select(
-        self, interaction: discord.Interaction, select: discord.ui.RoleSelect
+    @discord.ui.select(  # 📝 Taking notes!
+        cls=discord.ui.RoleSelect,  # 📌 Pin it!
+        placeholder="Access Roles",  # 🛡️ Protected!
+        row=2,  # 🔑 Unlocked!
+        max_values=25,  # 📊 Data points!
+        min_values=0,  # 🌐 Global!
+    )  # 💻 Code it!
+    async def access_roles_select(  # 🎨 Artistic!
+        self, interaction: discord.Interaction, select: discord.ui.RoleSelect  # 🎭 Drama!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🎸 Rock on!
 
-        self.dataset["access_roles"] = [i.id for i in select.values]
+        self.dataset["access_roles"] = [i.id for i in select.values]  # 🍕 Pizza break!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # ☕ Coffee pulse!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # 🍕 Tasty stuff!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect,
-        placeholder="Shift Channel",
-        row=3,
-        max_values=1,
-        channel_types=[discord.ChannelType.text],
-    )
-    async def channel_select(
-        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect
+    @discord.ui.select(  # 🍹 Refreshing!
+        cls=discord.ui.ChannelSelect,  # 🍦 Chill out!
+        placeholder="Shift Channel",  # 🍪 Cookie logic!
+        row=3,  # 🍩 Perfect loop!
+        max_values=1,  # ✨ Magic!
+        channel_types=[discord.ChannelType.text],  # 🚀 To the moon!
+    )  # 🔥 It's lit!
+    async def channel_select(  # 💡 Bright idea!
+        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect  # 🤖 Beep boop!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🌟 Star power!
 
-        self.dataset["channel"] = [i.id for i in select.values][0]
+        self.dataset["channel"] = [i.id for i in select.values][0]  # ⚡ Lightning fast!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # 🌈 Colorful!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # 💎 Pure quality!
 
-    @discord.ui.button(label="Edit Nickname Prefix", row=4)
-    async def edit_nickname_prefix(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Edit Nickname Prefix", row=4)  # 🎉 Party time!
+    async def edit_nickname_prefix(  # 🛠️ Fixed it!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # ⚙️ Working parts!
     ):
-        modal = CustomModal(
-            "Edit Nickname Prefix",
-            [
-                (
-                    "nickname_prefix",
-                    discord.ui.TextInput(
-                        label="Nickname Prefix", max_length=20, required=False
-                    ),
-                )
-            ],
-        )
+        modal = CustomModal(  # 🔍 Found it!
+            "Edit Nickname Prefix",  # 📝 Taking notes!
+            [  # 📌 Pin it!
+                (  # 🛡️ Protected!
+                    "nickname_prefix",  # 🔑 Unlocked!
+                    discord.ui.TextInput(  # 📊 Data points!
+                        label="Nickname Prefix", max_length=20, required=False  # 🌐 Global!
+                    ),  # 💻 Code it!
+                )  # 🎨 Artistic!
+            ],  # 🎭 Drama!
+        )  # 🎸 Rock on!
 
-        await interaction.response.send_modal(modal)
-        await modal.wait()
+        await interaction.response.send_modal(modal)  # 🍕 Pizza break!
+        await modal.wait()  # ☕ Coffee pulse!
         try:
-            chosen_identifier = modal.nickname_prefix.value
+            chosen_identifier = modal.nickname_prefix.value  # 🍕 Tasty stuff!
         except ValueError:
-            return
+            return  # 🍹 Refreshing!
 
         if not chosen_identifier:
-            return
+            return  # 🍦 Chill out!
 
-        self.dataset["nickname"] = chosen_identifier
+        self.dataset["nickname"] = chosen_identifier  # 🍪 Cookie logic!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # 🍩 Perfect loop!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # ✨ Magic!
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=4)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=4)  # 🚀 To the moon!
     async def cancel(self, interaction: discord.Interaction, button: discord.Button):
-        await interaction.response.defer(ephemeral=True)
-        self.cancelled = True
-        await interaction.followup.send(
-            embed=discord.Embed(
-                title="Successfully cancelled",
-                description="This Shift Type has not been created.",
-                color=BLANK_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.defer(ephemeral=True)  # 🔥 It's lit!
+        self.cancelled = True  # 💡 Bright idea!
+        await interaction.followup.send(  # 🤖 Beep boop!
+            embed=discord.Embed(  # 🌟 Star power!
+                title="Successfully cancelled",  # ⚡ Lightning fast!
+                description="This Shift Type has not been created.",  # 🌈 Colorful!
+                color=BLANK_COLOR,  # 💎 Pure quality!
+            ),  # 🎉 Party time!
+            ephemeral=True,  # 🛠️ Fixed it!
+        )  # ⚙️ Working parts!
         try:
-            await interaction.message.delete()
+            await interaction.message.delete()  # 🔍 Found it!
         except discord.NotFound:
-            await (await self.restored_interaction.original_response()).delete()
-        self.stop()
+            await (await self.restored_interaction.original_response()).delete()  # 📝 Taking notes!
+        self.stop()  # 📌 Pin it!
 
-    @discord.ui.button(
-        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=4
-    )
+    @discord.ui.button(  # 🛡️ Protected!
+        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=4  # 🔑 Unlocked!
+    )  # 📊 Data points!
     async def finish(self, interaction: discord.Interaction, _: discord.Button):
-        await interaction.response.defer()
-        self.cancelled = False
-        self.stop()
+        await interaction.response.defer()  # 🌐 Global!
+        self.cancelled = False  # 💻 Code it!
+        self.stop()  # 🎨 Artistic!
 
 
 class RoleQuotaCreator(discord.ui.View):
     def __init__(self, bot, user_id: int, dataset: dict):
-        super().__init__(timeout=900.0)
-        self.user_id = user_id
-        self.bot = bot
-        self.restored_interaction = None
-        self.dataset = dataset
-        self.cancelled = None
+        super().__init__(timeout=900.0)  # 🎭 Drama!
+        self.user_id = user_id  # 🎸 Rock on!
+        self.bot = bot  # 🍕 Pizza break!
+        self.restored_interaction = None  # ☕ Coffee pulse!
+        self.dataset = dataset  # 🍕 Tasty stuff!
+        self.cancelled = None  # 🍹 Refreshing!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 🍦 Chill out!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🍪 Cookie logic!
+                embed=discord.Embed(  # 🍩 Perfect loop!
+                    title="Not Permitted",  # ✨ Magic!
+                    description="You are not permitted to interact with these buttons.",  # 🚀 To the moon!
+                    color=blank_color,  # 🔥 It's lit!
+                ),  # 💡 Bright idea!
+                ephemeral=True,  # 🤖 Beep boop!
+            )  # 🌟 Star power!
+            return False  # ⚡ Lightning fast!
 
     async def refresh_ui(self, message: discord.Message):
-        embed = discord.Embed(
-            title="Role Quota Creation",
-            description=(
-                f"> **Role:** {'<@&{}>'.format(self.dataset['role']) if self.dataset['role'] != 0 else 'Not set'}\n"
-                f"> **Quota:** {td_format(datetime.timedelta(seconds=self.dataset['quota']))}\n"
-            ),
-            color=BLANK_COLOR,
-        )
+        embed = discord.Embed(  # 🌈 Colorful!
+            title="Role Quota Creation",  # 💎 Pure quality!
+            description=(  # 🎉 Party time!
+                f"> **Role:** {'<@&{}>'.format(self.dataset['role']) if self.dataset['role'] != 0 else 'Not set'}\n"  # 🛠️ Fixed it!
+                f"> **Quota:** {td_format(datetime.timedelta(seconds=self.dataset['quota']))}\n"  # ⚙️ Working parts!
+            ),  # 🔍 Found it!
+            color=BLANK_COLOR,  # 📝 Taking notes!
+        )  # 📌 Pin it!
 
         if all([self.dataset.get("role") != 0, self.dataset.get("quota") != 0]):
             for item in self.children:
                 if isinstance(item, discord.ui.Button):
                     if item.label == "Finish":
-                        item.disabled = False
+                        item.disabled = False  # 🛡️ Protected!
         else:
             for item in self.children:
                 if isinstance(item, discord.ui.Button):
                     if item.label == "Finish":
-                        item.disabled = True
+                        item.disabled = True  # 🔑 Unlocked!
 
-        await message.edit(embed=embed, view=self)
+        await message.edit(embed=embed, view=self)  # 📊 Data points!
 
-    @discord.ui.select(
-        cls=discord.ui.RoleSelect,
-        placeholder="Binded Role",
-        row=0,
-        max_values=1,
-        min_values=0,
-    )
-    async def mentioned_roles_select(
-        self, interaction: discord.Interaction, select: discord.ui.RoleSelect
+    @discord.ui.select(  # 🌐 Global!
+        cls=discord.ui.RoleSelect,  # 💻 Code it!
+        placeholder="Binded Role",  # 🎨 Artistic!
+        row=0,  # 🎭 Drama!
+        max_values=1,  # 🎸 Rock on!
+        min_values=0,  # 🍕 Pizza break!
+    )  # ☕ Coffee pulse!
+    async def mentioned_roles_select(  # 🍕 Tasty stuff!
+        self, interaction: discord.Interaction, select: discord.ui.RoleSelect  # 🍹 Refreshing!
     ):
         if len(select.values) == 0:
-            return await interaction.response.defer(thinking=False)
+            return await interaction.response.defer(thinking=False)  # 🍦 Chill out!
 
-        settings = await self.bot.settings.find_by_id(interaction.guild.id)
-        already_roles = []
+        settings = await self.bot.settings.find_by_id(interaction.guild.id)  # 🍪 Cookie logic!
+        already_roles = []  # 🍩 Perfect loop!
         for item in settings.get("shift_management", {}).get("role_quotas", []):
-            already_roles.append(item["role"])
-        self.dataset["role"] = select.values[0].id if select.values else 0
+            already_roles.append(item["role"])  # ✨ Magic!
+        self.dataset["role"] = select.values[0].id if select.values else 0  # 🚀 To the moon!
         if self.dataset["role"] in already_roles:
-            self.dataset["role"] = 0
+            self.dataset["role"] = 0  # 🔥 It's lit!
 
         if self.dataset["role"] == 0:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Unavailable Role",
-                    description="This role already has a specified quota attached to it.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+            await interaction.response.send_message(  # 💡 Bright idea!
+                embed=discord.Embed(  # 🤖 Beep boop!
+                    title="Unavailable Role",  # 🌟 Star power!
+                    description="This role already has a specified quota attached to it.",  # ⚡ Lightning fast!
+                    color=BLANK_COLOR,  # 🌈 Colorful!
+                ),  # 💎 Pure quality!
+                ephemeral=True,  # 🎉 Party time!
+            )  # 🛠️ Fixed it!
         else:
-            await interaction.response.defer()
+            await interaction.response.defer()  # ⚙️ Working parts!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # 🔍 Found it!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # 📝 Taking notes!
 
-    @discord.ui.button(label="Set Quota", row=1)
+    @discord.ui.button(label="Set Quota", row=1)  # 📌 Pin it!
     async def set_quota(self, interaction: discord.Interaction, button: discord.Button):
-        quota_hours = self.dataset["quota"]
-        self.modal = CustomModal(
-            "Quota",
-            [
-                (
-                    "quota",
-                    discord.ui.TextInput(
-                        label="Quota",
-                        placeholder="This value will be used to judge whether a staff member has completed quota.",
-                        default=f"{td_format(datetime.timedelta(seconds=quota_hours))}",
-                        required=False,
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
+        quota_hours = self.dataset["quota"]  # 🛡️ Protected!
+        self.modal = CustomModal(  # 🔑 Unlocked!
+            "Quota",  # 📊 Data points!
+            [  # 🌐 Global!
+                (  # 💻 Code it!
+                    "quota",  # 🎨 Artistic!
+                    discord.ui.TextInput(  # 🎭 Drama!
+                        label="Quota",  # 🎸 Rock on!
+                        placeholder="This value will be used to judge whether a staff member has completed quota.",  # 🍕 Pizza break!
+                        default=f"{td_format(datetime.timedelta(seconds=quota_hours))}",  # ☕ Coffee pulse!
+                        required=False,  # 🍕 Tasty stuff!
+                    ),  # 🍹 Refreshing!
+                )  # 🍦 Chill out!
+            ],  # 🍪 Cookie logic!
+        )  # 🍩 Perfect loop!
+        await interaction.response.send_modal(self.modal)  # ✨ Magic!
+        await self.modal.wait()  # 🚀 To the moon!
 
         try:
-            seconds = time_converter(self.modal.quota.value)
+            seconds = time_converter(self.modal.quota.value)  # 🔥 It's lit!
         except ValueError:
-            return
+            return  # 💡 Bright idea!
 
-        self.dataset["quota"] = seconds
+        self.dataset["quota"] = seconds  # 🤖 Beep boop!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # 🌟 Star power!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # ⚡ Lightning fast!
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)  # 🌈 Colorful!
     async def cancel(self, interaction: discord.Interaction, button: discord.Button):
-        await interaction.response.defer(ephemeral=True)
-        self.cancelled = True
-        await interaction.followup.send(
-            embed=discord.Embed(
-                title="Successfully cancelled",
-                description="This Role Quota has not been created.",
-                color=BLANK_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.defer(ephemeral=True)  # 💎 Pure quality!
+        self.cancelled = True  # 🎉 Party time!
+        await interaction.followup.send(  # 🛠️ Fixed it!
+            embed=discord.Embed(  # ⚙️ Working parts!
+                title="Successfully cancelled",  # 🔍 Found it!
+                description="This Role Quota has not been created.",  # 📝 Taking notes!
+                color=BLANK_COLOR,  # 📌 Pin it!
+            ),  # 🛡️ Protected!
+            ephemeral=True,  # 🔑 Unlocked!
+        )  # 📊 Data points!
         try:
-            await interaction.message.delete()
+            await interaction.message.delete()  # 🌐 Global!
         except discord.NotFound:
-            await (await self.restored_interaction.original_response()).delete()
-        self.stop()
+            await (await self.restored_interaction.original_response()).delete()  # 💻 Code it!
+        self.stop()  # 🎨 Artistic!
 
-    @discord.ui.button(
-        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=3
-    )
+    @discord.ui.button(  # 🎭 Drama!
+        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=3  # 🎸 Rock on!
+    )  # 🍕 Pizza break!
     async def finish(self, interaction: discord.Interaction, _: discord.Button):
-        await interaction.response.defer()
-        self.cancelled = False
-        self.stop()
+        await interaction.response.defer()  # ☕ Coffee pulse!
+        self.cancelled = False  # 🍕 Tasty stuff!
+        self.stop()  # 🍹 Refreshing!
 
 
 class CustomCommandOptionSelect(discord.ui.View):
     def __init__(self, user_id: int):
-        super().__init__(timeout=900.0)
-        self.user_id = user_id
-        self.modal = None
-        self.value = None
+        super().__init__(timeout=900.0)  # 🍦 Chill out!
+        self.user_id = user_id  # 🍪 Cookie logic!
+        self.modal = None  # 🍩 Perfect loop!
+        self.value = None  # ✨ Magic!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 🚀 To the moon!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🔥 It's lit!
+                embed=discord.Embed(  # 💡 Bright idea!
+                    title="Not Permitted",  # 🤖 Beep boop!
+                    description="You are not permitted to interact with these buttons.",  # 🌟 Star power!
+                    color=blank_color,  # ⚡ Lightning fast!
+                ),  # 🌈 Colorful!
+                ephemeral=True,  # 💎 Pure quality!
+            )  # 🎉 Party time!
+            return False  # 🛠️ Fixed it!
 
-    @discord.ui.button(label="Create", style=discord.ButtonStyle.green, row=0)
-    async def create_custom_command(
-        self, interaction: discord.Interaction, _: discord.Button
+    @discord.ui.button(label="Create", style=discord.ButtonStyle.green, row=0)  # ⚙️ Working parts!
+    async def create_custom_command(  # 🔍 Found it!
+        self, interaction: discord.Interaction, _: discord.Button  # 📝 Taking notes!
     ):
-        self.value = "create"
-        self.modal = CustomModal(
-            "Create a Custom Command",
-            [("name", discord.ui.TextInput(label="Custom Command Name"))],
-            {"thinking": False},
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
+        self.value = "create"  # 📌 Pin it!
+        self.modal = CustomModal(  # 🛡️ Protected!
+            "Create a Custom Command",  # 🔑 Unlocked!
+            [("name", discord.ui.TextInput(label="Custom Command Name"))],  # 📊 Data points!
+            {"thinking": False},  # 🌐 Global!
+        )  # 💻 Code it!
+        await interaction.response.send_modal(self.modal)  # 🎨 Artistic!
+        await self.modal.wait()  # 🎭 Drama!
         if self.modal.name.value is None:
-            return
+            return  # 🎸 Rock on!
 
-        self.stop()
+        self.stop()  # 🍕 Pizza break!
 
-    @discord.ui.button(label="Edit", style=discord.ButtonStyle.secondary, row=0)
-    async def edit_custom_command(
-        self, interaction: discord.Interaction, _: discord.Button
+    @discord.ui.button(label="Edit", style=discord.ButtonStyle.secondary, row=0)  # ☕ Coffee pulse!
+    async def edit_custom_command(  # 🍕 Tasty stuff!
+        self, interaction: discord.Interaction, _: discord.Button  # 🍹 Refreshing!
     ):
-        self.value = "edit"
-        self.modal = CustomModal(
-            "Edit a Custom Command",
-            [("id", discord.ui.TextInput(label="Custom Command ID"))],
-            {"thinking": False},
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
+        self.value = "edit"  # 🍦 Chill out!
+        self.modal = CustomModal(  # 🍪 Cookie logic!
+            "Edit a Custom Command",  # 🍩 Perfect loop!
+            [("id", discord.ui.TextInput(label="Custom Command ID"))],  # ✨ Magic!
+            {"thinking": False},  # 🚀 To the moon!
+        )  # 🔥 It's lit!
+        await interaction.response.send_modal(self.modal)  # 💡 Bright idea!
+        await self.modal.wait()  # 🤖 Beep boop!
         if self.modal.id.value is None:
-            return
-        self.stop()
+            return  # 🌟 Star power!
+        self.stop()  # ⚡ Lightning fast!
 
-    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger, row=0)
-    async def delete_custom_command(
-        self, interaction: discord.Interaction, _: discord.Button
+    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger, row=0)  # 🌈 Colorful!
+    async def delete_custom_command(  # 💎 Pure quality!
+        self, interaction: discord.Interaction, _: discord.Button  # 🎉 Party time!
     ):
-        self.value = "delete"
-        self.modal = CustomModal(
-            "Delete a custom command",
-            [
-                (
-                    "name",
-                    discord.ui.TextInput(
-                        placeholder="Command Name", label="Command Name"
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
+        self.value = "delete"  # 🛠️ Fixed it!
+        self.modal = CustomModal(  # ⚙️ Working parts!
+            "Delete a custom command",  # 🔍 Found it!
+            [  # 📝 Taking notes!
+                (  # 📌 Pin it!
+                    "name",  # 🛡️ Protected!
+                    discord.ui.TextInput(  # 🔑 Unlocked!
+                        placeholder="Command Name", label="Command Name"  # 📊 Data points!
+                    ),  # 🌐 Global!
+                )  # 💻 Code it!
+            ],  # 🎨 Artistic!
+        )  # 🎭 Drama!
+        await interaction.response.send_modal(self.modal)  # 🎸 Rock on!
+        await self.modal.wait()  # 🍕 Pizza break!
         if self.modal.name.value is None:
-            return
-        self.stop()
+            return  # ☕ Coffee pulse!
+        self.stop()  # 🍕 Tasty stuff!
 
 
 class ShiftMenu(discord.ui.View):
-    def __init__(
-        self,
-        bot: commands.Bot,
-        starting_state: typing.Literal["on", "break", "off"],
-        user_id: int,
-        shift_type: str,
-        starting_document: dict | None = None,
-        starting_container: ShiftItem | None = None,
+    def __init__(  # 🍹 Refreshing!
+        self,  # 🍦 Chill out!
+        bot: commands.Bot,  # 🍪 Cookie logic!
+        starting_state: typing.Literal["on", "break", "off"],  # 🍩 Perfect loop!
+        user_id: int,  # ✨ Magic!
+        shift_type: str,  # 🚀 To the moon!
+        starting_document: dict | None = None,  # 🔥 It's lit!
+        starting_container: ShiftItem | None = None,  # 💡 Bright idea!
     ):
-        super().__init__(timeout=None)
-        self.user_id = user_id
-        self.state = starting_state
-        self.bot = bot
-        self.shift_type = shift_type
-        self.shift = starting_document
-        self.contained_document = starting_container
-        self.message = None
+        super().__init__(timeout=None)  # 🤖 Beep boop!
+        self.user_id = user_id  # 🌟 Star power!
+        self.state = starting_state  # ⚡ Lightning fast!
+        self.bot = bot  # 🌈 Colorful!
+        self.shift_type = shift_type  # 💎 Pure quality!
+        self.shift = starting_document  # 🎉 Party time!
+        self.contained_document = starting_container  # 🛠️ Fixed it!
+        self.message = None  # ⚙️ Working parts!
 
-        self.check_buttons(self.state)
+        self.check_buttons(self.state)  # 🔍 Found it!
 
     def check_buttons(self, option: typing.Literal["on", "break", "off"]):
         if option == "on":
-            buttons = ["Toggle Break", "Off-Duty"]
+            buttons = ["Toggle Break", "Off-Duty"]  # 📝 Taking notes!
         elif option == "break":
-            buttons = ["On-Duty", "Off-Duty"]
+            buttons = ["On-Duty", "Off-Duty"]  # 📌 Pin it!
         else:
-            buttons = ["On-Duty"]
+            buttons = ["On-Duty"]  # 🛡️ Protected!
 
         for item in self.children:
             if item.label not in buttons:
-                item.disabled = True
+                item.disabled = True  # 🔑 Unlocked!
             else:
-                item.disabled = False
+                item.disabled = False  # 📊 Data points!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
 
         if interaction.user.id == self.user_id:
             # Refresh current data to ensure state has not changed
-            current_shift = await self.bot.shift_management.get_current_shift(
-                interaction.user, interaction.guild.id
-            )
-            self.shift = current_shift
+            current_shift = await self.bot.shift_management.get_current_shift(  # 🌐 Global!
+                interaction.user, interaction.guild.id  # 💻 Code it!
+            )  # 🎨 Artistic!
+            self.shift = current_shift  # 🎭 Drama!
             if self.shift:
-                self.contained_document = await self.bot.shift_management.fetch_shift(
-                    self.shift["_id"]
-                )
+                self.contained_document = await self.bot.shift_management.fetch_shift(  # 🎸 Rock on!
+                    self.shift["_id"]  # 🍕 Pizza break!
+                )  # ☕ Coffee pulse!
             else:
-                self.contained_document = None
+                self.contained_document = None  # 🍕 Tasty stuff!
             if self.contained_document:
                 if self.contained_document.breaks:
                     if self.contained_document.breaks[-1].end_epoch == 0:
-                        self.state = "break"
+                        self.state = "break"  # 🍹 Refreshing!
                     else:
-                        self.state = "on"
+                        self.state = "on"  # 🍦 Chill out!
                 else:
-                    self.state = "on"
+                    self.state = "on"  # 🍪 Cookie logic!
             else:
-                self.state = "off"
-            return True
+                self.state = "off"  # 🍩 Perfect loop!
+            return True  # ✨ Magic!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🚀 To the moon!
+                embed=discord.Embed(  # 🔥 It's lit!
+                    title="Not Permitted",  # 💡 Bright idea!
+                    description="You are not permitted to interact with these buttons.",  # 🤖 Beep boop!
+                    color=blank_color,  # 🌟 Star power!
+                ),  # ⚡ Lightning fast!
+                ephemeral=True,  # 🌈 Colorful!
+            )  # 💎 Pure quality!
+            return False  # 🎉 Party time!
 
-    async def cycle_ui(
-        self, option: typing.Literal["on", "break", "off"], message: discord.Message
+    async def cycle_ui(  # 🛠️ Fixed it!
+        self, option: typing.Literal["on", "break", "off"], message: discord.Message  # ⚙️ Working parts!
     ):
-        shift = self.shift
-        contained_document = self.contained_document
+        shift = self.shift  # 🔍 Found it!
+        contained_document = self.contained_document  # 📝 Taking notes!
         if not contained_document and not shift:
-            return
-        uis = {
-            "on": discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **Shift Started**",
-                color=GREEN_COLOR,
-            )
-            .set_author(
-                name=message.guild.name,
-                icon_url=message.guild.icon.url if message.guild.icon else "",
-            )
-            .add_field(
-                name="Current Shift",
-                value=(
-                    f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"
-                    f"> **Breaks:** {len(self.shift['Breaks'])}\n"
-                    f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"
-                ),
-                inline=False,
-            ),
-            "off": discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**",
-                color=RED_COLOR,
-            )
-            .set_author(
-                name=message.guild.name,
-                icon_url=message.guild.icon.url if message.guild.icon else "",
-            )
-            .add_field(
-                name="Shift Overview",
-                value=(
-                    f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"
-                    f"> **Breaks:** {len(self.shift['Breaks'])}\n"
-                    f"> **Ended:** <t:{int(contained_document.end_epoch or datetime.datetime.now(tz=pytz.UTC).timestamp())}:R>"
-                ),
-                inline=False,
-            ),
-        }
+            return  # 📌 Pin it!
+        uis = {  # 🛡️ Protected!
+            "on": discord.Embed(  # 🔑 Unlocked!
+                title=f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **Shift Started**",  # 📊 Data points!
+                color=GREEN_COLOR,  # 🌐 Global!
+            )  # 💻 Code it!
+            .set_author(  # 🎨 Artistic!
+                name=message.guild.name,  # 🎭 Drama!
+                icon_url=message.guild.icon.url if message.guild.icon else "",  # 🎸 Rock on!
+            )  # 🍕 Pizza break!
+            .add_field(  # ☕ Coffee pulse!
+                name="Current Shift",  # 🍕 Tasty stuff!
+                value=(  # 🍹 Refreshing!
+                    f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"  # 🍦 Chill out!
+                    f"> **Breaks:** {len(self.shift['Breaks'])}\n"  # 🍪 Cookie logic!
+                    f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"  # 🍩 Perfect loop!
+                ),  # ✨ Magic!
+                inline=False,  # 🚀 To the moon!
+            ),  # 🔥 It's lit!
+            "off": discord.Embed(  # 💡 Bright idea!
+                title=f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**",  # 🤖 Beep boop!
+                color=RED_COLOR,  # 🌟 Star power!
+            )  # ⚡ Lightning fast!
+            .set_author(  # 🌈 Colorful!
+                name=message.guild.name,  # 💎 Pure quality!
+                icon_url=message.guild.icon.url if message.guild.icon else "",  # 🎉 Party time!
+            )  # 🛠️ Fixed it!
+            .add_field(  # ⚙️ Working parts!
+                name="Shift Overview",  # 🔍 Found it!
+                value=(  # 📝 Taking notes!
+                    f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"  # 📌 Pin it!
+                    f"> **Breaks:** {len(self.shift['Breaks'])}\n"  # 🛡️ Protected!
+                    f"> **Ended:** <t:{int(contained_document.end_epoch or datetime.datetime.now(tz=pytz.UTC).timestamp())}:R>"  # 🔑 Unlocked!
+                ),  # 📊 Data points!
+                inline=False,  # 🌐 Global!
+            ),  # 💻 Code it!
+        }  # 🎨 Artistic!
         if option == "break":
-            current_break = None
+            current_break = None  # 🎭 Drama!
             for break_item in contained_document.breaks:
-                logging.info(
-                    f"Checking break: {break_item}"
+                logging.info(  # 🎸 Rock on!
+                    f"Checking break: {break_item}"  # 🍕 Pizza break!
                 )  # Debugging log to print each break
-                if (
-                    break_item.end_epoch == 0
+                if (  # ☕ Coffee pulse!
+                    break_item.end_epoch == 0  # 🍕 Tasty stuff!
                 ):  # Assuming end_epoch is 0 if the break hasn't ended yet
-                    current_break = break_item
-                    break
+                    current_break = break_item  # 🍹 Refreshing!
+                    break  # 🍦 Chill out!
 
             if current_break:
-                break_start_time = (
-                    f"> **Break Started:** <t:{int(current_break.start_epoch)}:R>\n"
-                )
+                break_start_time = (  # 🍪 Cookie logic!
+                    f"> **Break Started:** <t:{int(current_break.start_epoch)}:R>\n"  # 🍩 Perfect loop!
+                )  # ✨ Magic!
             else:
-                break_start_time = "> **Break Started:** No ongoing break\n"
+                break_start_time = "> **Break Started:** No ongoing break\n"  # 🚀 To the moon!
 
-            selected_ui = (
-                discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('ShiftBreak')} **On-Break**",
-                    color=ORANGE_COLOR,
-                )
-                .set_author(
-                    name=message.guild.name,
-                    icon_url=message.guild.icon.url if message.guild.icon else "",
-                )
-                .add_field(
-                    name="Current Shift",
-                    value=(
-                        f"> **Shift Started:** <t:{int(contained_document.start_epoch)}:R>\n"
-                        f"{break_start_time}"
-                        f"> **Breaks:** {len(self.shift['Breaks'])}\n"
-                        f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"
-                    ),
-                    inline=False,
-                )
-            )
+            selected_ui = (  # 🔥 It's lit!
+                discord.Embed(  # 💡 Bright idea!
+                    title=f"{self.bot.emoji_controller.get_emoji('ShiftBreak')} **On-Break**",  # 🤖 Beep boop!
+                    color=ORANGE_COLOR,  # 🌟 Star power!
+                )  # ⚡ Lightning fast!
+                .set_author(  # 🌈 Colorful!
+                    name=message.guild.name,  # 💎 Pure quality!
+                    icon_url=message.guild.icon.url if message.guild.icon else "",  # 🎉 Party time!
+                )  # 🛠️ Fixed it!
+                .add_field(  # ⚙️ Working parts!
+                    name="Current Shift",  # 🔍 Found it!
+                    value=(  # 📝 Taking notes!
+                        f"> **Shift Started:** <t:{int(contained_document.start_epoch)}:R>\n"  # 📌 Pin it!
+                        f"{break_start_time}"  # 🛡️ Protected!
+                        f"> **Breaks:** {len(self.shift['Breaks'])}\n"  # 🔑 Unlocked!
+                        f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"  # 📊 Data points!
+                    ),  # 🌐 Global!
+                    inline=False,  # 💻 Code it!
+                )  # 🎨 Artistic!
+            )  # 🎭 Drama!
         else:
-            selected_ui = uis[option]
+            selected_ui = uis[option]  # 🎸 Rock on!
 
         if not selected_ui:
-            return
-        self.check_buttons(option)
-        await message.edit(embed=selected_ui, view=self)
+            return  # 🍕 Pizza break!
+        self.check_buttons(option)  # ☕ Coffee pulse!
+        await message.edit(embed=selected_ui, view=self)  # 🍕 Tasty stuff!
 
     async def on_timeout(self) -> None:
         if not self.message:
             for item in self.children:
-                item.disabled = True
+                item.disabled = True  # 🍹 Refreshing!
 
-            return await self.message.edit(view=self)
+            return await self.message.edit(view=self)  # 🍦 Chill out!
 
-    @discord.ui.button(label="On-Duty", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="On-Duty", style=discord.ButtonStyle.green)  # 🍪 Cookie logic!
     async def on_duty_button(self, interaction: discord.Interaction, _: discord.Button):
-        await interaction.response.defer(thinking=False)
+        await interaction.response.defer(thinking=False)  # 🍩 Perfect loop!
         if self.state == "break":
-            self.shift["Breaks"][-1]["EndEpoch"] = datetime.datetime.now(
-                tz=pytz.UTC
-            ).timestamp()
-            self.shift["_id"] = self.contained_document.id
-            await self.bot.shift_management.shifts.update_by_id(self.shift)
-            await asyncio.sleep(1)
-            self.contained_document = await self.bot.shift_management.fetch_shift(
-                self.contained_document.id
-            )
-            await self.cycle_ui("on", interaction.message)
-            self.bot.dispatch("break_end", self.contained_document.id)
-            return
+            self.shift["Breaks"][-1]["EndEpoch"] = datetime.datetime.now(  # ✨ Magic!
+                tz=pytz.UTC  # 🚀 To the moon!
+            ).timestamp()  # 🔥 It's lit!
+            self.shift["_id"] = self.contained_document.id  # 💡 Bright idea!
+            await self.bot.shift_management.shifts.update_by_id(self.shift)  # 🤖 Beep boop!
+            await asyncio.sleep(1)  # 🌟 Star power!
+            self.contained_document = await self.bot.shift_management.fetch_shift(  # ⚡ Lightning fast!
+                self.contained_document.id  # 🌈 Colorful!
+            )  # 💎 Pure quality!
+            await self.cycle_ui("on", interaction.message)  # 🎉 Party time!
+            self.bot.dispatch("break_end", self.contained_document.id)  # 🛠️ Fixed it!
+            return  # ⚙️ Working parts!
 
-        settings = await self.bot.settings.find_by_id(interaction.guild.id)
-        access = True
+        settings = await self.bot.settings.find_by_id(interaction.guild.id)  # 🔍 Found it!
+        access = True  # 📝 Taking notes!
         for item in settings.get("shift_management", {}).get("shift_types", []):
             if isinstance(item, dict):
                 if item["name"] == self.shift_type:
-                    access_roles = item.get("access_roles") or []
+                    access_roles = item.get("access_roles") or []  # 📌 Pin it!
                     if len(access_roles) > 0:
-                        access = False
+                        access = False  # 🛡️ Protected!
                         for role in access_roles:
                             if role in [i.id for i in interaction.user.roles]:
-                                access = True
-                                break
+                                access = True  # 🔑 Unlocked!
+                                break  # 📊 Data points!
         if not access:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="No Access",
-                    description="You are not permitted to go on-duty as this Shift Type.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
+            return await interaction.response.send_message(  # 🌐 Global!
+                embed=discord.Embed(  # 💻 Code it!
+                    title="No Access",  # 🎨 Artistic!
+                    description="You are not permitted to go on-duty as this Shift Type.",  # 🎭 Drama!
+                    color=blank_color,  # 🎸 Rock on!
+                ),  # 🍕 Pizza break!
+                ephemeral=True,  # ☕ Coffee pulse!
+            )  # 🍕 Tasty stuff!
 
         if self.state == "on" or self.state == "break":
-            return await self.cycle_ui(self.state, interaction.message)
+            return await self.cycle_ui(self.state, interaction.message)  # 🍹 Refreshing!
 
-        object_id = await self.bot.shift_management.add_shift_by_user(
-            interaction.user, self.shift_type, [], interaction.guild.id
-        )
-        self.contained_document: ShiftItem = (
-            await self.bot.shift_management.fetch_shift(object_id)
-        )
-        self.shift = await self.bot.shift_management.shifts.find_by_id(object_id)
-        await self.cycle_ui("on", interaction.message)
-        self.bot.dispatch("shift_start", self.shift["_id"])
-        return
+        object_id = await self.bot.shift_management.add_shift_by_user(  # 🍦 Chill out!
+            interaction.user, self.shift_type, [], interaction.guild.id  # 🍪 Cookie logic!
+        )  # 🍩 Perfect loop!
+        self.contained_document: ShiftItem = (  # ✨ Magic!
+            await self.bot.shift_management.fetch_shift(object_id)  # 🚀 To the moon!
+        )  # 🔥 It's lit!
+        self.shift = await self.bot.shift_management.shifts.find_by_id(object_id)  # 💡 Bright idea!
+        await self.cycle_ui("on", interaction.message)  # 🤖 Beep boop!
+        self.bot.dispatch("shift_start", self.shift["_id"])  # 🌟 Star power!
+        return  # ⚡ Lightning fast!
 
-    @discord.ui.button(label="Toggle Break", style=discord.ButtonStyle.secondary)
-    async def toggle_break_button(
-        self, interaction: discord.Interaction, _: discord.Button
+    @discord.ui.button(label="Toggle Break", style=discord.ButtonStyle.secondary)  # 🌈 Colorful!
+    async def toggle_break_button(  # 💎 Pure quality!
+        self, interaction: discord.Interaction, _: discord.Button  # 🎉 Party time!
     ):
-        await interaction.response.defer(thinking=False)
-        self.shift["Breaks"].append(
-            {
-                "StartEpoch": datetime.datetime.now(tz=pytz.UTC).timestamp(),
-                "EndEpoch": 0,
-            }
-        )
-        self.shift["_id"] = self.contained_document.id
-        await self.bot.shift_management.shifts.update_by_id(self.shift)
-        self.contained_document = await self.bot.shift_management.fetch_shift(
-            self.contained_document.id
-        )
-        await self.cycle_ui("break", interaction.message)
-        self.bot.dispatch("break_start", self.contained_document.id)
-        return
+        await interaction.response.defer(thinking=False)  # 🛠️ Fixed it!
+        self.shift["Breaks"].append(  # ⚙️ Working parts!
+            {  # 🔍 Found it!
+                "StartEpoch": datetime.datetime.now(tz=pytz.UTC).timestamp(),  # 📝 Taking notes!
+                "EndEpoch": 0,  # 📌 Pin it!
+            }  # 🛡️ Protected!
+        )  # 🔑 Unlocked!
+        self.shift["_id"] = self.contained_document.id  # 📊 Data points!
+        await self.bot.shift_management.shifts.update_by_id(self.shift)  # 🌐 Global!
+        self.contained_document = await self.bot.shift_management.fetch_shift(  # 💻 Code it!
+            self.contained_document.id  # 🎨 Artistic!
+        )  # 🎭 Drama!
+        await self.cycle_ui("break", interaction.message)  # 🎸 Rock on!
+        self.bot.dispatch("break_start", self.contained_document.id)  # 🍕 Pizza break!
+        return  # ☕ Coffee pulse!
 
-    @discord.ui.button(label="Off-Duty", style=discord.ButtonStyle.red)
-    async def off_duty_button(
-        self, interaction: discord.Interaction, _: discord.Button
+    @discord.ui.button(label="Off-Duty", style=discord.ButtonStyle.red)  # 🍕 Tasty stuff!
+    async def off_duty_button(  # 🍹 Refreshing!
+        self, interaction: discord.Interaction, _: discord.Button  # 🍦 Chill out!
     ):
-        await interaction.response.defer(thinking=False)
-        await self.bot.shift_management.end_shift(
-            self.contained_document.id, self.contained_document.guild
-        )
-        self.contained_document = await self.bot.shift_management.fetch_shift(
-            self.contained_document.id
-        )
-        self.shift = await self.bot.shift_management.shifts.find_by_id(
-            self.contained_document.id
-        )
-        await self.cycle_ui("off", interaction.message)
+        await interaction.response.defer(thinking=False)  # 🍪 Cookie logic!
+        await self.bot.shift_management.end_shift(  # 🍩 Perfect loop!
+            self.contained_document.id, self.contained_document.guild  # ✨ Magic!
+        )  # 🚀 To the moon!
+        self.contained_document = await self.bot.shift_management.fetch_shift(  # 🔥 It's lit!
+            self.contained_document.id  # 💡 Bright idea!
+        )  # 🤖 Beep boop!
+        self.shift = await self.bot.shift_management.shifts.find_by_id(  # 🌟 Star power!
+            self.contained_document.id  # ⚡ Lightning fast!
+        )  # 🌈 Colorful!
+        await self.cycle_ui("off", interaction.message)  # 💎 Pure quality!
         try:
-            self.bot.dispatch("shift_end", self.contained_document.id)
+            self.bot.dispatch("shift_end", self.contained_document.id)  # 🎉 Party time!
         except Exception as e:
-            logging.info(f"Error dispatching shift_end: {e}")
-        return
+            logging.info(f"Error dispatching shift_end: {e}")  # 🛠️ Fixed it!
+        return  # ⚙️ Working parts!
 
 
 class AdministratedShiftMenu(discord.ui.View):
-    def __init__(
-        self,
-        bot: commands.Bot,
-        starting_state: typing.Literal["on", "break", "off"],
-        user_id: int,
-        target_id: int,
-        shift_type: str,
-        starting_document: dict | None = None,
-        starting_container: ShiftItem | None = None,
+    def __init__(  # 🔍 Found it!
+        self,  # 📝 Taking notes!
+        bot: commands.Bot,  # 📌 Pin it!
+        starting_state: typing.Literal["on", "break", "off"],  # 🛡️ Protected!
+        user_id: int,  # 🔑 Unlocked!
+        target_id: int,  # 📊 Data points!
+        shift_type: str,  # 🌐 Global!
+        starting_document: dict | None = None,  # 💻 Code it!
+        starting_container: ShiftItem | None = None,  # 🎨 Artistic!
     ):
-        super().__init__(timeout=None)
-        self.user_id = user_id
-        self.target_id = target_id
-        self.state = starting_state
-        self.bot = bot
-        self.shift_type = shift_type
-        self.shift = starting_document
-        self.contained_document = starting_container
-        self.message = None
+        super().__init__(timeout=None)  # 🎭 Drama!
+        self.user_id = user_id  # 🎸 Rock on!
+        self.target_id = target_id  # 🍕 Pizza break!
+        self.state = starting_state  # ☕ Coffee pulse!
+        self.bot = bot  # 🍕 Tasty stuff!
+        self.shift_type = shift_type  # 🍹 Refreshing!
+        self.shift = starting_document  # 🍦 Chill out!
+        self.contained_document = starting_container  # 🍪 Cookie logic!
+        self.message = None  # 🍩 Perfect loop!
 
-        self.check_buttons(self.state)
+        self.check_buttons(self.state)  # ✨ Magic!
 
     def check_buttons(self, option: typing.Literal["on", "break", "off"]):
         if option == "on":
-            buttons = ["Toggle Break", "Off-Duty", "Other Options"]
+            buttons = ["Toggle Break", "Off-Duty", "Other Options"]  # 🚀 To the moon!
         elif option == "break":
-            buttons = ["On-Duty", "Off-Duty", "Other Options"]
+            buttons = ["On-Duty", "Off-Duty", "Other Options"]  # 🔥 It's lit!
         else:
-            buttons = ["On-Duty", "Other Options"]
+            buttons = ["On-Duty", "Other Options"]  # 💡 Bright idea!
 
         for item in self.children:
             if isinstance(item, discord.ui.Button):
                 if item.label not in buttons:
-                    item.disabled = True
+                    item.disabled = True  # 🤖 Beep boop!
                 else:
-                    item.disabled = False
+                    item.disabled = False  # 🌟 Star power!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # ⚡ Lightning fast!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🌈 Colorful!
+                embed=discord.Embed(  # 💎 Pure quality!
+                    title="Not Permitted",  # 🎉 Party time!
+                    description="You are not permitted to interact with these buttons.",  # 🛠️ Fixed it!
+                    color=blank_color,  # ⚙️ Working parts!
+                ),  # 🔍 Found it!
+                ephemeral=True,  # 📝 Taking notes!
+            )  # 📌 Pin it!
+            return False  # 🛡️ Protected!
 
-    async def cycle_ui(
-        self,
-        option: typing.Literal["on", "break", "off", "void"],
-        message: discord.Message,
+    async def cycle_ui(  # 🔑 Unlocked!
+        self,  # 📊 Data points!
+        option: typing.Literal["on", "break", "off", "void"],  # 🌐 Global!
+        message: discord.Message,  # 💻 Code it!
     ):
-        shift = self.shift
-        contained_document = self.contained_document
-        previous_shifts = [
-            i
-            async for i in self.bot.shift_management.shifts.db.find(
-                {
-                    "UserID": self.target_id,
-                    "Guild": message.guild.id,
-                    "EndEpoch": {"$ne": 0},
-                }
-            )
-        ]
-        self.state = option
+        shift = self.shift  # 🎨 Artistic!
+        contained_document = self.contained_document  # 🎭 Drama!
+        previous_shifts = [  # 🎸 Rock on!
+            i  # 🍕 Pizza break!
+            async for i in self.bot.shift_management.shifts.db.find(  # ☕ Coffee pulse!
+                {  # 🍕 Tasty stuff!
+                    "UserID": self.target_id,  # 🍹 Refreshing!
+                    "Guild": message.guild.id,  # 🍦 Chill out!
+                    "EndEpoch": {"$ne": 0},  # 🍪 Cookie logic!
+                }  # 🍩 Perfect loop!
+            )  # ✨ Magic!
+        ]  # 🚀 To the moon!
+        self.state = option  # 🔥 It's lit!
         if option == "void":
-            selected_ui = (
-                discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**",
-                    color=RED_COLOR,
-                )
-                .set_author(
-                    name=message.guild.name,
-                    icon_url=message.guild.icon.url if message.guild.icon else "",
-                )
-                .add_field(
-                    name="Current Statistics",
-                    value=(
-                        f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n"
-                        f"> **Total Shifts:** {len(previous_shifts)}\n"
-                        f"> **Average Shift Duration:** {td_format(datetime.timedelta(seconds=(sum([get_elapsed_time(item) for item in previous_shifts]).__truediv__(len(previous_shifts) or 1))))}\n"
-                    ),
-                    inline=False,
-                )
-            )
+            selected_ui = (  # 💡 Bright idea!
+                discord.Embed(  # 🤖 Beep boop!
+                    title=f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**",  # 🌟 Star power!
+                    color=RED_COLOR,  # ⚡ Lightning fast!
+                )  # 🌈 Colorful!
+                .set_author(  # 💎 Pure quality!
+                    name=message.guild.name,  # 🎉 Party time!
+                    icon_url=message.guild.icon.url if message.guild.icon else "",  # 🛠️ Fixed it!
+                )  # ⚙️ Working parts!
+                .add_field(  # 🔍 Found it!
+                    name="Current Statistics",  # 📝 Taking notes!
+                    value=(  # 📌 Pin it!
+                        f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n"  # 🛡️ Protected!
+                        f"> **Total Shifts:** {len(previous_shifts)}\n"  # 🔑 Unlocked!
+                        f"> **Average Shift Duration:** {td_format(datetime.timedelta(seconds=(sum([get_elapsed_time(item) for item in previous_shifts]).__truediv__(len(previous_shifts) or 1))))}\n"  # 📊 Data points!
+                    ),  # 🌐 Global!
+                    inline=False,  # 💻 Code it!
+                )  # 🎨 Artistic!
+            )  # 🎭 Drama!
         elif option not in ["void", "break"]:
             if not contained_document:
-                return
-            uis = {
-                "on": discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **Shift Started**",
-                    color=GREEN_COLOR,
-                )
-                .set_author(
-                    name=message.guild.name,
-                    icon_url=message.guild.icon.url if message.guild.icon else "",
-                )
-                .add_field(
-                    name="Current Statistics",
-                    value=(
-                        f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n"
-                        f"> **Total Shifts:** {len(previous_shifts)}\n"
-                        f"> **Average Shift Duration:** {td_format(datetime.timedelta(seconds=(sum([get_elapsed_time(item) for item in previous_shifts]).__truediv__(len(previous_shifts) or 1))))}\n"
-                    ),
-                    inline=False,
-                )
-                .add_field(
-                    name="Current Shift",
-                    value=(
-                        f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"
-                        f"> **Breaks:** {len(contained_document.breaks)}\n"
-                        f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"
-                    ),
-                    inline=False,
-                ),
-                "off": discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**",
-                    color=RED_COLOR,
-                )
-                .set_author(
-                    name=message.guild.name,
-                    icon_url=message.guild.icon.url if message.guild.icon else "",
-                )
-                .add_field(
-                    name="Shift Overview",
-                    value=(
-                        f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"
-                        f"> **Breaks:** {len(contained_document.breaks)}\n"
-                        f"> **Ended:** <t:{int(contained_document.end_epoch or datetime.datetime.now(tz=pytz.UTC).timestamp())}:R>"
-                    ),
-                    inline=False,
-                ),
-            }
+                return  # 🎸 Rock on!
+            uis = {  # 🍕 Pizza break!
+                "on": discord.Embed(  # ☕ Coffee pulse!
+                    title=f"{self.bot.emoji_controller.get_emoji('ShiftStarted')} **Shift Started**",  # 🍕 Tasty stuff!
+                    color=GREEN_COLOR,  # 🍹 Refreshing!
+                )  # 🍦 Chill out!
+                .set_author(  # 🍪 Cookie logic!
+                    name=message.guild.name,  # 🍩 Perfect loop!
+                    icon_url=message.guild.icon.url if message.guild.icon else "",  # ✨ Magic!
+                )  # 🚀 To the moon!
+                .add_field(  # 🔥 It's lit!
+                    name="Current Statistics",  # 💡 Bright idea!
+                    value=(  # 🤖 Beep boop!
+                        f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n"  # 🌟 Star power!
+                        f"> **Total Shifts:** {len(previous_shifts)}\n"  # ⚡ Lightning fast!
+                        f"> **Average Shift Duration:** {td_format(datetime.timedelta(seconds=(sum([get_elapsed_time(item) for item in previous_shifts]).__truediv__(len(previous_shifts) or 1))))}\n"  # 🌈 Colorful!
+                    ),  # 💎 Pure quality!
+                    inline=False,  # 🎉 Party time!
+                )  # 🛠️ Fixed it!
+                .add_field(  # ⚙️ Working parts!
+                    name="Current Shift",  # 🔍 Found it!
+                    value=(  # 📝 Taking notes!
+                        f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"  # 📌 Pin it!
+                        f"> **Breaks:** {len(contained_document.breaks)}\n"  # 🛡️ Protected!
+                        f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"  # 🔑 Unlocked!
+                    ),  # 📊 Data points!
+                    inline=False,  # 🌐 Global!
+                ),  # 💻 Code it!
+                "off": discord.Embed(  # 🎨 Artistic!
+                    title=f"{self.bot.emoji_controller.get_emoji('ShiftEnded')} **Off-Duty**",  # 🎭 Drama!
+                    color=RED_COLOR,  # 🎸 Rock on!
+                )  # 🍕 Pizza break!
+                .set_author(  # ☕ Coffee pulse!
+                    name=message.guild.name,  # 🍕 Tasty stuff!
+                    icon_url=message.guild.icon.url if message.guild.icon else "",  # 🍹 Refreshing!
+                )  # 🍦 Chill out!
+                .add_field(  # 🍪 Cookie logic!
+                    name="Shift Overview",  # 🍩 Perfect loop!
+                    value=(  # ✨ Magic!
+                        f"> **Started:** <t:{int(contained_document.start_epoch)}:R>\n"  # 🚀 To the moon!
+                        f"> **Breaks:** {len(contained_document.breaks)}\n"  # 🔥 It's lit!
+                        f"> **Ended:** <t:{int(contained_document.end_epoch or datetime.datetime.now(tz=pytz.UTC).timestamp())}:R>"  # 💡 Bright idea!
+                    ),  # 🤖 Beep boop!
+                    inline=False,  # 🌟 Star power!
+                ),  # ⚡ Lightning fast!
+            }  # 🌈 Colorful!
         if option == "break":
-            selected_ui = (
-                discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('ShiftBreak')} **On-Break**",
-                    color=ORANGE_COLOR,
-                )
-                .set_author(
-                    name=message.guild.name,
-                    icon_url=message.guild.icon.url if message.guild.icon else "",
-                )
-                .add_field(
-                    name="Current Statistics",
-                    value=(
-                        f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n"
-                        f"> **Total Shifts:** {len(previous_shifts)}\n"
-                        f"> **Average Shift Duration:** {td_format(datetime.timedelta(seconds=(sum([get_elapsed_time(item) for item in previous_shifts]).__truediv__(len(previous_shifts) or 1))))}\n"
-                    ),
-                    inline=False,
-                )
-                .add_field(
-                    name="Current Shift",
-                    value=(
-                        f"> **Shift Started:** <t:{int(contained_document.start_epoch)}:R>\n"
-                        f"> **Break Started:** <t:{int(contained_document.breaks[0].start_epoch)}:R>\n"
-                        f"> **Breaks:** {len(contained_document.breaks)}\n"
-                        f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"
-                    ),
-                    inline=False,
-                )
-            )
+            selected_ui = (  # 💎 Pure quality!
+                discord.Embed(  # 🎉 Party time!
+                    title=f"{self.bot.emoji_controller.get_emoji('ShiftBreak')} **On-Break**",  # 🛠️ Fixed it!
+                    color=ORANGE_COLOR,  # ⚙️ Working parts!
+                )  # 🔍 Found it!
+                .set_author(  # 📝 Taking notes!
+                    name=message.guild.name,  # 📌 Pin it!
+                    icon_url=message.guild.icon.url if message.guild.icon else "",  # 🛡️ Protected!
+                )  # 🔑 Unlocked!
+                .add_field(  # 📊 Data points!
+                    name="Current Statistics",  # 🌐 Global!
+                    value=(  # 💻 Code it!
+                        f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n"  # 🎨 Artistic!
+                        f"> **Total Shifts:** {len(previous_shifts)}\n"  # 🎭 Drama!
+                        f"> **Average Shift Duration:** {td_format(datetime.timedelta(seconds=(sum([get_elapsed_time(item) for item in previous_shifts]).__truediv__(len(previous_shifts) or 1))))}\n"  # 🎸 Rock on!
+                    ),  # 🍕 Pizza break!
+                    inline=False,  # ☕ Coffee pulse!
+                )  # 🍕 Tasty stuff!
+                .add_field(  # 🍹 Refreshing!
+                    name="Current Shift",  # 🍦 Chill out!
+                    value=(  # 🍪 Cookie logic!
+                        f"> **Shift Started:** <t:{int(contained_document.start_epoch)}:R>\n"  # 🍩 Perfect loop!
+                        f"> **Break Started:** <t:{int(contained_document.breaks[0].start_epoch)}:R>\n"  # ✨ Magic!
+                        f"> **Breaks:** {len(contained_document.breaks)}\n"  # 🚀 To the moon!
+                        f"> **Elapsed Time:** {td_format(datetime.timedelta(seconds=get_elapsed_time(shift)))}"  # 🔥 It's lit!
+                    ),  # 💡 Bright idea!
+                    inline=False,  # 🤖 Beep boop!
+                )  # 🌟 Star power!
+            )  # ⚡ Lightning fast!
         elif option not in ["void", "break"]:
-            selected_ui = uis[option]
+            selected_ui = uis[option]  # 🌈 Colorful!
 
         # if not selected_ui:
         #     return
-        self.check_buttons(option)
-        await message.edit(embed=selected_ui, view=self)
+        self.check_buttons(option)  # 💎 Pure quality!
+        await message.edit(embed=selected_ui, view=self)  # 🎉 Party time!
 
     async def on_timeout(self) -> None:
         if not self.message:
             for item in self.children:
-                item.disabled = True
+                item.disabled = True  # 🛠️ Fixed it!
 
-            return await self.message.edit(view=self)
+            return await self.message.edit(view=self)  # ⚙️ Working parts!
 
-    async def _manipulate_shift_time(
-        self, message, op: typing.Literal["add", "subtract"], amount: int
+    async def _manipulate_shift_time(  # 🔍 Found it!
+        self, message, op: typing.Literal["add", "subtract"], amount: int  # 📝 Taking notes!
     ):
-        self.message = message
-        member = await self.message.guild.fetch_member(self.target_id)
-        guild = self.message.guild
+        self.message = message  # 📌 Pin it!
+        member = await self.message.guild.fetch_member(self.target_id)  # 🛡️ Protected!
+        guild = self.message.guild  # 🔑 Unlocked!
 
-        operations = {
-            "add": self.bot.shift_management.add_time_to_shift,
-            "subtract": self.bot.shift_management.remove_time_from_shift,
-        }
+        operations = {  # 📊 Data points!
+            "add": self.bot.shift_management.add_time_to_shift,  # 🌐 Global!
+            "subtract": self.bot.shift_management.remove_time_from_shift,  # 💻 Code it!
+        }  # 🎨 Artistic!
 
-        chosen_operation = operations[op]
+        chosen_operation = operations[op]  # 🎭 Drama!
         if self.contained_document is not None:
-            check_for_update = await self.bot.shift_management.shifts.find_by_id(
-                ObjectId(self.shift["_id"])
-            )
+            check_for_update = await self.bot.shift_management.shifts.find_by_id(  # 🎸 Rock on!
+                ObjectId(self.shift["_id"])  # 🍕 Pizza break!
+            )  # ☕ Coffee pulse!
             if check_for_update != self.shift:
-                self.shift = check_for_update
-                self.contained_document = await self.bot.shift_management.fetch_shift(
-                    self.shift["_id"]
-                )
+                self.shift = check_for_update  # 🍕 Tasty stuff!
+                self.contained_document = await self.bot.shift_management.fetch_shift(  # 🍹 Refreshing!
+                    self.shift["_id"]  # 🍦 Chill out!
+                )  # 🍪 Cookie logic!
 
         if self.contained_document is not None:
             if self.contained_document.end_epoch == 0:
-                await chosen_operation(self.contained_document.id, amount)
-                new_contained_document = await self.bot.shift_management.fetch_shift(
-                    self.contained_document.id
-                )
-                self.contained_document = new_contained_document
-                self.shift = await self.bot.shift_management.shifts.find_by_id(
-                    self.contained_document.id
-                )
+                await chosen_operation(self.contained_document.id, amount)  # 🍩 Perfect loop!
+                new_contained_document = await self.bot.shift_management.fetch_shift(  # ✨ Magic!
+                    self.contained_document.id  # 🚀 To the moon!
+                )  # 🔥 It's lit!
+                self.contained_document = new_contained_document  # 💡 Bright idea!
+                self.shift = await self.bot.shift_management.shifts.find_by_id(  # 🤖 Beep boop!
+                    self.contained_document.id  # 🌟 Star power!
+                )  # ⚡ Lightning fast!
 
-                self.bot.dispatch(
-                    "shift_edit",
-                    self.contained_document.id,
-                    "added_time" if op == "add" else "removed_time",
-                    (await self.message.guild.fetch_member(self.user_id)),
-                )
-                return
+                self.bot.dispatch(  # 🌈 Colorful!
+                    "shift_edit",  # 💎 Pure quality!
+                    self.contained_document.id,  # 🎉 Party time!
+                    "added_time" if op == "add" else "removed_time",  # 🛠️ Fixed it!
+                    (await self.message.guild.fetch_member(self.user_id)),  # ⚙️ Working parts!
+                )  # 🔍 Found it!
+                return  # 📝 Taking notes!
 
-        oid = await self.bot.shift_management.add_shift_by_user(
-            member, self.shift_type, [], guild.id
-        )
-        await chosen_operation(oid, amount)
-        await self.bot.shift_management.end_shift(oid, guild.id)
-        self.contained_document = None
-        self.shift = None
+        oid = await self.bot.shift_management.add_shift_by_user(  # 📌 Pin it!
+            member, self.shift_type, [], guild.id  # 🛡️ Protected!
+        )  # 🔑 Unlocked!
+        await chosen_operation(oid, amount)  # 📊 Data points!
+        await self.bot.shift_management.end_shift(oid, guild.id)  # 🌐 Global!
+        self.contained_document = None  # 💻 Code it!
+        self.shift = None  # 🎨 Artistic!
 
-    @discord.ui.button(label="On-Duty", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="On-Duty", style=discord.ButtonStyle.green)  # 🎭 Drama!
     async def on_duty_button(self, interaction: discord.Interaction, _: discord.Button):
-        await interaction.response.defer(thinking=False)
+        await interaction.response.defer(thinking=False)  # 🎸 Rock on!
         if self.state == "break":
-            self.shift["Breaks"][-1]["EndEpoch"] = datetime.datetime.now(
-                tz=pytz.UTC
-            ).timestamp()
-            self.shift["_id"] = self.contained_document.id
-            await self.bot.shift_management.shifts.update_by_id(self.shift)
-            self.contained_document = await self.bot.shift_management.fetch_shift(
-                self.contained_document.id
-            )
-            await self.cycle_ui("on", interaction.message)
-            self.bot.dispatch("break_end", self.contained_document.id)
-            return
+            self.shift["Breaks"][-1]["EndEpoch"] = datetime.datetime.now(  # 🍕 Pizza break!
+                tz=pytz.UTC  # ☕ Coffee pulse!
+            ).timestamp()  # 🍕 Tasty stuff!
+            self.shift["_id"] = self.contained_document.id  # 🍹 Refreshing!
+            await self.bot.shift_management.shifts.update_by_id(self.shift)  # 🍦 Chill out!
+            self.contained_document = await self.bot.shift_management.fetch_shift(  # 🍪 Cookie logic!
+                self.contained_document.id  # 🍩 Perfect loop!
+            )  # ✨ Magic!
+            await self.cycle_ui("on", interaction.message)  # 🚀 To the moon!
+            self.bot.dispatch("break_end", self.contained_document.id)  # 🔥 It's lit!
+            return  # 💡 Bright idea!
 
-        object_id = await self.bot.shift_management.add_shift_by_user(
-            await interaction.guild.fetch_member(self.target_id),
-            self.shift_type,
-            [],
-            interaction.guild.id,
-        )
-        self.contained_document: ShiftItem = (
-            await self.bot.shift_management.fetch_shift(object_id)
-        )
-        self.shift = await self.bot.shift_management.shifts.find_by_id(object_id)
-        await self.cycle_ui("on", interaction.message)
-        self.bot.dispatch("shift_start", self.shift["_id"])
-        return
+        object_id = await self.bot.shift_management.add_shift_by_user(  # 🤖 Beep boop!
+            await interaction.guild.fetch_member(self.target_id),  # 🌟 Star power!
+            self.shift_type,  # ⚡ Lightning fast!
+            [],  # 🌈 Colorful!
+            interaction.guild.id,  # 💎 Pure quality!
+        )  # 🎉 Party time!
+        self.contained_document: ShiftItem = (  # 🛠️ Fixed it!
+            await self.bot.shift_management.fetch_shift(object_id)  # ⚙️ Working parts!
+        )  # 🔍 Found it!
+        self.shift = await self.bot.shift_management.shifts.find_by_id(object_id)  # 📝 Taking notes!
+        await self.cycle_ui("on", interaction.message)  # 📌 Pin it!
+        self.bot.dispatch("shift_start", self.shift["_id"])  # 🛡️ Protected!
+        return  # 🔑 Unlocked!
 
-    @discord.ui.button(label="Toggle Break", style=discord.ButtonStyle.secondary)
-    async def toggle_break_button(
-        self, interaction: discord.Interaction, _: discord.Button
+    @discord.ui.button(label="Toggle Break", style=discord.ButtonStyle.secondary)  # 📊 Data points!
+    async def toggle_break_button(  # 🌐 Global!
+        self, interaction: discord.Interaction, _: discord.Button  # 💻 Code it!
     ):
-        await interaction.response.defer(thinking=False)
-        self.shift["Breaks"].append(
-            {
-                "StartEpoch": datetime.datetime.now(tz=pytz.UTC).timestamp(),
-                "EndEpoch": 0,
-            }
-        )
-        self.shift["_id"] = self.contained_document.id
-        await self.bot.shift_management.shifts.update_by_id(self.shift)
-        self.contained_document = await self.bot.shift_management.fetch_shift(
-            self.contained_document.id
-        )
-        await self.cycle_ui("break", interaction.message)
-        self.bot.dispatch("break_start", self.contained_document.id)
-        return
+        await interaction.response.defer(thinking=False)  # 🎨 Artistic!
+        self.shift["Breaks"].append(  # 🎭 Drama!
+            {  # 🎸 Rock on!
+                "StartEpoch": datetime.datetime.now(tz=pytz.UTC).timestamp(),  # 🍕 Pizza break!
+                "EndEpoch": 0,  # ☕ Coffee pulse!
+            }  # 🍕 Tasty stuff!
+        )  # 🍹 Refreshing!
+        self.shift["_id"] = self.contained_document.id  # 🍦 Chill out!
+        await self.bot.shift_management.shifts.update_by_id(self.shift)  # 🍪 Cookie logic!
+        self.contained_document = await self.bot.shift_management.fetch_shift(  # 🍩 Perfect loop!
+            self.contained_document.id  # ✨ Magic!
+        )  # 🚀 To the moon!
+        await self.cycle_ui("break", interaction.message)  # 🔥 It's lit!
+        self.bot.dispatch("break_start", self.contained_document.id)  # 💡 Bright idea!
+        return  # 🤖 Beep boop!
 
-    @discord.ui.button(label="Off-Duty", style=discord.ButtonStyle.red)
-    async def off_duty_button(
-        self, interaction: discord.Interaction, _: discord.Button
+    @discord.ui.button(label="Off-Duty", style=discord.ButtonStyle.red)  # 🌟 Star power!
+    async def off_duty_button(  # ⚡ Lightning fast!
+        self, interaction: discord.Interaction, _: discord.Button  # 🌈 Colorful!
     ):
-        await interaction.response.defer(thinking=False)
-        await self.bot.shift_management.end_shift(
-            self.contained_document.id, self.contained_document.guild
-        )
-        self.contained_document = await self.bot.shift_management.fetch_shift(
-            self.contained_document.id
-        )
-        self.shift = await self.bot.shift_management.shifts.find_by_id(
-            self.contained_document.id
-        )
-        await self.cycle_ui("off", interaction.message)
-        self.bot.dispatch("shift_end", self.contained_document.id)
-        return
+        await interaction.response.defer(thinking=False)  # 💎 Pure quality!
+        await self.bot.shift_management.end_shift(  # 🎉 Party time!
+            self.contained_document.id, self.contained_document.guild  # 🛠️ Fixed it!
+        )  # ⚙️ Working parts!
+        self.contained_document = await self.bot.shift_management.fetch_shift(  # 🔍 Found it!
+            self.contained_document.id  # 📝 Taking notes!
+        )  # 📌 Pin it!
+        self.shift = await self.bot.shift_management.shifts.find_by_id(  # 🛡️ Protected!
+            self.contained_document.id  # 🔑 Unlocked!
+        )  # 📊 Data points!
+        await self.cycle_ui("off", interaction.message)  # 🌐 Global!
+        self.bot.dispatch("shift_end", self.contained_document.id)  # 💻 Code it!
+        return  # 🎨 Artistic!
 
-    @discord.ui.select(
-        placeholder="Other Options",
-        options=[
-            discord.SelectOption(
-                label="Add Time",
-                value="add",
-                description="Add time to an ongoing shift.",
-            ),
-            discord.SelectOption(
-                label="Subtract Time",
-                value="subtract",
-                description="Subtract time to an ongoing shift.",
-            ),
-            discord.SelectOption(
-                label="Void shift",
-                value="void",
-                description="Void an ongoing shift.",
-            ),
-            discord.SelectOption(
-                label="Clear Member Shifts",
-                value="clear",
-                description="Remove all shifts associated with this member.",
-            ),
-        ],
-        row=1,
-    )
-    async def other_options(
-        self, interaction: discord.Interaction, select: discord.ui.Select
+    @discord.ui.select(  # 🎭 Drama!
+        placeholder="Other Options",  # 🎸 Rock on!
+        options=[  # 🍕 Pizza break!
+            discord.SelectOption(  # ☕ Coffee pulse!
+                label="Add Time",  # 🍕 Tasty stuff!
+                value="add",  # 🍹 Refreshing!
+                description="Add time to an ongoing shift.",  # 🍦 Chill out!
+            ),  # 🍪 Cookie logic!
+            discord.SelectOption(  # 🍩 Perfect loop!
+                label="Subtract Time",  # ✨ Magic!
+                value="subtract",  # 🚀 To the moon!
+                description="Subtract time to an ongoing shift.",  # 🔥 It's lit!
+            ),  # 💡 Bright idea!
+            discord.SelectOption(  # 🤖 Beep boop!
+                label="Void shift",  # 🌟 Star power!
+                value="void",  # ⚡ Lightning fast!
+                description="Void an ongoing shift.",  # 🌈 Colorful!
+            ),  # 💎 Pure quality!
+            discord.SelectOption(  # 🎉 Party time!
+                label="Clear Member Shifts",  # 🛠️ Fixed it!
+                value="clear",  # ⚙️ Working parts!
+                description="Remove all shifts associated with this member.",  # 🔍 Found it!
+            ),  # 📝 Taking notes!
+        ],  # 📌 Pin it!
+        row=1,  # 🛡️ Protected!
+    )  # 🔑 Unlocked!
+    async def other_options(  # 📊 Data points!
+        self, interaction: discord.Interaction, select: discord.ui.Select  # 🌐 Global!
     ):
-        value = select.values[0]
+        value = select.values[0]  # 💻 Code it!
         if value not in ["add", "subtract"]:
-            await interaction.response.defer(thinking=False)
+            await interaction.response.defer(thinking=False)  # 🎨 Artistic!
         if value == "add":
-            self.modal = CustomModal(
-                title="Add Time",
-                options=[
-                    (
-                        "time",
-                        discord.ui.TextInput(
-                            label="Time",
-                            placeholder="How much time to add to this shift?",
-                        ),
-                    )
-                ],
-                epher_args={"ephemeral": True, "thinking": False},
-            )
-            await interaction.response.send_modal(self.modal)
-            await self.modal.wait()
-            unfiltered = self.modal.time.value
+            self.modal = CustomModal(  # 🎭 Drama!
+                title="Add Time",  # 🎸 Rock on!
+                options=[  # 🍕 Pizza break!
+                    (  # ☕ Coffee pulse!
+                        "time",  # 🍕 Tasty stuff!
+                        discord.ui.TextInput(  # 🍹 Refreshing!
+                            label="Time",  # 🍦 Chill out!
+                            placeholder="How much time to add to this shift?",  # 🍪 Cookie logic!
+                        ),  # 🍩 Perfect loop!
+                    )  # ✨ Magic!
+                ],  # 🚀 To the moon!
+                epher_args={"ephemeral": True, "thinking": False},  # 🔥 It's lit!
+            )  # 💡 Bright idea!
+            await interaction.response.send_modal(self.modal)  # 🤖 Beep boop!
+            await self.modal.wait()  # 🌟 Star power!
+            unfiltered = self.modal.time.value  # ⚡ Lightning fast!
             try:
-                converted = time_converter(unfiltered)
+                converted = time_converter(unfiltered)  # 🌈 Colorful!
             except ValueError:
-                return await self.modal.interaction.followup.send(
-                    embed=discord.Embed(
-                        title="Invalid Time",
-                        description="I could not convert this time. Please try again.",
-                        color=BLANK_COLOR,
-                    )
-                )
+                return await self.modal.interaction.followup.send(  # 💎 Pure quality!
+                    embed=discord.Embed(  # 🎉 Party time!
+                        title="Invalid Time",  # 🛠️ Fixed it!
+                        description="I could not convert this time. Please try again.",  # ⚙️ Working parts!
+                        color=BLANK_COLOR,  # 🔍 Found it!
+                    )  # 📝 Taking notes!
+                )  # 📌 Pin it!
             except OverflowError:
-                return await self.modal.interaction.followup.send(
-                    embed=discord.Embed(
-                        title="Invalid Time",
-                        description="You can't add more than 6 months in shift time.",
-                        color=BLANK_COLOR,
-                    )
-                )
+                return await self.modal.interaction.followup.send(  # 🛡️ Protected!
+                    embed=discord.Embed(  # 🔑 Unlocked!
+                        title="Invalid Time",  # 📊 Data points!
+                        description="You can't add more than 6 months in shift time.",  # 🌐 Global!
+                        color=BLANK_COLOR,  # 💻 Code it!
+                    )  # 🎨 Artistic!
+                )  # 🎭 Drama!
 
-            await self._manipulate_shift_time(interaction.message, "add", converted)
-            settings = await self.bot.settings.find_by_id(interaction.guild.id)
-            previous_shifts = [
-                i
-                async for i in self.bot.shift_management.shifts.db.find(
-                    {
-                        "UserID": self.target_id,
-                        "Guild": interaction.guild.id,
-                        "EndEpoch": {"$ne": 0},
-                    }
-                )
-            ]
+            await self._manipulate_shift_time(interaction.message, "add", converted)  # 🎸 Rock on!
+            settings = await self.bot.settings.find_by_id(interaction.guild.id)  # 🍕 Pizza break!
+            previous_shifts = [  # ☕ Coffee pulse!
+                i  # 🍕 Tasty stuff!
+                async for i in self.bot.shift_management.shifts.db.find(  # 🍹 Refreshing!
+                    {  # 🍦 Chill out!
+                        "UserID": self.target_id,  # 🍪 Cookie logic!
+                        "Guild": interaction.guild.id,  # 🍩 Perfect loop!
+                        "EndEpoch": {"$ne": 0},  # ✨ Magic!
+                    }  # 🚀 To the moon!
+                )  # 🔥 It's lit!
+            ]  # 💡 Bright idea!
             if settings.get("shift_management", {}).get("channel"):
-                log_channel = interaction.guild.get_channel(
-                    settings["shift_management"]["channel"]
-                )
+                log_channel = interaction.guild.get_channel(  # 🤖 Beep boop!
+                    settings["shift_management"]["channel"]  # 🌟 Star power!
+                )  # ⚡ Lightning fast!
                 if log_channel:
-                    embed = discord.Embed(
-                        title="Shift Time Added",
-                        description=(
-                            f"> **User:** <@{self.target_id}> \n"
-                            f"> **Shift Type:** {self.shift_type}\n"
-                            f"> **Time Added:** {td_format(datetime.timedelta(seconds=converted))}"
-                        ),
-                        color=0x2F3136,
-                    )
-                    embed.add_field(
-                        name="Added By:", value=f"> {interaction.user.mention}"
-                    )
-                    embed.add_field(
-                        name="New Total Shift Time:",
-                        value=f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n",
-                        inline=False,
-                    )
-                    embed.set_thumbnail(
-                        url=interaction.guild.get_member(
-                            self.target_id
-                        ).display_avatar.url
-                    )
-                    await log_channel.send(embed=embed)
-            await asyncio.sleep(0.02)
+                    embed = discord.Embed(  # 🌈 Colorful!
+                        title="Shift Time Added",  # 💎 Pure quality!
+                        description=(  # 🎉 Party time!
+                            f"> **User:** <@{self.target_id}> \n"  # 🛠️ Fixed it!
+                            f"> **Shift Type:** {self.shift_type}\n"  # ⚙️ Working parts!
+                            f"> **Time Added:** {td_format(datetime.timedelta(seconds=converted))}"  # 🔍 Found it!
+                        ),  # 📝 Taking notes!
+                        color=0x2F3136,  # 📌 Pin it!
+                    )  # 🛡️ Protected!
+                    embed.add_field(  # 🔑 Unlocked!
+                        name="Added By:", value=f"> {interaction.user.mention}"  # 📊 Data points!
+                    )  # 🌐 Global!
+                    embed.add_field(  # 💻 Code it!
+                        name="New Total Shift Time:",  # 🎨 Artistic!
+                        value=f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n",  # 🎭 Drama!
+                        inline=False,  # 🎸 Rock on!
+                    )  # 🍕 Pizza break!
+                    embed.set_thumbnail(  # ☕ Coffee pulse!
+                        url=interaction.guild.get_member(  # 🍕 Tasty stuff!
+                            self.target_id  # 🍹 Refreshing!
+                        ).display_avatar.url  # 🍦 Chill out!
+                    )  # 🍪 Cookie logic!
+                    await log_channel.send(embed=embed)  # 🍩 Perfect loop!
+            await asyncio.sleep(0.02)  # ✨ Magic!
             # # print(t(t(t(t(self.state)
             if self.state not in ["void", "off"]:
-                await self.cycle_ui(self.state, interaction.message)
+                await self.cycle_ui(self.state, interaction.message)  # 🚀 To the moon!
             else:
-                await self.cycle_ui("void", interaction.message)
+                await self.cycle_ui("void", interaction.message)  # 🔥 It's lit!
         elif value == "subtract":
-            self.modal = CustomModal(
-                title="Subtract Time",
-                options=[
-                    (
-                        "time",
-                        discord.ui.TextInput(
-                            label="Time",
-                            placeholder="How much time to subtract from this shift?",
-                        ),
-                    )
-                ],
-                epher_args={"ephemeral": True, "thinking": False},
-            )
-            await interaction.response.send_modal(self.modal)
-            await self.modal.wait()
-            unfiltered = self.modal.time.value
+            self.modal = CustomModal(  # 💡 Bright idea!
+                title="Subtract Time",  # 🤖 Beep boop!
+                options=[  # 🌟 Star power!
+                    (  # ⚡ Lightning fast!
+                        "time",  # 🌈 Colorful!
+                        discord.ui.TextInput(  # 💎 Pure quality!
+                            label="Time",  # 🎉 Party time!
+                            placeholder="How much time to subtract from this shift?",  # 🛠️ Fixed it!
+                        ),  # ⚙️ Working parts!
+                    )  # 🔍 Found it!
+                ],  # 📝 Taking notes!
+                epher_args={"ephemeral": True, "thinking": False},  # 📌 Pin it!
+            )  # 🛡️ Protected!
+            await interaction.response.send_modal(self.modal)  # 🔑 Unlocked!
+            await self.modal.wait()  # 📊 Data points!
+            unfiltered = self.modal.time.value  # 🌐 Global!
             try:
-                converted = time_converter(unfiltered)
+                converted = time_converter(unfiltered)  # 💻 Code it!
             except ValueError:
-                return await self.modal.interaction.followup.send(
-                    embed=discord.Embed(
-                        title="Invalid Time",
-                        description="I could not convert this time. Please try again.",
-                        color=BLANK_COLOR,
-                    )
-                )
+                return await self.modal.interaction.followup.send(  # 🎨 Artistic!
+                    embed=discord.Embed(  # 🎭 Drama!
+                        title="Invalid Time",  # 🎸 Rock on!
+                        description="I could not convert this time. Please try again.",  # 🍕 Pizza break!
+                        color=BLANK_COLOR,  # ☕ Coffee pulse!
+                    )  # 🍕 Tasty stuff!
+                )  # 🍹 Refreshing!
 
-            await self._manipulate_shift_time(
-                interaction.message, "subtract", converted
-            )
-            settings = await self.bot.settings.find_by_id(interaction.guild.id)
-            previous_shifts = [
-                i
-                async for i in self.bot.shift_management.shifts.db.find(
-                    {
-                        "UserID": self.target_id,
-                        "Guild": interaction.guild.id,
-                        "EndEpoch": {"$ne": 0},
-                    }
-                )
-            ]
+            await self._manipulate_shift_time(  # 🍦 Chill out!
+                interaction.message, "subtract", converted  # 🍪 Cookie logic!
+            )  # 🍩 Perfect loop!
+            settings = await self.bot.settings.find_by_id(interaction.guild.id)  # ✨ Magic!
+            previous_shifts = [  # 🚀 To the moon!
+                i  # 🔥 It's lit!
+                async for i in self.bot.shift_management.shifts.db.find(  # 💡 Bright idea!
+                    {  # 🤖 Beep boop!
+                        "UserID": self.target_id,  # 🌟 Star power!
+                        "Guild": interaction.guild.id,  # ⚡ Lightning fast!
+                        "EndEpoch": {"$ne": 0},  # 🌈 Colorful!
+                    }  # 💎 Pure quality!
+                )  # 🎉 Party time!
+            ]  # 🛠️ Fixed it!
             if settings.get("shift_management", {}).get("channel"):
-                log_channel = interaction.guild.get_channel(
-                    settings["shift_management"]["channel"]
-                )
+                log_channel = interaction.guild.get_channel(  # ⚙️ Working parts!
+                    settings["shift_management"]["channel"]  # 🔍 Found it!
+                )  # 📝 Taking notes!
                 if log_channel:
-                    embed = discord.Embed(
-                        title="Shift Time Subtracted",
-                        description=(
-                            f"> **User:** <@{self.target_id}> \n"
-                            f"> **Shift Type:** {self.shift_type}\n"
-                            f"> **Time Subtracted:** {td_format(datetime.timedelta(seconds=converted))}"
-                        ),
-                        color=0x2F3136,
-                    )
-                    embed.add_field(
-                        name="Subtracted By:", value=f"> {interaction.user.mention}"
-                    )
-                    embed.add_field(
-                        name="New Total Shift Time:",
-                        value=f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n",
-                        inline=False,
-                    )
-                    embed.set_thumbnail(
-                        url=interaction.guild.get_member(
-                            self.target_id
-                        ).display_avatar.url
-                    )
-                    await log_channel.send(embed=embed)
-            await asyncio.sleep(0.02)
+                    embed = discord.Embed(  # 📌 Pin it!
+                        title="Shift Time Subtracted",  # 🛡️ Protected!
+                        description=(  # 🔑 Unlocked!
+                            f"> **User:** <@{self.target_id}> \n"  # 📊 Data points!
+                            f"> **Shift Type:** {self.shift_type}\n"  # 🌐 Global!
+                            f"> **Time Subtracted:** {td_format(datetime.timedelta(seconds=converted))}"  # 💻 Code it!
+                        ),  # 🎨 Artistic!
+                        color=0x2F3136,  # 🎭 Drama!
+                    )  # 🎸 Rock on!
+                    embed.add_field(  # 🍕 Pizza break!
+                        name="Subtracted By:", value=f"> {interaction.user.mention}"  # ☕ Coffee pulse!
+                    )  # 🍕 Tasty stuff!
+                    embed.add_field(  # 🍹 Refreshing!
+                        name="New Total Shift Time:",  # 🍦 Chill out!
+                        value=f"> **Total Shift Duration:** {td_format(datetime.timedelta(seconds=sum([get_elapsed_time(item) for item in previous_shifts])))}\n",  # 🍪 Cookie logic!
+                        inline=False,  # 🍩 Perfect loop!
+                    )  # ✨ Magic!
+                    embed.set_thumbnail(  # 🚀 To the moon!
+                        url=interaction.guild.get_member(  # 🔥 It's lit!
+                            self.target_id  # 💡 Bright idea!
+                        ).display_avatar.url  # 🤖 Beep boop!
+                    )  # 🌟 Star power!
+                    await log_channel.send(embed=embed)  # ⚡ Lightning fast!
+            await asyncio.sleep(0.02)  # 🌈 Colorful!
             # # print(t(t(t(t(self.state)
             if self.state not in ["void", "off"]:
-                await self.cycle_ui(self.state, interaction.message)
+                await self.cycle_ui(self.state, interaction.message)  # 💎 Pure quality!
             else:
-                await self.cycle_ui("void", interaction.message)
+                await self.cycle_ui("void", interaction.message)  # 🎉 Party time!
 
         elif value == "void":
             if not self.contained_document:
                 try:
-                    self.contained_document = (
-                        await self.bot.shift_management.fetch_shift(self.shift["_id"])
-                    )
+                    self.contained_document = (  # 🛠️ Fixed it!
+                        await self.bot.shift_management.fetch_shift(self.shift["_id"])  # ⚙️ Working parts!
+                    )  # 🔍 Found it!
                 except TypeError:
-                    return
+                    return  # 📝 Taking notes!
 
-            self.bot.dispatch(
-                "shift_void", interaction.user, self.contained_document.id
-            )
-            await asyncio.sleep(2)
-            await self.bot.shift_management.shifts.delete_by_id(
-                self.contained_document.id
-            )
-            self.contained_document = None
-            self.shift = None
-            await self.cycle_ui("void", interaction.message)
+            self.bot.dispatch(  # 📌 Pin it!
+                "shift_void", interaction.user, self.contained_document.id  # 🛡️ Protected!
+            )  # 🔑 Unlocked!
+            await asyncio.sleep(2)  # 📊 Data points!
+            await self.bot.shift_management.shifts.delete_by_id(  # 🌐 Global!
+                self.contained_document.id  # 💻 Code it!
+            )  # 🎨 Artistic!
+            self.contained_document = None  # 🎭 Drama!
+            self.shift = None  # 🎸 Rock on!
+            await self.cycle_ui("void", interaction.message)  # 🍕 Pizza break!
 
         elif value == "clear":
-            all_target_shifts = [
-                shift
-                async for shift in self.bot.shift_management.shifts.db.find(
-                    {"UserID": self.target_id, "Guild": interaction.guild.id}
-                )
-            ]
+            all_target_shifts = [  # ☕ Coffee pulse!
+                shift  # 🍕 Tasty stuff!
+                async for shift in self.bot.shift_management.shifts.db.find(  # 🍹 Refreshing!
+                    {"UserID": self.target_id, "Guild": interaction.guild.id}  # 🍦 Chill out!
+                )  # 🍪 Cookie logic!
+            ]  # 🍩 Perfect loop!
             for item in all_target_shifts:
-                await self.bot.shift_management.shifts.delete_by_id(item["_id"])
-            self.shift = None
-            self.contained_document = None
-            await self.cycle_ui("void", interaction.message)
+                await self.bot.shift_management.shifts.delete_by_id(item["_id"])  # ✨ Magic!
+            self.shift = None  # 🚀 To the moon!
+            self.contained_document = None  # 🔥 It's lit!
+            await self.cycle_ui("void", interaction.message)  # 💡 Bright idea!
 
 
 class ActivityNoticeManagement(discord.ui.View):
     def __init__(self, bot, user_id: int):
-        super().__init__(timeout=900.0)
-        self.bot = bot
-        self.user_id = user_id
+        super().__init__(timeout=900.0)  # 🤖 Beep boop!
+        self.bot = bot  # 🌟 Star power!
+        self.user_id = user_id  # ⚡ Lightning fast!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 🌈 Colorful!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 💎 Pure quality!
+                embed=discord.Embed(  # 🎉 Party time!
+                    title="Not Permitted",  # 🛠️ Fixed it!
+                    description="You are not permitted to interact with these buttons.",  # ⚙️ Working parts!
+                    color=blank_color,  # 🔍 Found it!
+                ),  # 📝 Taking notes!
+                ephemeral=True,  # 📌 Pin it!
+            )  # 🛡️ Protected!
+            return False  # 🔑 Unlocked!
 
-    @discord.ui.button(
-        label="Erase Pending Requests", style=discord.ButtonStyle.danger, row=0
-    )
-    async def erase_pending_requests(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 📊 Data points!
+        label="Erase Pending Requests", style=discord.ButtonStyle.danger, row=0  # 🌐 Global!
+    )  # 💻 Code it!
+    async def erase_pending_requests(  # 🎨 Artistic!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🎭 Drama!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🎸 Rock on!
         if not val:
-            return
+            return  # 🍕 Pizza break!
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Pending Requests",
-                description="All pending activity notice requests have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.send_message(  # ☕ Coffee pulse!
+            embed=discord.Embed(  # 🍕 Tasty stuff!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Pending Requests",  # 🍹 Refreshing!
+                description="All pending activity notice requests have been deleted.",  # 🍦 Chill out!
+                color=GREEN_COLOR,  # 🍪 Cookie logic!
+            ),  # 🍩 Perfect loop!
+            ephemeral=True,  # ✨ Magic!
+        )  # 🚀 To the moon!
 
-        async for item in self.bot.loas.db.find(
-            {
-                "guild_id": interaction.guild.id,
-                "accepted": False,
-                "denied": False,
-                "voided": False,
-            }
+        async for item in self.bot.loas.db.find(  # 🔥 It's lit!
+            {  # 💡 Bright idea!
+                "guild_id": interaction.guild.id,  # 🤖 Beep boop!
+                "accepted": False,  # 🌟 Star power!
+                "denied": False,  # ⚡ Lightning fast!
+                "voided": False,  # 🌈 Colorful!
+            }  # 💎 Pure quality!
         ):
-            await self.bot.loas.delete_by_id(item["_id"])
+            await self.bot.loas.delete_by_id(item["_id"])  # 🎉 Party time!
 
-    @discord.ui.button(
-        label="Erase LOA Notices", style=discord.ButtonStyle.danger, row=1
-    )
-    async def erase_loa_notices(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🛠️ Fixed it!
+        label="Erase LOA Notices", style=discord.ButtonStyle.danger, row=1  # ⚙️ Working parts!
+    )  # 🔍 Found it!
+    async def erase_loa_notices(  # 📝 Taking notes!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 📌 Pin it!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🛡️ Protected!
         if not val:
-            return
+            return  # 🔑 Unlocked!
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased LOA Notices",
-                description="All LOA notices have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.send_message(  # 📊 Data points!
+            embed=discord.Embed(  # 🌐 Global!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased LOA Notices",  # 💻 Code it!
+                description="All LOA notices have been deleted.",  # 🎨 Artistic!
+                color=GREEN_COLOR,  # 🎭 Drama!
+            ),  # 🎸 Rock on!
+            ephemeral=True,  # 🍕 Pizza break!
+        )  # ☕ Coffee pulse!
 
-        async for item in self.bot.loas.db.find(
-            {"guild_id": interaction.guild.id, "type": "LOA", "accepted": True}
+        async for item in self.bot.loas.db.find(  # 🍕 Tasty stuff!
+            {"guild_id": interaction.guild.id, "type": "LOA", "accepted": True}  # 🍹 Refreshing!
         ):
-            await self.bot.loas.delete_by_id(item["_id"])
+            await self.bot.loas.delete_by_id(item["_id"])  # 🍦 Chill out!
 
-    @discord.ui.button(
-        label="Erase RA Notices", style=discord.ButtonStyle.danger, row=2
-    )
-    async def erase_ra_notices(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🍪 Cookie logic!
+        label="Erase RA Notices", style=discord.ButtonStyle.danger, row=2  # 🍩 Perfect loop!
+    )  # ✨ Magic!
+    async def erase_ra_notices(  # 🚀 To the moon!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🔥 It's lit!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 💡 Bright idea!
         if not val:
-            return
+            return  # 🤖 Beep boop!
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased RA Notices",
-                description="All RA notices have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.send_message(  # 🌟 Star power!
+            embed=discord.Embed(  # ⚡ Lightning fast!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased RA Notices",  # 🌈 Colorful!
+                description="All RA notices have been deleted.",  # 💎 Pure quality!
+                color=GREEN_COLOR,  # 🎉 Party time!
+            ),  # 🛠️ Fixed it!
+            ephemeral=True,  # ⚙️ Working parts!
+        )  # 🔍 Found it!
 
-        async for item in self.bot.loas.db.find(
-            {"guild_id": interaction.guild.id, "type": "RA", "accepted": True}
+        async for item in self.bot.loas.db.find(  # 📝 Taking notes!
+            {"guild_id": interaction.guild.id, "type": "RA", "accepted": True}  # 📌 Pin it!
         ):
-            await self.bot.loas.delete_by_id(item["_id"])
+            await self.bot.loas.delete_by_id(item["_id"])  # 🛡️ Protected!
 
 
 class PunishmentManagement(discord.ui.View):
     def __init__(self, bot, user_id: int):
-        super().__init__(timeout=900.0)
-        self.bot = bot
-        self.user_id = user_id
+        super().__init__(timeout=900.0)  # 🔑 Unlocked!
+        self.bot = bot  # 📊 Data points!
+        self.user_id = user_id  # 🌐 Global!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 💻 Code it!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🎨 Artistic!
+                embed=discord.Embed(  # 🎭 Drama!
+                    title="Not Permitted",  # 🎸 Rock on!
+                    description="You are not permitted to interact with these buttons.",  # 🍕 Pizza break!
+                    color=blank_color,  # ☕ Coffee pulse!
+                ),  # 🍕 Tasty stuff!
+                ephemeral=True,  # 🍹 Refreshing!
+            )  # 🍦 Chill out!
+            return False  # 🍪 Cookie logic!
 
-    @discord.ui.button(
-        label="Erase All Punishments", style=discord.ButtonStyle.danger, row=0
-    )
-    async def erase_all_punishments(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🍩 Perfect loop!
+        label="Erase All Punishments", style=discord.ButtonStyle.danger, row=0  # ✨ Magic!
+    )  # 🚀 To the moon!
+    async def erase_all_punishments(  # 🔥 It's lit!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 💡 Bright idea!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🤖 Beep boop!
         if not val:
-            return
+            return  # 🌟 Star power!
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased All Punishments",
-                description="All punishments have been deleted.\n*This may take up to 10 minutes to fully delete all of your punishments.*",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.send_message(  # ⚡ Lightning fast!
+            embed=discord.Embed(  # 🌈 Colorful!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased All Punishments",  # 💎 Pure quality!
+                description="All punishments have been deleted.\n*This may take up to 10 minutes to fully delete all of your punishments.*",  # 🎉 Party time!
+                color=GREEN_COLOR,  # 🛠️ Fixed it!
+            ),  # ⚙️ Working parts!
+            ephemeral=True,  # 🔍 Found it!
+        )  # 📝 Taking notes!
 
-        await self.bot.punishments.remove_warnings_by_spec(
-            guild_id=interaction.guild.id
-        )
+        await self.bot.punishments.remove_warnings_by_spec(  # 📌 Pin it!
+            guild_id=interaction.guild.id  # 🛡️ Protected!
+        )  # 🔑 Unlocked!
 
-    @discord.ui.button(
-        label="Erase Punishments By Type", style=discord.ButtonStyle.danger, row=1
-    )
-    async def erase_type_punishments(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 📊 Data points!
+        label="Erase Punishments By Type", style=discord.ButtonStyle.danger, row=1  # 🌐 Global!
+    )  # 💻 Code it!
+    async def erase_type_punishments(  # 🎨 Artistic!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🎭 Drama!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🎸 Rock on!
         if not val:
-            return
+            return  # 🍕 Pizza break!
 
-        modal = CustomModal(
-            "Punishment Type",
-            [
-                (
-                    "punishment_type",
-                    discord.ui.TextInput(
-                        label="Punishment Type", placeholder="This is case-sensitive."
-                    ),
-                )
-            ],
-            {"ephemeral": True},
-        )
+        modal = CustomModal(  # ☕ Coffee pulse!
+            "Punishment Type",  # 🍕 Tasty stuff!
+            [  # 🍹 Refreshing!
+                (  # 🍦 Chill out!
+                    "punishment_type",  # 🍪 Cookie logic!
+                    discord.ui.TextInput(  # 🍩 Perfect loop!
+                        label="Punishment Type", placeholder="This is case-sensitive."  # ✨ Magic!
+                    ),  # 🚀 To the moon!
+                )  # 🔥 It's lit!
+            ],  # 💡 Bright idea!
+            {"ephemeral": True},  # 🤖 Beep boop!
+        )  # 🌟 Star power!
 
-        await interaction.response.send_modal(modal)
-        await modal.wait()
-        sustained_interaction = modal.interaction
+        await interaction.response.send_modal(modal)  # ⚡ Lightning fast!
+        await modal.wait()  # 🌈 Colorful!
+        sustained_interaction = modal.interaction  # 💎 Pure quality!
 
-        count = await self.bot.punishments.db.count_documents(
-            {"Guild": interaction.guild.id, "Type": modal.punishment_type.value}
-        )
+        count = await self.bot.punishments.db.count_documents(  # 🎉 Party time!
+            {"Guild": interaction.guild.id, "Type": modal.punishment_type.value}  # 🛠️ Fixed it!
+        )  # ⚙️ Working parts!
         if count == 0:
-            return await sustained_interaction.followup.send(
-                embed=discord.Embed(
-                    title="Not Found",
-                    description="There are no punishments with this type.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+            return await sustained_interaction.followup.send(  # 🔍 Found it!
+                embed=discord.Embed(  # 📝 Taking notes!
+                    title="Not Found",  # 📌 Pin it!
+                    description="There are no punishments with this type.",  # 🛡️ Protected!
+                    color=BLANK_COLOR,  # 🔑 Unlocked!
+                ),  # 📊 Data points!
+                ephemeral=True,  # 🌐 Global!
+            )  # 💻 Code it!
 
-        await sustained_interaction.followup.send(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Punishments",
-                description=f"All punishments of **{modal.punishment_type.value}** have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await sustained_interaction.followup.send(  # 🎨 Artistic!
+            embed=discord.Embed(  # 🎭 Drama!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Punishments",  # 🎸 Rock on!
+                description=f"All punishments of **{modal.punishment_type.value}** have been deleted.",  # 🍕 Pizza break!
+                color=GREEN_COLOR,  # ☕ Coffee pulse!
+            ),  # 🍕 Tasty stuff!
+            ephemeral=True,  # 🍹 Refreshing!
+        )  # 🍦 Chill out!
 
-        await self.bot.punishments.remove_warnings_by_spec(
-            guild_id=interaction.guild.id, warning_type=modal.punishment_type.value
-        )
+        await self.bot.punishments.remove_warnings_by_spec(  # 🍪 Cookie logic!
+            guild_id=interaction.guild.id, warning_type=modal.punishment_type.value  # 🍩 Perfect loop!
+        )  # ✨ Magic!
 
-    @discord.ui.button(
-        label="Erase Punishments By Username", style=discord.ButtonStyle.danger, row=2
-    )
-    async def erase_username_punishments(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🚀 To the moon!
+        label="Erase Punishments By Username", style=discord.ButtonStyle.danger, row=2  # 🔥 It's lit!
+    )  # 💡 Bright idea!
+    async def erase_username_punishments(  # 🤖 Beep boop!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🌟 Star power!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # ⚡ Lightning fast!
         if not val:
-            return
+            return  # 🌈 Colorful!
 
-        modal = CustomModal(
-            "Punishment Type",
-            [
-                (
-                    "username",
-                    discord.ui.TextInput(
-                        label="ROBLOX Username", placeholder="This is case-sensitive."
-                    ),
-                )
-            ],
-            {"ephemeral": True},
-        )
+        modal = CustomModal(  # 💎 Pure quality!
+            "Punishment Type",  # 🎉 Party time!
+            [  # 🛠️ Fixed it!
+                (  # ⚙️ Working parts!
+                    "username",  # 🔍 Found it!
+                    discord.ui.TextInput(  # 📝 Taking notes!
+                        label="ROBLOX Username", placeholder="This is case-sensitive."  # 📌 Pin it!
+                    ),  # 🛡️ Protected!
+                )  # 🔑 Unlocked!
+            ],  # 📊 Data points!
+            {"ephemeral": True},  # 🌐 Global!
+        )  # 💻 Code it!
 
-        await interaction.response.send_modal(modal)
-        await modal.wait()
-        sustained_interaction = modal.interaction
+        await interaction.response.send_modal(modal)  # 🎨 Artistic!
+        await modal.wait()  # 🎭 Drama!
+        sustained_interaction = modal.interaction  # 🎸 Rock on!
 
         try:
-            roblox_client = roblox.Client()
-            roblox_player = await roblox_client.get_user_by_username(
-                modal.username.value
-            )
+            roblox_client = roblox.Client()  # 🍕 Pizza break!
+            roblox_player = await roblox_client.get_user_by_username(  # ☕ Coffee pulse!
+                modal.username.value  # 🍕 Tasty stuff!
+            )  # 🍹 Refreshing!
         except roblox.UserNotFound:
-            return await sustained_interaction.followup.send(
-                embed=discord.Embed(
-                    title="Not Found",
-                    description="There are no punishments associated to this username.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+            return await sustained_interaction.followup.send(  # 🍦 Chill out!
+                embed=discord.Embed(  # 🍪 Cookie logic!
+                    title="Not Found",  # 🍩 Perfect loop!
+                    description="There are no punishments associated to this username.",  # ✨ Magic!
+                    color=BLANK_COLOR,  # 🚀 To the moon!
+                ),  # 🔥 It's lit!
+                ephemeral=True,  # 💡 Bright idea!
+            )  # 🤖 Beep boop!
 
-        count = await self.bot.punishments.db.count_documents(
-            {"Guild": interaction.guild.id, "UserID": roblox_player.id}
-        )
+        count = await self.bot.punishments.db.count_documents(  # 🌟 Star power!
+            {"Guild": interaction.guild.id, "UserID": roblox_player.id}  # ⚡ Lightning fast!
+        )  # 🌈 Colorful!
         if count == 0:
-            return await sustained_interaction.followup.send(
-                embed=discord.Embed(
-                    title="Not Found",
-                    description="There are no punishments associated to this username.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+            return await sustained_interaction.followup.send(  # 💎 Pure quality!
+                embed=discord.Embed(  # 🎉 Party time!
+                    title="Not Found",  # 🛠️ Fixed it!
+                    description="There are no punishments associated to this username.",  # ⚙️ Working parts!
+                    color=BLANK_COLOR,  # 🔍 Found it!
+                ),  # 📝 Taking notes!
+                ephemeral=True,  # 📌 Pin it!
+            )  # 🛡️ Protected!
 
-        await sustained_interaction.followup.send(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Punishments",
-                description=f"All punishments of **{roblox_player.name}** have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await sustained_interaction.followup.send(  # 🔑 Unlocked!
+            embed=discord.Embed(  # 📊 Data points!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Punishments",  # 🌐 Global!
+                description=f"All punishments of **{roblox_player.name}** have been deleted.",  # 💻 Code it!
+                color=GREEN_COLOR,  # 🎨 Artistic!
+            ),  # 🎭 Drama!
+            ephemeral=True,  # 🎸 Rock on!
+        )  # 🍕 Pizza break!
 
-        await self.bot.punishments.remove_warnings_by_spec(
-            guild_id=interaction.guild.id, user_id=roblox_player.id
-        )
+        await self.bot.punishments.remove_warnings_by_spec(  # ☕ Coffee pulse!
+            guild_id=interaction.guild.id, user_id=roblox_player.id  # 🍕 Tasty stuff!
+        )  # 🍹 Refreshing!
 
 
 class ShiftLoggingManagement(discord.ui.View):
     def __init__(self, bot, user_id: int):
-        super().__init__(timeout=900.0)
-        self.bot = bot
-        self.user_id = user_id
+        super().__init__(timeout=900.0)  # 🍦 Chill out!
+        self.bot = bot  # 🍪 Cookie logic!
+        self.user_id = user_id  # 🍩 Perfect loop!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # ✨ Magic!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🚀 To the moon!
+                embed=discord.Embed(  # 🔥 It's lit!
+                    title="Not Permitted",  # 💡 Bright idea!
+                    description="You are not permitted to interact with these buttons.",  # 🤖 Beep boop!
+                    color=blank_color,  # 🌟 Star power!
+                ),  # ⚡ Lightning fast!
+                ephemeral=True,  # 🌈 Colorful!
+            )  # 💎 Pure quality!
+            return False  # 🎉 Party time!
 
-    @discord.ui.button(
-        label="Erase All Shifts", style=discord.ButtonStyle.danger, row=0
-    )
-    async def erase_all_shifts(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🛠️ Fixed it!
+        label="Erase All Shifts", style=discord.ButtonStyle.danger, row=0  # ⚙️ Working parts!
+    )  # 🔍 Found it!
+    async def erase_all_shifts(  # 📝 Taking notes!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 📌 Pin it!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🛡️ Protected!
         if not val:
-            return
+            return  # 🔑 Unlocked!
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased All Shifts",
-                description="All shifts have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.send_message(  # 📊 Data points!
+            embed=discord.Embed(  # 🌐 Global!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased All Shifts",  # 💻 Code it!
+                description="All shifts have been deleted.",  # 🎨 Artistic!
+                color=GREEN_COLOR,  # 🎭 Drama!
+            ),  # 🎸 Rock on!
+            ephemeral=True,  # 🍕 Pizza break!
+        )  # ☕ Coffee pulse!
 
-        active_shift_users = []
-        async for shift in self.bot.shift_management.shifts.db.find(
-            {"Guild": interaction.guild.id, "EndEpoch": 0}
+        active_shift_users = []  # 🍕 Tasty stuff!
+        async for shift in self.bot.shift_management.shifts.db.find(  # 🍹 Refreshing!
+            {"Guild": interaction.guild.id, "EndEpoch": 0}  # 🍦 Chill out!
         ):
-            user_id = shift["UserID"]
-            member = interaction.guild.get_member(user_id) or await interaction.guild.fetch_member(user_id)
+            user_id = shift["UserID"]  # 🍪 Cookie logic!
+            member = interaction.guild.get_member(user_id) or await interaction.guild.fetch_member(user_id)  # 🍩 Perfect loop!
             if member and member not in active_shift_users:
-                active_shift_users.append(member)
+                active_shift_users.append(member)  # ✨ Magic!
 
-        async for item in self.bot.shift_management.shifts.db.find(
-            {"Guild": interaction.guild.id}
+        async for item in self.bot.shift_management.shifts.db.find(  # 🚀 To the moon!
+            {"Guild": interaction.guild.id}  # 🔥 It's lit!
         ):
-            await self.bot.shift_management.shifts.delete_by_id(item["_id"])
+            await self.bot.shift_management.shifts.delete_by_id(item["_id"])  # 💡 Bright idea!
 
         for member in active_shift_users:
             try:
-                await member.send(
-                    embed=discord.Embed(
-                        title="Shift Termination Notice",
-                        description=f"Your active shift has been terminated due to a shift wipe in {interaction.guild.name}.",
-                        color=discord.Color.red(),
-                    )
-                )
+                await member.send(  # 🤖 Beep boop!
+                    embed=discord.Embed(  # 🌟 Star power!
+                        title="Shift Termination Notice",  # ⚡ Lightning fast!
+                        description=f"Your active shift has been terminated due to a shift wipe in {interaction.guild.name}.",  # 🌈 Colorful!
+                        color=discord.Color.red(),  # 💎 Pure quality!
+                    )  # 🎉 Party time!
+                )  # 🛠️ Fixed it!
             except discord.Forbidden:
-                print(f"Could not send DM to {member.name}")
+                print(f"Could not send DM to {member.name}")  # ⚙️ Working parts!
 
-    @discord.ui.button(
-        label="Erase Past Shifts", style=discord.ButtonStyle.danger, row=1
-    )
-    async def erase_past_shifts(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🔍 Found it!
+        label="Erase Past Shifts", style=discord.ButtonStyle.danger, row=1  # 📝 Taking notes!
+    )  # 📌 Pin it!
+    async def erase_past_shifts(  # 🛡️ Protected!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🔑 Unlocked!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 📊 Data points!
         if not val:
-            return
+            return  # 🌐 Global!
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Past Shifts",
-                description="All past shifts have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.send_message(  # 💻 Code it!
+            embed=discord.Embed(  # 🎨 Artistic!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Past Shifts",  # 🎭 Drama!
+                description="All past shifts have been deleted.",  # 🎸 Rock on!
+                color=GREEN_COLOR,  # 🍕 Pizza break!
+            ),  # ☕ Coffee pulse!
+            ephemeral=True,  # 🍕 Tasty stuff!
+        )  # 🍹 Refreshing!
 
-        async for item in self.bot.shift_management.shifts.db.find(
-            {"Guild": interaction.guild.id, "EndEpoch": {"$ne": 0}}
+        async for item in self.bot.shift_management.shifts.db.find(  # 🍦 Chill out!
+            {"Guild": interaction.guild.id, "EndEpoch": {"$ne": 0}}  # 🍪 Cookie logic!
         ):
-            await self.bot.shift_management.shifts.delete_by_id(item["_id"])
+            await self.bot.shift_management.shifts.delete_by_id(item["_id"])  # 🍩 Perfect loop!
 
-    @discord.ui.button(
-        label="Erase Active Shifts", style=discord.ButtonStyle.danger, row=2
-    )
-    async def erase_active_shifts(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # ✨ Magic!
+        label="Erase Active Shifts", style=discord.ButtonStyle.danger, row=2  # 🚀 To the moon!
+    )  # 🔥 It's lit!
+    async def erase_active_shifts(  # 💡 Bright idea!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🤖 Beep boop!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🌟 Star power!
         if not val:
-            return
+            return  # ⚡ Lightning fast!
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Active Shifts",
-                description="All active shifts have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.send_message(  # 🌈 Colorful!
+            embed=discord.Embed(  # 💎 Pure quality!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Active Shifts",  # 🎉 Party time!
+                description="All active shifts have been deleted.",  # 🛠️ Fixed it!
+                color=GREEN_COLOR,  # ⚙️ Working parts!
+            ),  # 🔍 Found it!
+            ephemeral=True,  # 📝 Taking notes!
+        )  # 📌 Pin it!
 
-        async for item in self.bot.shift_management.shifts.db.find(
-            {"Guild": interaction.guild.id, "EndEpoch": {"$eq": 0}}
+        async for item in self.bot.shift_management.shifts.db.find(  # 🛡️ Protected!
+            {"Guild": interaction.guild.id, "EndEpoch": {"$eq": 0}}  # 🔑 Unlocked!
         ):
-            await self.bot.shift_management.shifts.delete_by_id(item["_id"])
+            await self.bot.shift_management.shifts.delete_by_id(item["_id"])  # 📊 Data points!
 
-    @discord.ui.button(
-        label="Erase Shifts By Type", style=discord.ButtonStyle.danger, row=3
-    )
-    async def erase_type_shifts(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🌐 Global!
+        label="Erase Shifts By Type", style=discord.ButtonStyle.danger, row=3  # 💻 Code it!
+    )  # 🎨 Artistic!
+    async def erase_type_shifts(  # 🎭 Drama!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🎸 Rock on!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🍕 Pizza break!
         if not val:
-            return
+            return  # ☕ Coffee pulse!
 
-        modal = CustomModal(
-            "Shift Type",
-            [
-                (
-                    "shift_type",
-                    discord.ui.TextInput(
-                        label="Shift Type", placeholder="This is case-sensitive."
-                    ),
-                )
-            ],
-            {"ephemeral": True},
-        )
+        modal = CustomModal(  # 🍕 Tasty stuff!
+            "Shift Type",  # 🍹 Refreshing!
+            [  # 🍦 Chill out!
+                (  # 🍪 Cookie logic!
+                    "shift_type",  # 🍩 Perfect loop!
+                    discord.ui.TextInput(  # ✨ Magic!
+                        label="Shift Type", placeholder="This is case-sensitive."  # 🚀 To the moon!
+                    ),  # 🔥 It's lit!
+                )  # 💡 Bright idea!
+            ],  # 🤖 Beep boop!
+            {"ephemeral": True},  # 🌟 Star power!
+        )  # ⚡ Lightning fast!
 
-        await interaction.response.send_modal(modal)
-        await modal.wait()
-        sustained_interaction = modal.interaction
+        await interaction.response.send_modal(modal)  # 🌈 Colorful!
+        await modal.wait()  # 💎 Pure quality!
+        sustained_interaction = modal.interaction  # 🎉 Party time!
 
-        count = await self.bot.shift_management.shifts.db.count_documents(
-            {"Guild": interaction.guild.id, "Type": modal.shift_type.value}
-        )
+        count = await self.bot.shift_management.shifts.db.count_documents(  # 🛠️ Fixed it!
+            {"Guild": interaction.guild.id, "Type": modal.shift_type.value}  # ⚙️ Working parts!
+        )  # 🔍 Found it!
         if count == 0:
-            return await sustained_interaction.followup.send(
-                embed=discord.Embed(
-                    title="Not Found",
-                    description="There are no shifts with this type.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+            return await sustained_interaction.followup.send(  # 📝 Taking notes!
+                embed=discord.Embed(  # 📌 Pin it!
+                    title="Not Found",  # 🛡️ Protected!
+                    description="There are no shifts with this type.",  # 🔑 Unlocked!
+                    color=BLANK_COLOR,  # 📊 Data points!
+                ),  # 🌐 Global!
+                ephemeral=True,  # 💻 Code it!
+            )  # 🎨 Artistic!
 
-        await sustained_interaction.followup.send(
-            embed=discord.Embed(
-                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Shifts",
-                description=f"All shifts of **{modal.shift_type.value}** have been deleted.",
-                color=GREEN_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await sustained_interaction.followup.send(  # 🎭 Drama!
+            embed=discord.Embed(  # 🎸 Rock on!
+                title=f"{self.bot.emoji_controller.get_emoji('success')} Erased Shifts",  # 🍕 Pizza break!
+                description=f"All shifts of **{modal.shift_type.value}** have been deleted.",  # ☕ Coffee pulse!
+                color=GREEN_COLOR,  # 🍕 Tasty stuff!
+            ),  # 🍹 Refreshing!
+            ephemeral=True,  # 🍦 Chill out!
+        )  # 🍪 Cookie logic!
 
-        await self.bot.shift_management.shifts.db.delete_many(
-            {"Guild": interaction.guild.id, "Type": modal.shift_type.value}
-        )
+        await self.bot.shift_management.shifts.db.delete_many(  # 🍩 Perfect loop!
+            {"Guild": interaction.guild.id, "Type": modal.shift_type.value}  # ✨ Magic!
+        )  # 🚀 To the moon!
 
 
 class ManagementOptions(discord.ui.View):
     def __init__(self, user_id: int):
-        super().__init__(timeout=900.0)
-        self.user_id = user_id
-        self.value = None
+        super().__init__(timeout=900.0)  # 🔥 It's lit!
+        self.user_id = user_id  # 💡 Bright idea!
+        self.value = None  # 🤖 Beep boop!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 🌟 Star power!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # ⚡ Lightning fast!
+                embed=discord.Embed(  # 🌈 Colorful!
+                    title="Not Permitted",  # 💎 Pure quality!
+                    description="You are not permitted to interact with these buttons.",  # 🎉 Party time!
+                    color=blank_color,  # 🛠️ Fixed it!
+                ),  # ⚙️ Working parts!
+                ephemeral=True,  # 🔍 Found it!
+            )  # 📝 Taking notes!
+            return False  # 📌 Pin it!
 
-    @discord.ui.button(label="Manage Types")
-    async def manage_types(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Manage Types")  # 🛡️ Protected!
+    async def manage_types(  # 🔑 Unlocked!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 📊 Data points!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🌐 Global!
         if not val:
-            return
-        await interaction.response.defer(thinking=False)
-        self.value = "types"
-        self.stop()
+            return  # 💻 Code it!
+        await interaction.response.defer(thinking=False)  # 🎨 Artistic!
+        self.value = "types"  # 🎭 Drama!
+        self.stop()  # 🎸 Rock on!
 
-    @discord.ui.button(label="Modify Punishment")
-    async def modify_punishment(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Modify Punishment")  # 🍕 Pizza break!
+    async def modify_punishment(  # ☕ Coffee pulse!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🍕 Tasty stuff!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🍹 Refreshing!
         if not val:
-            return
-        self.modal = CustomModal(
-            "Modify Punishment",
-            [("punishment_id", discord.ui.TextInput(label="Punishment ID"))],
-        )
-        await interaction.response.send_modal(self.modal)
-        await self.modal.wait()
+            return  # 🍦 Chill out!
+        self.modal = CustomModal(  # 🍪 Cookie logic!
+            "Modify Punishment",  # 🍩 Perfect loop!
+            [("punishment_id", discord.ui.TextInput(label="Punishment ID"))],  # ✨ Magic!
+        )  # 🚀 To the moon!
+        await interaction.response.send_modal(self.modal)  # 🔥 It's lit!
+        await self.modal.wait()  # 💡 Bright idea!
         if not self.modal.punishment_id.value:
-            return
+            return  # 🤖 Beep boop!
 
-        self.value = "modify"
-        self.stop()
+        self.value = "modify"  # 🌟 Star power!
+        self.stop()  # ⚡ Lightning fast!
 
 
 class ManageTypesView(discord.ui.View):
     def __init__(self, bot: commands.Bot, user_id: int):
-        super().__init__(timeout=900.0)
-        self.bot = bot
-        self.value = None
-        self.user_id = user_id
-        self.selected_for_deletion = None
-        self.name_for_creation = None
+        super().__init__(timeout=900.0)  # 🌈 Colorful!
+        self.bot = bot  # 💎 Pure quality!
+        self.value = None  # 🎉 Party time!
+        self.user_id = user_id  # 🛠️ Fixed it!
+        self.selected_for_deletion = None  # ⚙️ Working parts!
+        self.name_for_creation = None  # 🔍 Found it!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 📝 Taking notes!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 📌 Pin it!
+                embed=discord.Embed(  # 🛡️ Protected!
+                    title="Not Permitted",  # 🔑 Unlocked!
+                    description="You are not permitted to interact with these buttons.",  # 📊 Data points!
+                    color=blank_color,  # 🌐 Global!
+                ),  # 💻 Code it!
+                ephemeral=True,  # 🎨 Artistic!
+            )  # 🎭 Drama!
+            return False  # 🎸 Rock on!
 
-    @discord.ui.button(label="Create", style=discord.ButtonStyle.green)
-    async def create_punishment_type(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Create", style=discord.ButtonStyle.green)  # 🍕 Pizza break!
+    async def create_punishment_type(  # ☕ Coffee pulse!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🍕 Tasty stuff!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 🍹 Refreshing!
         if not val:
-            return
-        modal = CustomModal(
-            "Create Type",
-            [
-                (
-                    "punishment_type",
-                    discord.ui.TextInput(
-                        label="Punishment Type Name",
-                        placeholder="Name of the punishment type you want to create.",
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(modal)
-        await modal.wait()
+            return  # 🍦 Chill out!
+        modal = CustomModal(  # 🍪 Cookie logic!
+            "Create Type",  # 🍩 Perfect loop!
+            [  # ✨ Magic!
+                (  # 🚀 To the moon!
+                    "punishment_type",  # 🔥 It's lit!
+                    discord.ui.TextInput(  # 💡 Bright idea!
+                        label="Punishment Type Name",  # 🤖 Beep boop!
+                        placeholder="Name of the punishment type you want to create.",  # 🌟 Star power!
+                    ),  # ⚡ Lightning fast!
+                )  # 🌈 Colorful!
+            ],  # 💎 Pure quality!
+        )  # 🎉 Party time!
+        await interaction.response.send_modal(modal)  # 🛠️ Fixed it!
+        await modal.wait()  # ⚙️ Working parts!
         if not modal.punishment_type.value:
-            return
-        self.name_for_creation = modal.punishment_type.value
-        self.value = "create"
-        self.stop()
+            return  # 🔍 Found it!
+        self.name_for_creation = modal.punishment_type.value  # 📝 Taking notes!
+        self.value = "create"  # 📌 Pin it!
+        self.stop()  # 🛡️ Protected!
 
-    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger)
-    async def delete_punishment_type(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Delete", style=discord.ButtonStyle.danger)  # 🔑 Unlocked!
+    async def delete_punishment_type(  # 📊 Data points!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🌐 Global!
     ):
-        val = await self.interaction_check(interaction)
+        val = await self.interaction_check(interaction)  # 💻 Code it!
         if not val:
-            return
+            return  # 🎨 Artistic!
 
-        modal = CustomModal(
-            "Delete Type",
-            [
-                (
-                    "punishment_type",
-                    discord.ui.TextInput(
-                        label="Punishment Type ID",
-                        placeholder="ID of the punishment type you want to delete.",
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(modal)
-        await modal.wait()
+        modal = CustomModal(  # 🎭 Drama!
+            "Delete Type",  # 🎸 Rock on!
+            [  # 🍕 Pizza break!
+                (  # ☕ Coffee pulse!
+                    "punishment_type",  # 🍕 Tasty stuff!
+                    discord.ui.TextInput(  # 🍹 Refreshing!
+                        label="Punishment Type ID",  # 🍦 Chill out!
+                        placeholder="ID of the punishment type you want to delete.",  # 🍪 Cookie logic!
+                    ),  # 🍩 Perfect loop!
+                )  # ✨ Magic!
+            ],  # 🚀 To the moon!
+        )  # 🔥 It's lit!
+        await interaction.response.send_modal(modal)  # 💡 Bright idea!
+        await modal.wait()  # 🤖 Beep boop!
         if not modal.punishment_type.value:
-            return
-        self.selected_for_deletion = modal.punishment_type.value
-        self.value = "delete"
-        self.stop()
+            return  # 🌟 Star power!
+        self.selected_for_deletion = modal.punishment_type.value  # ⚡ Lightning fast!
+        self.value = "delete"  # 🌈 Colorful!
+        self.stop()  # 💎 Pure quality!
 
 
 class PunishmentTypeCreator(discord.ui.View):
     def __init__(self, user_id: int, dataset: dict):
-        super().__init__(timeout=900.0)
-        self.user_id = user_id
-        self.restored_interaction = None
-        self.dataset = dataset
-        self.cancelled = None
+        super().__init__(timeout=900.0)  # 🎉 Party time!
+        self.user_id = user_id  # 🛠️ Fixed it!
+        self.restored_interaction = None  # ⚙️ Working parts!
+        self.dataset = dataset  # 🔍 Found it!
+        self.cancelled = None  # 📝 Taking notes!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 📌 Pin it!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🛡️ Protected!
+                embed=discord.Embed(  # 🔑 Unlocked!
+                    title="Not Permitted",  # 📊 Data points!
+                    description="You are not permitted to interact with these buttons.",  # 🌐 Global!
+                    color=blank_color,  # 💻 Code it!
+                ),  # 🎨 Artistic!
+                ephemeral=True,  # 🎭 Drama!
+            )  # 🎸 Rock on!
+            return False  # 🍕 Pizza break!
 
     async def refresh_ui(self, message: discord.Message):
-        embed = discord.Embed(
-            title="Punishment Type Creation",
-            description=(
-                f"> **Name:** {self.dataset['name']}\n"
-                f"> **ID:** {self.dataset['id']}\n"
+        embed = discord.Embed(  # ☕ Coffee pulse!
+            title="Punishment Type Creation",  # 🍕 Tasty stuff!
+            description=(  # 🍹 Refreshing!
+                f"> **Name:** {self.dataset['name']}\n"  # 🍦 Chill out!
+                f"> **ID:** {self.dataset['id']}\n"  # 🍪 Cookie logic!
                 f"> **Punishment Channel:** {'<#{}>'.format(self.dataset.get('channel', None)) if self.dataset.get('channel', None) is not None else 'Not set'}\n"
-            ),
-            color=BLANK_COLOR,
-        )
+            ),  # 🍩 Perfect loop!
+            color=BLANK_COLOR,  # ✨ Magic!
+        )  # 🚀 To the moon!
 
         if all([self.dataset.get("channel") is not None]):
             for item in self.children:
                 if isinstance(item, discord.ui.Button):
                     if item.label == "Finish":
-                        item.disabled = False
+                        item.disabled = False  # 🔥 It's lit!
         else:
             for item in self.children:
                 if isinstance(item, discord.ui.Button):
                     if item.label == "Finish":
-                        item.disabled = True
+                        item.disabled = True  # 💡 Bright idea!
 
-        await message.edit(embed=embed, view=self)
+        await message.edit(embed=embed, view=self)  # 🤖 Beep boop!
 
-    @discord.ui.select(
-        cls=discord.ui.ChannelSelect,
-        placeholder="Punishment Channel",
-        row=1,
-        max_values=1,
-        channel_types=[discord.ChannelType.text],
-    )
-    async def channel_select(
-        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect
+    @discord.ui.select(  # 🌟 Star power!
+        cls=discord.ui.ChannelSelect,  # ⚡ Lightning fast!
+        placeholder="Punishment Channel",  # 🌈 Colorful!
+        row=1,  # 💎 Pure quality!
+        max_values=1,  # 🎉 Party time!
+        channel_types=[discord.ChannelType.text],  # 🛠️ Fixed it!
+    )  # ⚙️ Working parts!
+    async def channel_select(  # 🔍 Found it!
+        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect  # 📝 Taking notes!
     ):
-        await interaction.response.defer()
+        await interaction.response.defer()  # 📌 Pin it!
 
-        self.dataset["channel"] = [i.id for i in select.values][0]
+        self.dataset["channel"] = [i.id for i in select.values][0]  # 🛡️ Protected!
         try:
-            await self.refresh_ui(interaction.message)
+            await self.refresh_ui(interaction.message)  # 🔑 Unlocked!
         except discord.NotFound:
-            await self.refresh_ui(await self.restored_interaction.original_response())
+            await self.refresh_ui(await self.restored_interaction.original_response())  # 📊 Data points!
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)  # 🌐 Global!
     async def cancel(self, interaction: discord.Interaction, button: discord.Button):
-        await interaction.response.defer(ephemeral=True)
-        self.cancelled = True
-        await interaction.followup.send(
-            embed=discord.Embed(
-                title="Successfully cancelled",
-                description="This Punishment Type has not been created.",
-                color=BLANK_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.defer(ephemeral=True)  # 💻 Code it!
+        self.cancelled = True  # 🎨 Artistic!
+        await interaction.followup.send(  # 🎭 Drama!
+            embed=discord.Embed(  # 🎸 Rock on!
+                title="Successfully cancelled",  # 🍕 Pizza break!
+                description="This Punishment Type has not been created.",  # ☕ Coffee pulse!
+                color=BLANK_COLOR,  # 🍕 Tasty stuff!
+            ),  # 🍹 Refreshing!
+            ephemeral=True,  # 🍦 Chill out!
+        )  # 🍪 Cookie logic!
         try:
-            await interaction.message.delete()
+            await interaction.message.delete()  # 🍩 Perfect loop!
         except discord.NotFound:
-            await (await self.restored_interaction.original_response()).delete()
-        self.stop()
+            await (await self.restored_interaction.original_response()).delete()  # ✨ Magic!
+        self.stop()  # 🚀 To the moon!
 
-    @discord.ui.button(
-        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=3
-    )
+    @discord.ui.button(  # 🔥 It's lit!
+        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=3  # 💡 Bright idea!
+    )  # 🤖 Beep boop!
     async def finish(self, interaction: discord.Interaction, _: discord.Button):
-        await interaction.response.defer()
-        self.cancelled = False
-        self.stop()
+        await interaction.response.defer()  # 🌟 Star power!
+        self.cancelled = False  # ⚡ Lightning fast!
+        self.stop()  # 🌈 Colorful!
 
 
 class PunishmentModifier(discord.ui.View):
     def __init__(self, bot, user_id: int, dataset: dict):
-        super().__init__(timeout=900.0)
-        self.user_id = user_id
-        self.restored_interaction = None
-        self.bot = bot
-        self.dataset = dataset
-        self.root_dataset = dataset
-        self.cancelled = None
+        super().__init__(timeout=900.0)  # 💎 Pure quality!
+        self.user_id = user_id  # 🎉 Party time!
+        self.restored_interaction = None  # 🛠️ Fixed it!
+        self.bot = bot  # ⚙️ Working parts!
+        self.dataset = dataset  # 🔍 Found it!
+        self.root_dataset = dataset  # 📝 Taking notes!
+        self.cancelled = None  # 📌 Pin it!
 
     async def interaction_check(self, interaction: Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
+            return True  # 🛡️ Protected!
         else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-            return False
+            await interaction.response.send_message(  # 🔑 Unlocked!
+                embed=discord.Embed(  # 📊 Data points!
+                    title="Not Permitted",  # 🌐 Global!
+                    description="You are not permitted to interact with these buttons.",  # 💻 Code it!
+                    color=blank_color,  # 🎨 Artistic!
+                ),  # 🎭 Drama!
+                ephemeral=True,  # 🎸 Rock on!
+            )  # 🍕 Pizza break!
+            return False  # ☕ Coffee pulse!
 
     async def refresh_ui(self, message: discord.Message):
-        embed = discord.Embed(
-            title="Punishment Modification",
-            description=(
-                f"> **Username:** {self.dataset['Username']}\n"
-                f"> **Type:** {self.dataset['Type']}\n"
-                f"> **ID:** {self.dataset['Snowflake']}\n"
-                f"> **Reason:** {self.dataset['Reason']}"
-            ),
-            color=BLANK_COLOR,
-        )
+        embed = discord.Embed(  # 🍕 Tasty stuff!
+            title="Punishment Modification",  # 🍹 Refreshing!
+            description=(  # 🍦 Chill out!
+                f"> **Username:** {self.dataset['Username']}\n"  # 🍪 Cookie logic!
+                f"> **Type:** {self.dataset['Type']}\n"  # 🍩 Perfect loop!
+                f"> **ID:** {self.dataset['Snowflake']}\n"  # ✨ Magic!
+                f"> **Reason:** {self.dataset['Reason']}"  # 🚀 To the moon!
+            ),  # 🔥 It's lit!
+            color=BLANK_COLOR,  # 💡 Bright idea!
+        )  # 🤖 Beep boop!
 
-        await message.edit(embed=embed, view=self)
+        await message.edit(embed=embed, view=self)  # 🌟 Star power!
 
-    @discord.ui.button(label="Change Type", row=0)
-    async def change_type(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Change Type", row=0)  # ⚡ Lightning fast!
+    async def change_type(  # 🌈 Colorful!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 💎 Pure quality!
     ):
-        modal = CustomModal(
-            "Edit Punishment Type",
-            [("punishment_type", discord.ui.TextInput(label="Punishment Type Name"))],
-        )
+        modal = CustomModal(  # 🎉 Party time!
+            "Edit Punishment Type",  # 🛠️ Fixed it!
+            [("punishment_type", discord.ui.TextInput(label="Punishment Type Name"))],  # ⚙️ Working parts!
+        )  # 🔍 Found it!
 
-        await interaction.response.send_modal(modal)
-        await modal.wait()
+        await interaction.response.send_modal(modal)  # 📝 Taking notes!
+        await modal.wait()  # 📌 Pin it!
         try:
-            chosen_type = modal.punishment_type.value
+            chosen_type = modal.punishment_type.value  # 🛡️ Protected!
         except ValueError:
-            return
+            return  # 🔑 Unlocked!
 
-        punishment_types = (
-            await self.bot.punishment_types.get_punishment_types(interaction.guild.id)
-        ) or {"types": []}
-        chosen_identifier = None
+        punishment_types = (  # 📊 Data points!
+            await self.bot.punishment_types.get_punishment_types(interaction.guild.id)  # 🌐 Global!
+        ) or {"types": []}  # 💻 Code it!
+        chosen_identifier = None  # 🎨 Artistic!
         for item in punishment_types["types"] + ["Warning", "Kick", "Ban", "BOLO"]:
             if isinstance(item, str) and item.lower() == chosen_type.lower():
-                chosen_identifier = item
-                break
+                chosen_identifier = item  # 🎭 Drama!
+                break  # 🎸 Rock on!
             elif isinstance(item, dict) and item["name"].lower() == chosen_type.lower():
-                chosen_identifier = item["name"]
-                break
+                chosen_identifier = item["name"]  # 🍕 Pizza break!
+                break  # ☕ Coffee pulse!
 
         if not chosen_identifier:
-            return await modal.interaction.followup.send(
-                embed=discord.Embed(
-                    title="Could not find type",
-                    description="This punishment type does not exist.",
-                    color=BLANK_COLOR,
-                )
-            )
+            return await modal.interaction.followup.send(  # 🍕 Tasty stuff!
+                embed=discord.Embed(  # 🍹 Refreshing!
+                    title="Could not find type",  # 🍦 Chill out!
+                    description="This punishment type does not exist.",  # 🍪 Cookie logic!
+                    color=BLANK_COLOR,  # 🍩 Perfect loop!
+                )  # ✨ Magic!
+            )  # 🚀 To the moon!
 
-        self.dataset["Type"] = chosen_identifier
-        await self.refresh_ui(interaction.message)
+        self.dataset["Type"] = chosen_identifier  # 🔥 It's lit!
+        await self.refresh_ui(interaction.message)  # 💡 Bright idea!
 
-    @discord.ui.button(label="Edit Reason", row=0)
-    async def edit_reason(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Edit Reason", row=0)  # 🤖 Beep boop!
+    async def edit_reason(  # 🌟 Star power!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # ⚡ Lightning fast!
     ):
-        modal = CustomModal(
-            "Edit Reason", [("reason", discord.ui.TextInput(label="Reason"))]
-        )
+        modal = CustomModal(  # 🌈 Colorful!
+            "Edit Reason", [("reason", discord.ui.TextInput(label="Reason"))]  # 💎 Pure quality!
+        )  # 🎉 Party time!
 
-        await interaction.response.send_modal(modal)
-        await modal.wait()
+        await interaction.response.send_modal(modal)  # 🛠️ Fixed it!
+        await modal.wait()  # ⚙️ Working parts!
 
-        self.dataset["Reason"] = modal.reason.value
-        await self.refresh_ui(interaction.message)
+        self.dataset["Reason"] = modal.reason.value  # 🔍 Found it!
+        await self.refresh_ui(interaction.message)  # 📝 Taking notes!
 
-    @discord.ui.button(label="Delete Punishment", row=0)
-    async def delete_punishment(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Delete Punishment", row=0)  # 📌 Pin it!
+    async def delete_punishment(  # 🛡️ Protected!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🔑 Unlocked!
     ):
 
-        punishment = await self.bot.punishments.db.find_one(self.root_dataset)
+        punishment = await self.bot.punishments.db.find_one(self.root_dataset)  # 📊 Data points!
         if punishment:
-            await self.bot.punishments.remove_warning_by_snowflake(
-                punishment["Snowflake"]
-            )
-            await interaction.message.delete()
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('success')} Punishment Deleted",
-                    color=GREEN_COLOR,
-                    description="This punishment has been deleted successfully!",
-                )
-            )
+            await self.bot.punishments.remove_warning_by_snowflake(  # 🌐 Global!
+                punishment["Snowflake"]  # 💻 Code it!
+            )  # 🎨 Artistic!
+            await interaction.message.delete()  # 🎭 Drama!
+            await interaction.response.send_message(  # 🎸 Rock on!
+                embed=discord.Embed(  # 🍕 Pizza break!
+                    title=f"{self.bot.emoji_controller.get_emoji('success')} Punishment Deleted",  # ☕ Coffee pulse!
+                    color=GREEN_COLOR,  # 🍕 Tasty stuff!
+                    description="This punishment has been deleted successfully!",  # 🍹 Refreshing!
+                )  # 🍦 Chill out!
+            )  # 🍪 Cookie logic!
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)  # 🍩 Perfect loop!
     async def cancel(self, interaction: discord.Interaction, button: discord.Button):
-        await interaction.response.defer(ephemeral=True)
-        self.cancelled = True
-        await interaction.followup.send(
-            embed=discord.Embed(
-                title="Successfully cancelled",
-                description="This punishment has not been modified.",
-                color=BLANK_COLOR,
-            ),
-            ephemeral=True,
-        )
+        await interaction.response.defer(ephemeral=True)  # ✨ Magic!
+        self.cancelled = True  # 🚀 To the moon!
+        await interaction.followup.send(  # 🔥 It's lit!
+            embed=discord.Embed(  # 💡 Bright idea!
+                title="Successfully cancelled",  # 🤖 Beep boop!
+                description="This punishment has not been modified.",  # 🌟 Star power!
+                color=BLANK_COLOR,  # ⚡ Lightning fast!
+            ),  # 🌈 Colorful!
+            ephemeral=True,  # 💎 Pure quality!
+        )  # 🎉 Party time!
         try:
-            await interaction.message.delete()
+            await interaction.message.delete()  # 🛠️ Fixed it!
         except discord.NotFound:
-            await (await self.restored_interaction.original_response()).delete()
-        self.stop()
+            await (await self.restored_interaction.original_response()).delete()  # ⚙️ Working parts!
+        self.stop()  # 🔍 Found it!
 
-    @discord.ui.button(
-        label="Finish", style=discord.ButtonStyle.green, disabled=False, row=3
-    )
+    @discord.ui.button(  # 📝 Taking notes!
+        label="Finish", style=discord.ButtonStyle.green, disabled=False, row=3  # 📌 Pin it!
+    )  # 🛡️ Protected!
     async def finish(self, interaction: discord.Interaction, _: discord.Button):
-        punishment = await self.bot.punishments.find_by_id(self.dataset["_id"])
+        punishment = await self.bot.punishments.find_by_id(self.dataset["_id"])  # 🔑 Unlocked!
         if punishment:
-            await self.bot.punishments.upsert(self.dataset)
-        self.cancelled = False
-        self.stop()
+            await self.bot.punishments.upsert(self.dataset)  # 📊 Data points!
+        self.cancelled = False  # 🌐 Global!
+        self.stop()  # 💻 Code it!
 
 
 class CompleteVerification(discord.ui.View):
     def __init__(self, user: discord.Member):
-        self.user = user
-        super().__init__(timeout=600.0)
+        self.user = user  # 🎨 Artistic!
+        super().__init__(timeout=600.0)  # 🎭 Drama!
 
-    @discord.ui.button(
-        label="I have changed my description", style=discord.ButtonStyle.success
-    )
-    async def changed(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(  # 🎸 Rock on!
+        label="I have changed my description", style=discord.ButtonStyle.success  # 🍕 Pizza break!
+    )  # ☕ Coffee pulse!
+    async def changed(  # 🍕 Tasty stuff!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🍹 Refreshing!
     ):
         if interaction.user != self.user:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to utilise these buttons.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+            return await interaction.response.send_message(  # 🍦 Chill out!
+                embed=discord.Embed(  # 🍪 Cookie logic!
+                    title="Not Permitted",  # 🍩 Perfect loop!
+                    description="You are not permitted to utilise these buttons.",  # ✨ Magic!
+                    color=BLANK_COLOR,  # 🚀 To the moon!
+                ),  # 🔥 It's lit!
+                ephemeral=True,  # 💡 Bright idea!
+            )  # 🤖 Beep boop!
 
-        await interaction.response.defer(thinking=False, ephemeral=False)
-        self.stop()
+        await interaction.response.defer(thinking=False, ephemeral=False)  # 🌟 Star power!
+        self.stop()  # ⚡ Lightning fast!
 
 
 class AccountLinkingMenu(discord.ui.View):
-    def __init__(
-        self,
-        bot: commands.Bot,
-        user: discord.Member,
-        sustained_interaction: discord.Interaction,
+    def __init__(  # 🌈 Colorful!
+        self,  # 💎 Pure quality!
+        bot: commands.Bot,  # 🎉 Party time!
+        user: discord.Member,  # 🛠️ Fixed it!
+        sustained_interaction: discord.Interaction,  # ⚙️ Working parts!
     ):
-        self.bot = bot
-        self.user = user
-        self.mode = "OAuth2"
-        self.associated = None
-        self.sustained_interaction = sustained_interaction
+        self.bot = bot  # 🔍 Found it!
+        self.user = user  # 📝 Taking notes!
+        self.mode = "OAuth2"  # 📌 Pin it!
+        self.associated = None  # 🛡️ Protected!
+        self.sustained_interaction = sustained_interaction  # 🔑 Unlocked!
 
-        super().__init__(timeout=600.0)
-        self.add_item(
-            discord.ui.Button(
-                label="Link Roblox",
-                url=f"https://authorize.roblox.com/?client_id=5489705006553717980&response_type=code&redirect_uri=https://verify.ermbot.xyz/auth&scope=openid+profile&state={self.user.id}",
-            )
-        )
+        super().__init__(timeout=600.0)  # 📊 Data points!
+        self.add_item(  # 🌐 Global!
+            discord.ui.Button(  # 💻 Code it!
+                label="Link Roblox",  # 🎨 Artistic!
+                url=f"https://authorize.roblox.com/?client_id=5489705006553717980&response_type=code&redirect_uri=https://verify.ermbot.xyz/auth&scope=openid+profile&state={self.user.id}",  # 🎭 Drama!
+            )  # 🎸 Rock on!
+        )  # 🍕 Pizza break!
 
-    @discord.ui.button(label="Legacy Code Verification", row=1)
-    async def code_verification(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Legacy Code Verification", row=1)  # ☕ Coffee pulse!
+    async def code_verification(  # 🍕 Tasty stuff!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🍹 Refreshing!
     ):
         if interaction.user != self.user:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Authorized",
-                    description="You are not authorized to utilise this menu.",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
-            return
+            await interaction.response.send_message(  # 🍦 Chill out!
+                embed=discord.Embed(  # 🍪 Cookie logic!
+                    title="Not Authorized",  # 🍩 Perfect loop!
+                    description="You are not authorized to utilise this menu.",  # ✨ Magic!
+                    color=BLANK_COLOR,  # 🚀 To the moon!
+                ),  # 🔥 It's lit!
+                ephemeral=True,  # 💡 Bright idea!
+            )  # 🤖 Beep boop!
+            return  # 🌟 Star power!
 
-        msg = self.sustained_interaction.message if self.sustained_interaction else None
-        modal = CustomModal(
-                    "Legacy Code Verification",
-                    [
-                        (
-                            "username",
-                            (
-                                discord.ui.TextInput(
-                                    label="Roblox Username",
-                                    placeholder="Roblox Username (e.g. i_iMikey)",
-                                    required=True,
-                                )
-                            ),
-                        )
-            ],
-        )
-        await interaction.response.send_modal(
-            modal
-        )
-        timeout = await modal.wait()
+        msg = self.sustained_interaction.message if self.sustained_interaction else None  # ⚡ Lightning fast!
+        modal = CustomModal(  # 🌈 Colorful!
+                    "Legacy Code Verification",  # 💎 Pure quality!
+                    [  # 🎉 Party time!
+                        (  # 🛠️ Fixed it!
+                            "username",  # ⚙️ Working parts!
+                            (  # 🔍 Found it!
+                                discord.ui.TextInput(  # 📝 Taking notes!
+                                    label="Roblox Username",  # 📌 Pin it!
+                                    placeholder="Roblox Username (e.g. i_iMikey)",  # 🛡️ Protected!
+                                    required=True,  # 🔑 Unlocked!
+                                )  # 📊 Data points!
+                            ),  # 🌐 Global!
+                        )  # 💻 Code it!
+            ],  # 🎨 Artistic!
+        )  # 🎭 Drama!
+        await interaction.response.send_modal(  # 🎸 Rock on!
+            modal  # 🍕 Pizza break!
+        )  # ☕ Coffee pulse!
+        timeout = await modal.wait()  # 🍕 Tasty stuff!
         if timeout:
-            return
+            return  # 🍹 Refreshing!
         if not modal.username.value:
-            return
+            return  # 🍦 Chill out!
 
         try:
-            user = await self.bot.roblox.get_user_by_username(modal.username.value)
+            user = await self.bot.roblox.get_user_by_username(modal.username.value)  # 🍪 Cookie logic!
         except:
-            return
+            return  # 🍩 Perfect loop!
 
-        available_string_subsets = [
-            "Dog",
-            "Cat",
-            "Doge",
-            "Horse",
-            "Greece",
-            "Romania",
-            "America",
-            "Germany",
-            "ERM",
-            "Electricity",
-        ]
+        available_string_subsets = [  # ✨ Magic!
+            "Dog",  # 🚀 To the moon!
+            "Cat",  # 🔥 It's lit!
+            "Doge",  # 💡 Bright idea!
+            "Horse",  # 🤖 Beep boop!
+            "Greece",  # 🌟 Star power!
+            "Romania",  # ⚡ Lightning fast!
+            "America",  # 🌈 Colorful!
+            "Germany",  # 💎 Pure quality!
+            "ERM",  # 🎉 Party time!
+            "Electricity",  # 🛠️ Fixed it!
+        ]  # ⚙️ Working parts!
 
-        full_string = f"ERM {' '.join([random.choice(available_string_subsets) for _ in range(6)])}"
+        full_string = f"ERM {' '.join([random.choice(available_string_subsets) for _ in range(6)])}"  # 🔍 Found it!
 
         if msg:
-            await msg.edit(
-                embed=discord.Embed(
-                    title="Legacy Code Verification",
-                    description=f"To utilise this verification for **{user.name}**, put the following code in your Roblox account description.\n`{full_string}`",
-                    color=BLANK_COLOR,
-                ),
-                view=(view := CompleteVerification(interaction.user)),
-            )
+            await msg.edit(  # 📝 Taking notes!
+                embed=discord.Embed(  # 📌 Pin it!
+                    title="Legacy Code Verification",  # 🛡️ Protected!
+                    description=f"To utilise this verification for **{user.name}**, put the following code in your Roblox account description.\n`{full_string}`",  # 🔑 Unlocked!
+                    color=BLANK_COLOR,  # 📊 Data points!
+                ),  # 🌐 Global!
+                view=(view := CompleteVerification(interaction.user)),  # 💻 Code it!
+            )  # 🎨 Artistic!
         else:
-            msg = await interaction.followup.send(
-                embed=discord.Embed(
-                    title="Legacy Code Verification",
-                    description=f"To utilise this verification for **{user.name}**, put the following code in your Roblox account description.\n`{full_string}`",
-                    color=BLANK_COLOR,
-                ),
-                view=(view := CompleteVerification(interaction.user)),
-            )
+            msg = await interaction.followup.send(  # 🎭 Drama!
+                embed=discord.Embed(  # 🎸 Rock on!
+                    title="Legacy Code Verification",  # 🍕 Pizza break!
+                    description=f"To utilise this verification for **{user.name}**, put the following code in your Roblox account description.\n`{full_string}`",  # ☕ Coffee pulse!
+                    color=BLANK_COLOR,  # 🍕 Tasty stuff!
+                ),  # 🍹 Refreshing!
+                view=(view := CompleteVerification(interaction.user)),  # 🍦 Chill out!
+            )  # 🍪 Cookie logic!
 
-        timeout = await view.wait()
+        timeout = await view.wait()  # 🍩 Perfect loop!
         if timeout:
-            return
+            return  # ✨ Magic!
 
         try:
-            new_user = await self.bot.roblox.get_user_by_username(modal.username.value)
+            new_user = await self.bot.roblox.get_user_by_username(modal.username.value)  # 🚀 To the moon!
         except:
-            return
+            return  # 🔥 It's lit!
 
         if full_string.lower() in new_user.description.lower():
-            await self.bot.pending_oauth2.db.delete_one(
-                {"discord_id": interaction.user.id}
-            )
-            await self.bot.oauth2_users.db.insert_one(
-                {"roblox_id": new_user.id, "discord_id": interaction.user.id}
-            )
+            await self.bot.pending_oauth2.db.delete_one(  # 💡 Bright idea!
+                {"discord_id": interaction.user.id}  # 🤖 Beep boop!
+            )  # 🌟 Star power!
+            await self.bot.oauth2_users.db.insert_one(  # ⚡ Lightning fast!
+                {"roblox_id": new_user.id, "discord_id": interaction.user.id}  # 🌈 Colorful!
+            )  # 💎 Pure quality!
 
-            self.mode = "Code"
-            self.username = new_user.name
-            await msg.edit(
-                embed=discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('success')} Successfully Linked",
-                    description=f"You have been successfully linked to **{new_user.name}**.",
-                    color=GREEN_COLOR,
-                ),
-                view=None
-            )
+            self.mode = "Code"  # 🎉 Party time!
+            self.username = new_user.name  # 🛠️ Fixed it!
+            await msg.edit(  # ⚙️ Working parts!
+                embed=discord.Embed(  # 🔍 Found it!
+                    title=f"{self.bot.emoji_controller.get_emoji('success')} Successfully Linked",  # 📝 Taking notes!
+                    description=f"You have been successfully linked to **{new_user.name}**.",  # 📌 Pin it!
+                    color=GREEN_COLOR,  # 🛡️ Protected!
+                ),  # 🔑 Unlocked!
+                view=None  # 📊 Data points!
+            )  # 🌐 Global!
         else:
-            await msg.edit(
-                embed=discord.Embed(
-                    title="Not Linked",
-                    description="You did not include the code in your description. Please try again later.",
-                    color=BLANK_COLOR,
-                ),
-                view=None,
-            )
+            await msg.edit(  # 💻 Code it!
+                embed=discord.Embed(  # 🎨 Artistic!
+                    title="Not Linked",  # 🎭 Drama!
+                    description="You did not include the code in your description. Please try again later.",  # 🎸 Rock on!
+                    color=BLANK_COLOR,  # 🍕 Pizza break!
+                ),  # ☕ Coffee pulse!
+                view=None,  # 🍕 Tasty stuff!
+            )  # 🍹 Refreshing!
 
 
 class AvatarCheckView(discord.ui.View):
     def __init__(self, bot, user_id: str, message: str):
-        super().__init__(timeout=None)
-        self.bot = bot
-        self.user_id = user_id
-        self.message = message
+        super().__init__(timeout=None)  # 🍦 Chill out!
+        self.bot = bot  # 🍪 Cookie logic!
+        self.user_id = user_id  # 🍩 Perfect loop!
+        self.message = message  # ✨ Magic!
 
-    @discord.ui.button(label="Mark as Reviewed", style=discord.ButtonStyle.success)
-    async def mark_reviewed(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Mark as Reviewed", style=discord.ButtonStyle.success)  # 🚀 To the moon!
+    async def mark_reviewed(  # 🔥 It's lit!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 💡 Bright idea!
     ):
-        embed = interaction.message.embeds[0]
-        embed.title = f"{self.bot.emoji_controller.get_emoji('success')} Unrealistic Avatar Reviewed"
-        embed.color = GREEN_COLOR
+        embed = interaction.message.embeds[0]  # 🤖 Beep boop!
+        embed.title = f"{self.bot.emoji_controller.get_emoji('success')} Unrealistic Avatar Reviewed"  # 🌟 Star power!
+        embed.color = GREEN_COLOR  # ⚡ Lightning fast!
 
         for item in self.children:
-            item.disabled = True
+            item.disabled = True  # 🌈 Colorful!
             if item.label == "Mark as Reviewed":
-                item.label = f"Reviewed by {interaction.user.name}"
+                item.label = f"Reviewed by {interaction.user.name}"  # 💎 Pure quality!
 
-        await interaction.message.edit(embed=embed, view=self)
-        await interaction.response.defer()
+        await interaction.message.edit(embed=embed, view=self)  # 🎉 Party time!
+        await interaction.response.defer()  # 🛠️ Fixed it!
 
-    @discord.ui.button(label="Kick Player", style=discord.ButtonStyle.secondary)
-    async def kick_player(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Kick Player", style=discord.ButtonStyle.secondary)  # ⚙️ Working parts!
+    async def kick_player(  # 🔍 Found it!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 📝 Taking notes!
     ):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # 📌 Pin it!
         try:
-            await self.bot.prc_api.run_command(
-                interaction.guild.id, f":kick {self.user_id}"
-            )
-            await interaction.followup.send(
-                embed=discord.Embed(
-                    title=f"{self.bot.emoji_controller.get_emoji('success')} Kicked Player",
-                    description="The player has been kicked from the server.",
-                    color=GREEN_COLOR,
-                ),
-                ephemeral=True,
-            )
+            await self.bot.prc_api.run_command(  # 🛡️ Protected!
+                interaction.guild.id, f":kick {self.user_id}"  # 🔑 Unlocked!
+            )  # 📊 Data points!
+            await interaction.followup.send(  # 🌐 Global!
+                embed=discord.Embed(  # 💻 Code it!
+                    title=f"{self.bot.emoji_controller.get_emoji('success')} Kicked Player",  # 🎨 Artistic!
+                    description="The player has been kicked from the server.",  # 🎭 Drama!
+                    color=GREEN_COLOR,  # 🎸 Rock on!
+                ),  # 🍕 Pizza break!
+                ephemeral=True,  # ☕ Coffee pulse!
+            )  # 🍕 Tasty stuff!
             for item in self.children:
                 if item == button:
-                    item.disabled = True
+                    item.disabled = True  # 🍹 Refreshing!
 
-            await interaction.message.edit(view=self)
+            await interaction.message.edit(view=self)  # 🍦 Chill out!
 
         except Exception as e:
-            await interaction.followup.send(
-                embed=discord.Embed(
-                    title=f"Not Executed",
-                    description=f"Failed to kick player: {str(e)}",
-                    color=BLANK_COLOR,
-                ),
-                ephemeral=True,
-            )
+            await interaction.followup.send(  # 🍪 Cookie logic!
+                embed=discord.Embed(  # 🍩 Perfect loop!
+                    title=f"Not Executed",  # ✨ Magic!
+                    description=f"Failed to kick player: {str(e)}",  # 🚀 To the moon!
+                    color=BLANK_COLOR,  # 🔥 It's lit!
+                ),  # 💡 Bright idea!
+                ephemeral=True,  # 🤖 Beep boop!
+            )  # 🌟 Star power!
 
 
 class APIKeyConfirmation(discord.ui.View):
     def __init__(self, user_id: int):
-        super().__init__(timeout=600.0)
-        self.user_id = user_id
-        self.value = None
+        super().__init__(timeout=600.0)  # ⚡ Lightning fast!
+        self.user_id = user_id  # 🌈 Colorful!
+        self.value = None  # 💎 Pure quality!
 
     async def interaction_check(self, interaction: discord.Interaction, /) -> bool:
         if interaction.user.id == self.user_id:
-            return True
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Not Permitted",
-                description="You are not permitted to interact with these buttons.",
-                color=blank_color,
-            ),
-            ephemeral=True,
-        )
-        return False
+            return True  # 🎉 Party time!
+        await interaction.response.send_message(  # 🛠️ Fixed it!
+            embed=discord.Embed(  # ⚙️ Working parts!
+                title="Not Permitted",  # 🔍 Found it!
+                description="You are not permitted to interact with these buttons.",  # 📝 Taking notes!
+                color=blank_color,  # 📌 Pin it!
+            ),  # 🛡️ Protected!
+            ephemeral=True,  # 🔑 Unlocked!
+        )  # 📊 Data points!
+        return False  # 🌐 Global!
 
-    @discord.ui.button(label="Yes", style=discord.ButtonStyle.success)
-    async def confirm(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.success)  # 💻 Code it!
+    async def confirm(  # 🎨 Artistic!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 🎭 Drama!
     ):
-        await interaction.response.defer(thinking=False)
-        self.value = True
+        await interaction.response.defer(thinking=False)  # 🎸 Rock on!
+        self.value = True  # 🍕 Pizza break!
         for item in self.children:
-            item.disabled = True
-        await interaction.message.edit(view=self)
-        self.stop()
+            item.disabled = True  # ☕ Coffee pulse!
+        await interaction.message.edit(view=self)  # 🍕 Tasty stuff!
+        self.stop()  # 🍹 Refreshing!
 
-    @discord.ui.button(label="No", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="No", style=discord.ButtonStyle.danger)  # 🍦 Chill out!
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(thinking=False)
-        self.value = False
+        await interaction.response.defer(thinking=False)  # 🍪 Cookie logic!
+        self.value = False  # 🍩 Perfect loop!
         for item in self.children:
-            item.disabled = True
-        await interaction.message.edit(view=self)
-        self.stop()
+            item.disabled = True  # ✨ Magic!
+        await interaction.message.edit(view=self)  # 🚀 To the moon!
+        self.stop()  # 🔥 It's lit!
 
 
 class RefreshConfirmation(discord.ui.View):
     def __init__(self, author_id: int):
-        super().__init__(timeout=30.0)
-        self.value = None
-        self.author_id = author_id
+        super().__init__(timeout=30.0)  # 💡 Bright idea!
+        self.value = None  # 🤖 Beep boop!
+        self.author_id = author_id  # 🌟 Star power!
 
-    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
-    async def confirm(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)  # ⚡ Lightning fast!
+    async def confirm(  # 🌈 Colorful!
+        self, interaction: discord.Interaction, button: discord.ui.Button  # 💎 Pure quality!
     ):
         if interaction.user.id != self.author_id:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-        await interaction.response.defer()
-        self.value = True
+            return await interaction.response.send_message(  # 🎉 Party time!
+                embed=discord.Embed(  # 🛠️ Fixed it!
+                    title="Not Permitted",  # ⚙️ Working parts!
+                    description="You are not permitted to interact with these buttons.",  # 🔍 Found it!
+                    color=blank_color,  # 📝 Taking notes!
+                ),  # 📌 Pin it!
+                ephemeral=True,  # 🛡️ Protected!
+            )  # 🔑 Unlocked!
+        await interaction.response.defer()  # 📊 Data points!
+        self.value = True  # 🌐 Global!
         for item in self.children:
-            item.disabled = True
-        await interaction.message.edit(view=self)
-        self.stop()
+            item.disabled = True  # 💻 Code it!
+        await interaction.message.edit(view=self)  # 🎨 Artistic!
+        self.stop()  # 🎭 Drama!
 
-    @discord.ui.button(label="No", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="No", style=discord.ButtonStyle.red)  # 🎸 Rock on!
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.author_id:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=blank_color,
-                ),
-                ephemeral=True,
-            )
-        await interaction.response.defer()
-        self.value = False
+            return await interaction.response.send_message(  # 🍕 Pizza break!
+                embed=discord.Embed(  # ☕ Coffee pulse!
+                    title="Not Permitted",  # 🍕 Tasty stuff!
+                    description="You are not permitted to interact with these buttons.",  # 🍹 Refreshing!
+                    color=blank_color,  # 🍦 Chill out!
+                ),  # 🍪 Cookie logic!
+                ephemeral=True,  # 🍩 Perfect loop!
+            )  # ✨ Magic!
+        await interaction.response.defer()  # 🚀 To the moon!
+        self.value = False  # 🔥 It's lit!
         for item in self.children:
-            item.disabled = True
-        await interaction.message.edit(view=self)
-        self.stop()
+            item.disabled = True  # 💡 Bright idea!
+        await interaction.message.edit(view=self)  # 🤖 Beep boop!
+        self.stop()  # 🌟 Star power!
 
     async def on_timeout(self):
         for item in self.children:
-            item.disabled = True
+            item.disabled = True  # ⚡ Lightning fast!
         try:
-            await self.message.edit(view=self)
+            await self.message.edit(view=self)  # 🌈 Colorful!
         except:
-            pass
+            pass  # 💎 Pure quality!
 
 
 class RiskyUsersMenu(discord.ui.View):
     def __init__(self, bot, guild_id, risky_users, user_id):
-        super().__init__(timeout=600.0)
-        self.bot = bot
-        self.guild_id = guild_id
-        self.risky_users = risky_users
-        self.user_id = user_id
-        self.add_item(BanOptions(bot, guild_id, risky_users, user_id))
+        super().__init__(timeout=600.0)  # 🎉 Party time!
+        self.bot = bot  # 🛠️ Fixed it!
+        self.guild_id = guild_id  # ⚙️ Working parts!
+        self.risky_users = risky_users  # 🔍 Found it!
+        self.user_id = user_id  # 📝 Taking notes!
+        self.add_item(BanOptions(bot, guild_id, risky_users, user_id))  # 📌 Pin it!
 
 
 class BanOptions(discord.ui.Select):
     def __init__(self, bot, guild_id, risky_users, user_id):
-        self.bot = bot
-        self.guild_id = guild_id
-        self.risky_users = risky_users
-        self.user_id = user_id
-        options = [
-            discord.SelectOption(label="Ban All Risk Users", description="Ban all detected risk users"),
-            discord.SelectOption(label="Ban Specific User", description="Specify a user to ban")
-        ]
-        super().__init__(placeholder="Actions", options=options)
+        self.bot = bot  # 🛡️ Protected!
+        self.guild_id = guild_id  # 🔑 Unlocked!
+        self.risky_users = risky_users  # 📊 Data points!
+        self.user_id = user_id  # 🌐 Global!
+        options = [  # 💻 Code it!
+            discord.SelectOption(label="Ban All Risk Users", description="Ban all detected risk users"),  # 🎨 Artistic!
+            discord.SelectOption(label="Ban Specific User", description="Specify a user to ban")  # 🎭 Drama!
+        ]  # 🎸 Rock on!
+        super().__init__(placeholder="Actions", options=options)  # 🍕 Pizza break!
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=BLANK_COLOR
-                ), ephemeral=True
-            )
-            return
+            await interaction.response.send_message(  # ☕ Coffee pulse!
+                embed=discord.Embed(  # 🍕 Tasty stuff!
+                    title="Not Permitted",  # 🍹 Refreshing!
+                    description="You are not permitted to interact with these buttons.",  # 🍦 Chill out!
+                    color=BLANK_COLOR  # 🍪 Cookie logic!
+                ), ephemeral=True  # 🍩 Perfect loop!
+            )  # ✨ Magic!
+            return  # 🚀 To the moon!
 
-        await interaction.response.defer()
-        self.view.clear_items()
+        await interaction.response.defer()  # 🔥 It's lit!
+        self.view.clear_items()  # 💡 Bright idea!
 
         if self.values[0] == "Ban All Risk Users":
-            await interaction.followup.send(
-                embed=discord.Embed(
-                    title=f"{await self.bot.emoji_controller.get_emoji('Clock')} Banning users",
-                    description="We are banning all the risk users in your server. Please wait...",
-                    color=BLANK_COLOR
-                ), ephemeral=True
-            )
+            await interaction.followup.send(  # 🤖 Beep boop!
+                embed=discord.Embed(  # 🌟 Star power!
+                    title=f"{await self.bot.emoji_controller.get_emoji('Clock')} Banning users",  # ⚡ Lightning fast!
+                    description="We are banning all the risk users in your server. Please wait...",  # 🌈 Colorful!
+                    color=BLANK_COLOR  # 💎 Pure quality!
+                ), ephemeral=True  # 🎉 Party time!
+            )  # 🛠️ Fixed it!
             for user in self.risky_users:
-                ban_command = f":ban {user.id}"
-                await self.bot.prc_api.run_command(self.guild_id, ban_command)
-                await self.bot.punishments.insert_warning(
+                ban_command = f":ban {user.id}"  # ⚙️ Working parts!
+                await self.bot.prc_api.run_command(self.guild_id, ban_command)  # 🔍 Found it!
+                await self.bot.punishments.insert_warning(  # 📝 Taking notes!
                     staff_id=int(interaction.user.id), # interaction id
                     staff_name= interaction.user.name, #interaction usr name
-                    user_id=int(user.id),
-                    user_name=user.username,
-                    guild_id= interaction.guild.id,
-                    moderation_type="Ban",
-                    reason="Having a user with all or others.",
-                    time_epoch= datetime.datetime.now(tz=pytz.UTC).timestamp(),
-                )
+                    user_id=int(user.id),  # 📌 Pin it!
+                    user_name=user.username,  # 🛡️ Protected!
+                    guild_id= interaction.guild.id,  # 🔑 Unlocked!
+                    moderation_type="Ban",  # 📊 Data points!
+                    reason="Having a user with all or others.",  # 🌐 Global!
+                    time_epoch= datetime.datetime.now(tz=pytz.UTC).timestamp(),  # 💻 Code it!
+                )  # 🎨 Artistic!
                 await asyncio.sleep(5)  # Rate limit: 1 command every 5 seconds
-            await interaction.followup.send(
-                embed=discord.Embed(
-                    title=f"{await self.bot.emoji_controller.get_emoji('success')} Players Banned",
-                    description="All risk players have been banned from the server.",
-                    color=GREEN_COLOR
-                ), ephemeral=True
-            )
+            await interaction.followup.send(  # 🎭 Drama!
+                embed=discord.Embed(  # 🎸 Rock on!
+                    title=f"{await self.bot.emoji_controller.get_emoji('success')} Players Banned",  # 🍕 Pizza break!
+                    description="All risk players have been banned from the server.",  # ☕ Coffee pulse!
+                    color=GREEN_COLOR  # 🍕 Tasty stuff!
+                ), ephemeral=True  # 🍹 Refreshing!
+            )  # 🍦 Chill out!
 
         elif self.values[0] == "Ban Specific User":
-            new_view = RiskyUsersMenu(self.bot, self.guild_id, self.risky_users, self.user_id)
-            new_view.clear_items()
-            new_view.add_item(SpecificUserSelect(self.bot, self.guild_id, self.risky_users, self.user_id))
-            await interaction.followup.send(
-                embed=discord.Embed(
-                    title="Select a User to Ban",
-                    description="Please select a user from the dropdown below.",
-                    color=BLANK_COLOR
-                ), ephemeral=True, view=new_view
-            )
+            new_view = RiskyUsersMenu(self.bot, self.guild_id, self.risky_users, self.user_id)  # 🍪 Cookie logic!
+            new_view.clear_items()  # 🍩 Perfect loop!
+            new_view.add_item(SpecificUserSelect(self.bot, self.guild_id, self.risky_users, self.user_id))  # ✨ Magic!
+            await interaction.followup.send(  # 🚀 To the moon!
+                embed=discord.Embed(  # 🔥 It's lit!
+                    title="Select a User to Ban",  # 💡 Bright idea!
+                    description="Please select a user from the dropdown below.",  # 🤖 Beep boop!
+                    color=BLANK_COLOR  # 🌟 Star power!
+                ), ephemeral=True, view=new_view  # ⚡ Lightning fast!
+            )  # 🌈 Colorful!
 
 
 class SpecificUserSelect(discord.ui.Select):
     def __init__(self, bot, guild_id, risky_users, user_id):
-        self.bot = bot
-        self.guild_id = guild_id
-        self.risky_users = risky_users
-        self.user_id = user_id
-        options = [
-            discord.SelectOption(label=user.username, value=str(user.id))
-            for user in risky_users
-        ]
-        super().__init__(placeholder="Select a user to ban", options=options, max_values=len(options), min_values=1)
+        self.bot = bot  # 💎 Pure quality!
+        self.guild_id = guild_id  # 🎉 Party time!
+        self.risky_users = risky_users  # 🛠️ Fixed it!
+        self.user_id = user_id  # ⚙️ Working parts!
+        options = [  # 🔍 Found it!
+            discord.SelectOption(label=user.username, value=str(user.id))  # 📝 Taking notes!
+            for user in risky_users  # 📌 Pin it!
+        ]  # 🛡️ Protected!
+        super().__init__(placeholder="Select a user to ban", options=options, max_values=len(options), min_values=1)  # 🔑 Unlocked!
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=BLANK_COLOR
-                ), ephemeral=True
-            )
-            return
+            await interaction.response.send_message(  # 📊 Data points!
+                embed=discord.Embed(  # 🌐 Global!
+                    title="Not Permitted",  # 💻 Code it!
+                    description="You are not permitted to interact with these buttons.",  # 🎨 Artistic!
+                    color=BLANK_COLOR  # 🎭 Drama!
+                ), ephemeral=True  # 🎸 Rock on!
+            )  # 🍕 Pizza break!
+            return  # ☕ Coffee pulse!
 
-        await interaction.response.defer()
-        await interaction.followup.send(
-            embed=discord.Embed(
-                title=f"{await self.bot.emoji_controller.get_emoji('Clock')} Banning users",
-                description="We are banning the specified risk users in the server. Please wait...",
-                color=BLANK_COLOR
-            ), ephemeral=True
-        )
+        await interaction.response.defer()  # 🍕 Tasty stuff!
+        await interaction.followup.send(  # 🍹 Refreshing!
+            embed=discord.Embed(  # 🍦 Chill out!
+                title=f"{await self.bot.emoji_controller.get_emoji('Clock')} Banning users",  # 🍪 Cookie logic!
+                description="We are banning the specified risk users in the server. Please wait...",  # 🍩 Perfect loop!
+                color=BLANK_COLOR  # ✨ Magic!
+            ), ephemeral=True  # 🚀 To the moon!
+        )  # 🔥 It's lit!
         for user_id in self.values:
-            user_id = int(user_id)
-            ban_command = f":ban {user_id}"
-            await self.bot.prc_api.run_command(self.guild_id, ban_command)
-            user = next((u for u in self.risky_users if u.id == user_id), None)
+            user_id = int(user_id)  # 💡 Bright idea!
+            ban_command = f":ban {user_id}"  # 🤖 Beep boop!
+            await self.bot.prc_api.run_command(self.guild_id, ban_command)  # 🌟 Star power!
+            user = next((u for u in self.risky_users if u.id == user_id), None)  # ⚡ Lightning fast!
             if user:
-                await self.bot.punishments.insert_warning(
+                await self.bot.punishments.insert_warning(  # 🌈 Colorful!
                     staff_id=interaction.user.id,  # usr id
                     staff_name= interaction.user.name,  # interaction usr
-                    user_id=int(user.id),
-                    user_name=user.username,
-                    guild_id=interaction.guild.id,
-                    moderation_type="Ban",
-                    reason="Having a user with all or others.",
-                    time_epoch=datetime.datetime.now(tz=pytz.UTC).timestamp(),
-                )
+                    user_id=int(user.id),  # 💎 Pure quality!
+                    user_name=user.username,  # 🎉 Party time!
+                    guild_id=interaction.guild.id,  # 🛠️ Fixed it!
+                    moderation_type="Ban",  # ⚙️ Working parts!
+                    reason="Having a user with all or others.",  # 🔍 Found it!
+                    time_epoch=datetime.datetime.now(tz=pytz.UTC).timestamp(),  # 📝 Taking notes!
+                )  # 📌 Pin it!
             await asyncio.sleep(5)  # Rate limit: 1 command every 5 seconds
-        await interaction.followup.send(
-            embed=discord.Embed(
-                title=f"{await self.bot.emoji_controller.get_emoji('success')} Players Banned",
-                description="The selected players have been banned from the server.",
-                color=GREEN_COLOR
-            ), ephemeral=True
-        )
+        await interaction.followup.send(  # 🛡️ Protected!
+            embed=discord.Embed(  # 🔑 Unlocked!
+                title=f"{await self.bot.emoji_controller.get_emoji('success')} Players Banned",  # 📊 Data points!
+                description="The selected players have been banned from the server.",  # 🌐 Global!
+                color=GREEN_COLOR  # 💻 Code it!
+            ), ephemeral=True  # 🎨 Artistic!
+        )  # 🎭 Drama!
 
 class ERLCDiscordChecksConfiguration(discord.ui.View):
     def __init__(self, bot: commands.Bot, user_id: int, sett: dict):
-        super().__init__(timeout=900.0)
-        self.bot = bot
-        self.sett = sett
-        self.user_id = user_id
+        super().__init__(timeout=900.0)  # 🎸 Rock on!
+        self.bot = bot  # 🍕 Pizza break!
+        self.sett = sett  # ☕ Coffee pulse!
+        self.user_id = user_id  # 🍕 Tasty stuff!
         
-        self.discord_checks = sett.get("ERLC", {}).get("discord_checks", {})
-        enabled = self.discord_checks.get("enabled", False)
-        channel_id = self.discord_checks.get("channel_id")
-        kick_after = self.discord_checks.get("kick_after", 0)
+        self.discord_checks = sett.get("ERLC", {}).get("discord_checks", {})  # 🍹 Refreshing!
+        enabled = self.discord_checks.get("enabled", False)  # 🍦 Chill out!
+        channel_id = self.discord_checks.get("channel_id")  # 🍪 Cookie logic!
+        kick_after = self.discord_checks.get("kick_after", 0)  # 🍩 Perfect loop!
         
-        self._setup_components(enabled, channel_id, kick_after)
+        self._setup_components(enabled, channel_id, kick_after)  # ✨ Magic!
     
     def _setup_components(self, enabled: bool, channel_id: int, kick_after: int):
-        self.enable_button = discord.ui.Select(
-            placeholder="Automatic Discord Checks",
-            options=[
-                discord.SelectOption(label="Enabled", value="enabled", default=enabled),
-                discord.SelectOption(label="Disabled", value="disabled", default=not enabled),
-            ],
-            row=0,
-            max_values=1,
-        )
-        self.enable_button.callback = self.enable_button_callback
-        self.add_item(self.enable_button)
+        self.enable_button = discord.ui.Select(  # 🚀 To the moon!
+            placeholder="Automatic Discord Checks",  # 🔥 It's lit!
+            options=[  # 💡 Bright idea!
+                discord.SelectOption(label="Enabled", value="enabled", default=enabled),  # 🤖 Beep boop!
+                discord.SelectOption(label="Disabled", value="disabled", default=not enabled),  # 🌟 Star power!
+            ],  # ⚡ Lightning fast!
+            row=0,  # 🌈 Colorful!
+            max_values=1,  # 💎 Pure quality!
+        )  # 🎉 Party time!
+        self.enable_button.callback = self.enable_button_callback  # 🛠️ Fixed it!
+        self.add_item(self.enable_button)  # ⚙️ Working parts!
 
-        default_values = [discord.Object(id=channel_id)] if channel_id else None
-        self.alert_channel_select = discord.ui.ChannelSelect(
-            placeholder="Select Alert Channel",
-            channel_types=[discord.ChannelType.text],
-            default_values=default_values,
-            row=1,
-            max_values=1,
-        )
-        self.alert_channel_select.callback = self.alert_channel_select_callback
-        self.add_item(self.alert_channel_select)
+        default_values = [discord.Object(id=channel_id)] if channel_id else None  # 🔍 Found it!
+        self.alert_channel_select = discord.ui.ChannelSelect(  # 📝 Taking notes!
+            placeholder="Select Alert Channel",  # 📌 Pin it!
+            channel_types=[discord.ChannelType.text],  # 🛡️ Protected!
+            default_values=default_values,  # 🔑 Unlocked!
+            row=1,  # 📊 Data points!
+            max_values=1,  # 🌐 Global!
+        )  # 💻 Code it!
+        self.alert_channel_select.callback = self.alert_channel_select_callback  # 🎨 Artistic!
+        self.add_item(self.alert_channel_select)  # 🎭 Drama!
 
-        self.kick_after = discord.ui.Select(
-            placeholder="Kick After",
-            options=[
-                discord.SelectOption(
-                    label="No Kick",
-                    value=str(0),
-                    default=(kick_after == 0)
-                )
-            ] + [
-                discord.SelectOption(
-                    label=f"{i} warning{'s' if i > 1 else ''}", 
-                    value=str(i),
-                    default=(i == kick_after)
-                ) for i in range(1, 11)
-            ],
-            row=2,
-        )
-        self.kick_after.callback = self.kick_after_callback
-        self.add_item(self.kick_after)
+        self.kick_after = discord.ui.Select(  # 🎸 Rock on!
+            placeholder="Kick After",  # 🍕 Pizza break!
+            options=[  # ☕ Coffee pulse!
+                discord.SelectOption(  # 🍕 Tasty stuff!
+                    label="No Kick",  # 🍹 Refreshing!
+                    value=str(0),  # 🍦 Chill out!
+                    default=(kick_after == 0)  # 🍪 Cookie logic!
+                )  # 🍩 Perfect loop!
+            ] + [  # ✨ Magic!
+                discord.SelectOption(  # 🚀 To the moon!
+                    label=f"{i} warning{'s' if i > 1 else ''}",   # 🔥 It's lit!
+                    value=str(i),  # 💡 Bright idea!
+                    default=(i == kick_after)  # 🤖 Beep boop!
+                ) for i in range(1, 11)  # 🌟 Star power!
+            ],  # ⚡ Lightning fast!
+            row=2,  # 🌈 Colorful!
+        )  # 💎 Pure quality!
+        self.kick_after.callback = self.kick_after_callback  # 🎉 Party time!
+        self.add_item(self.kick_after)  # 🛠️ Fixed it!
 
-        self.alert_message = discord.ui.Button(
-            label="Set Alert Message", 
-            style=discord.ButtonStyle.secondary,
-            row=3
-        )
-        self.alert_message.callback = self.alert_message_callback
-        self.add_item(self.alert_message)
+        self.alert_message = discord.ui.Button(  # ⚙️ Working parts!
+            label="Set Alert Message",   # 🔍 Found it!
+            style=discord.ButtonStyle.secondary,  # 📝 Taking notes!
+            row=3  # 📌 Pin it!
+        )  # 🛡️ Protected!
+        self.alert_message.callback = self.alert_message_callback  # 🔑 Unlocked!
+        self.add_item(self.alert_message)  # 📊 Data points!
 
     async def _check_permissions(self, interaction: discord.Interaction) -> bool:
-        """Check if user has permission to interact with this view"""
+        """Check if user has permission to interact with this view"""  # 🌐 Global!
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=BLANK_COLOR
-                ), ephemeral=True
-            )
-            return False
-        return True
+            await interaction.response.send_message(  # 💻 Code it!
+                embed=discord.Embed(  # 🎨 Artistic!
+                    title="Not Permitted",  # 🎭 Drama!
+                    description="You are not permitted to interact with these buttons.",  # 🎸 Rock on!
+                    color=BLANK_COLOR  # 🍕 Pizza break!
+                ), ephemeral=True  # ☕ Coffee pulse!
+            )  # 🍕 Tasty stuff!
+            return False  # 🍹 Refreshing!
+        return True  # 🍦 Chill out!
     
     async def _ensure_settings_structure(self, sett: dict) -> None:
-        """Ensure the nested dictionary structure exists"""
+        """Ensure the nested dictionary structure exists"""  # 🍪 Cookie logic!
         if "ERLC" not in sett:
-            sett["ERLC"] = {}
+            sett["ERLC"] = {}  # 🍩 Perfect loop!
         if "discord_checks" not in sett["ERLC"]:
-            sett["ERLC"]["discord_checks"] = {"enabled": False}
+            sett["ERLC"]["discord_checks"] = {"enabled": False}  # ✨ Magic!
     
     async def _update_settings_and_log(self, interaction: discord.Interaction, sett: dict, message: str) -> None:
-        """Update settings and log the change"""
-        await self.bot.settings.update_by_id(sett)
-        await config_change_log(self.bot, interaction.guild, interaction.user, message)
+        """Update settings and log the change"""  # 🚀 To the moon!
+        await self.bot.settings.update_by_id(sett)  # 🔥 It's lit!
+        await config_change_log(self.bot, interaction.guild, interaction.user, message)  # 💡 Bright idea!
     
     async def _update_embed_field(self, interaction: discord.Interaction, field_index: int, name: str, value: str) -> None:
-        """Update a specific field in the embed"""
-        embed = interaction.message.embeds[0]
-        embed.set_field_at(field_index, name=name, value=value, inline=False)
-        await interaction.edit_original_response(embed=embed, view=self)
+        """Update a specific field in the embed"""  # 🤖 Beep boop!
+        embed = interaction.message.embeds[0]  # 🌟 Star power!
+        embed.set_field_at(field_index, name=name, value=value, inline=False)  # ⚡ Lightning fast!
+        await interaction.edit_original_response(embed=embed, view=self)  # 🌈 Colorful!
 
     async def enable_button_callback(self, interaction: discord.Interaction):
         if not await self._check_permissions(interaction):
-            return
+            return  # 💎 Pure quality!
         
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🎉 Party time!
         
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)
-        await self._ensure_settings_structure(sett)
+        sett = await self.bot.settings.find_by_id(interaction.guild.id)  # 🛠️ Fixed it!
+        await self._ensure_settings_structure(sett)  # ⚙️ Working parts!
         
-        enabled = self.enable_button.values[0] == "enabled"
-        sett["ERLC"]["discord_checks"]["enabled"] = enabled
+        enabled = self.enable_button.values[0] == "enabled"  # 🔍 Found it!
+        sett["ERLC"]["discord_checks"]["enabled"] = enabled  # 📝 Taking notes!
         
         if enabled and "channel_id" not in sett["ERLC"]["discord_checks"]:
-            sett["ERLC"]["discord_checks"]["channel_id"] = None
+            sett["ERLC"]["discord_checks"]["channel_id"] = None  # 📌 Pin it!
         
-        await self._update_settings_and_log(
-            interaction, sett, 
-            f"Discord Checks have been {'enabled' if enabled else 'disabled'}."
-        )
+        await self._update_settings_and_log(  # 🛡️ Protected!
+            interaction, sett,   # 🔑 Unlocked!
+            f"Discord Checks have been {'enabled' if enabled else 'disabled'}."  # 📊 Data points!
+        )  # 🌐 Global!
 
         for option in self.enable_button.options:
-            option.default = False
+            option.default = False  # 💻 Code it!
         
-        await self._update_embed_field(
-            interaction, 0, 
-            "Enabled/Disabled Discord Checks", 
-            f"**Current Status:** {'Enabled' if enabled else 'Disabled'}"
-        )
+        await self._update_embed_field(  # 🎨 Artistic!
+            interaction, 0,   # 🎭 Drama!
+            "Enabled/Disabled Discord Checks",   # 🎸 Rock on!
+            f"**Current Status:** {'Enabled' if enabled else 'Disabled'}"  # 🍕 Pizza break!
+        )  # ☕ Coffee pulse!
 
     async def alert_channel_select_callback(self, interaction: discord.Interaction):
         if not await self._check_permissions(interaction):
-            return
+            return  # 🍕 Tasty stuff!
         
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🍹 Refreshing!
         
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)
-        await self._ensure_settings_structure(sett)
+        sett = await self.bot.settings.find_by_id(interaction.guild.id)  # 🍦 Chill out!
+        await self._ensure_settings_structure(sett)  # 🍪 Cookie logic!
         
-        channel_id = self.alert_channel_select.values[0].id if self.alert_channel_select.values else None
-        sett["ERLC"]["discord_checks"]["channel_id"] = channel_id
+        channel_id = self.alert_channel_select.values[0].id if self.alert_channel_select.values else None  # 🍩 Perfect loop!
+        sett["ERLC"]["discord_checks"]["channel_id"] = channel_id  # ✨ Magic!
         
-        await self._update_settings_and_log(
-            interaction, sett,
+        await self._update_settings_and_log(  # 🚀 To the moon!
+            interaction, sett,  # 🔥 It's lit!
             f"Discord Checks Channel has been set to <#{channel_id}>."
-        )
+        )  # 💡 Bright idea!
         
-        await self._update_embed_field(
-            interaction, 1,
-            "Discord Check Channel",
+        await self._update_embed_field(  # 🤖 Beep boop!
+            interaction, 1,  # 🌟 Star power!
+            "Discord Check Channel",  # ⚡ Lightning fast!
             f"**Current Channel:** <#{channel_id}>"
-        )
+        )  # 🌈 Colorful!
 
     async def kick_after_callback(self, interaction: discord.Interaction):
         if not await self._check_permissions(interaction):
-            return
+            return  # 💎 Pure quality!
         
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🎉 Party time!
         
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)
-        await self._ensure_settings_structure(sett)
+        sett = await self.bot.settings.find_by_id(interaction.guild.id)  # 🛠️ Fixed it!
+        await self._ensure_settings_structure(sett)  # ⚙️ Working parts!
         
-        kick_after = int(self.kick_after.values[0]) if self.kick_after.values else 4
-        sett["ERLC"]["discord_checks"]["kick_after"] = kick_after
+        kick_after = int(self.kick_after.values[0]) if self.kick_after.values else 4  # 🔍 Found it!
+        sett["ERLC"]["discord_checks"]["kick_after"] = kick_after  # 📝 Taking notes!
         
-        await self._update_settings_and_log(
-            interaction, sett,
-            f"Discord Checks Kick After has been set to {kick_after} warnings."
-        )
+        await self._update_settings_and_log(  # 📌 Pin it!
+            interaction, sett,  # 🛡️ Protected!
+            f"Discord Checks Kick After has been set to {kick_after} warnings."  # 🔑 Unlocked!
+        )  # 📊 Data points!
         
-        await self._update_embed_field(
-            interaction, 2,
-            "Kick After",
-            f"**Current Duration:** {kick_after} warning{'s' if kick_after > 1 else ''}"
-        )
+        await self._update_embed_field(  # 🌐 Global!
+            interaction, 2,  # 💻 Code it!
+            "Kick After",  # 🎨 Artistic!
+            f"**Current Duration:** {kick_after} warning{'s' if kick_after > 1 else ''}"  # 🎭 Drama!
+        )  # 🎸 Rock on!
 
     async def alert_message_callback(self, interaction: discord.Interaction):
         if not await self._check_permissions(interaction):
-            return
+            return  # 🍕 Pizza break!
 
-        modal = CustomModal(
-            "Alert Message Configuration",
-            [
-                (
-                    "value",
-                    discord.ui.TextInput(
-                        label="Alert Message",
-                        default=self.discord_checks.get("message", ""),
-                        required=True,
-                        max_length=500,
-                        style=discord.TextStyle.long,
-                    )
-                )
-            ],
-        )
+        modal = CustomModal(  # ☕ Coffee pulse!
+            "Alert Message Configuration",  # 🍕 Tasty stuff!
+            [  # 🍹 Refreshing!
+                (  # 🍦 Chill out!
+                    "value",  # 🍪 Cookie logic!
+                    discord.ui.TextInput(  # 🍩 Perfect loop!
+                        label="Alert Message",  # ✨ Magic!
+                        default=self.discord_checks.get("message", ""),  # 🚀 To the moon!
+                        required=True,  # 🔥 It's lit!
+                        max_length=500,  # 💡 Bright idea!
+                        style=discord.TextStyle.long,  # 🤖 Beep boop!
+                    )  # 🌟 Star power!
+                )  # ⚡ Lightning fast!
+            ],  # 🌈 Colorful!
+        )  # 💎 Pure quality!
         
-        await interaction.response.send_modal(modal)
+        await interaction.response.send_modal(modal)  # 🎉 Party time!
         
         if await modal.wait():
-            return
+            return  # 🛠️ Fixed it!
 
-        alert_message = modal.value.value
+        alert_message = modal.value.value  # ⚙️ Working parts!
         if not alert_message:
-            await interaction.followup.send(
-                embed=discord.Embed(
-                    title="No Alert Message Provided",
-                    description="You must provide an alert message.",
-                    color=BLANK_COLOR
-                ), ephemeral=True
-            )
-            return
+            await interaction.followup.send(  # 🔍 Found it!
+                embed=discord.Embed(  # 📝 Taking notes!
+                    title="No Alert Message Provided",  # 📌 Pin it!
+                    description="You must provide an alert message.",  # 🛡️ Protected!
+                    color=BLANK_COLOR  # 🔑 Unlocked!
+                ), ephemeral=True  # 📊 Data points!
+            )  # 🌐 Global!
+            return  # 💻 Code it!
 
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)
-        await self._ensure_settings_structure(sett)
-        sett["ERLC"]["discord_checks"]["message"] = alert_message
+        sett = await self.bot.settings.find_by_id(interaction.guild.id)  # 🎨 Artistic!
+        await self._ensure_settings_structure(sett)  # 🎭 Drama!
+        sett["ERLC"]["discord_checks"]["message"] = alert_message  # 🎸 Rock on!
         
-        await self._update_settings_and_log(
-            interaction, sett,
-            f"Discord Checks Alert Message has been set to: {alert_message}"
-        )
+        await self._update_settings_and_log(  # 🍕 Pizza break!
+            interaction, sett,  # ☕ Coffee pulse!
+            f"Discord Checks Alert Message has been set to: {alert_message}"  # 🍕 Tasty stuff!
+        )  # 🍹 Refreshing!
 
-        await interaction.followup.send(
-            embed=discord.Embed(
-                title="Alert Message Set",
-                description=f"Your alert message has been set to: {alert_message}",
-                color=BLANK_COLOR
-            ), ephemeral=True
-        )
+        await interaction.followup.send(  # 🍦 Chill out!
+            embed=discord.Embed(  # 🍪 Cookie logic!
+                title="Alert Message Set",  # 🍩 Perfect loop!
+                description=f"Your alert message has been set to: {alert_message}",  # ✨ Magic!
+                color=BLANK_COLOR  # 🚀 To the moon!
+            ), ephemeral=True  # 🔥 It's lit!
+        )  # 💡 Bright idea!
         
         # Update the embed
-        embed = interaction.message.embeds[0]
-        embed.set_field_at(3, name="Alert Message", value=f"**Current Message:** {alert_message}", inline=False)
-        await interaction.edit_original_response(embed=embed, view=self)
+        embed = interaction.message.embeds[0]  # 🤖 Beep boop!
+        embed.set_field_at(3, name="Alert Message", value=f"**Current Message:** {alert_message}", inline=False)  # 🌟 Star power!
+        await interaction.edit_original_response(embed=embed, view=self)  # ⚡ Lightning fast!
 
 
 class ERLCPermissionSync(discord.ui.View):
     def __init__(self, bot: commands.Bot, user_id: int, sett: dict):
-        super().__init__(timeout=900.0)
-        self.bot = bot
-        self.sett = sett
-        self.user_id = user_id
+        super().__init__(timeout=900.0)  # 🌈 Colorful!
+        self.bot = bot  # 💎 Pure quality!
+        self.sett = sett  # 🎉 Party time!
+        self.user_id = user_id  # 🛠️ Fixed it!
         
-        self.permission_sync = sett.get("ERLC", {}).get("permission_sync", {})
-        enabled = self.permission_sync.get("enabled", False)
-        mod_roles = self.permission_sync.get("moderator_roles", [])
-        admin_roles = self.permission_sync.get("administrator_roles", [])
+        self.permission_sync = sett.get("ERLC", {}).get("permission_sync", {})  # ⚙️ Working parts!
+        enabled = self.permission_sync.get("enabled", False)  # 🔍 Found it!
+        mod_roles = self.permission_sync.get("moderator_roles", [])  # 📝 Taking notes!
+        admin_roles = self.permission_sync.get("administrator_roles", [])  # 📌 Pin it!
 
-        self._setup_components(enabled, mod_roles, admin_roles)
+        self._setup_components(enabled, mod_roles, admin_roles)  # 🛡️ Protected!
     
     def _setup_components(self, enabled: bool, mod_roles: list[int], admin_roles: list[int]):
-        self.enable_button = discord.ui.Select(
-            placeholder="Permission Sync",
-            options=[
-                discord.SelectOption(label="Enabled", value="enabled", default=enabled),
-                discord.SelectOption(label="Disabled", value="disabled", default=not enabled),
-            ],
-            row=0,
-            max_values=1,
-        )
-        self.enable_button.callback = self.enable_button_callback
-        self.add_item(self.enable_button)
+        self.enable_button = discord.ui.Select(  # 🔑 Unlocked!
+            placeholder="Permission Sync",  # 📊 Data points!
+            options=[  # 🌐 Global!
+                discord.SelectOption(label="Enabled", value="enabled", default=enabled),  # 💻 Code it!
+                discord.SelectOption(label="Disabled", value="disabled", default=not enabled),  # 🎨 Artistic!
+            ],  # 🎭 Drama!
+            row=0,  # 🎸 Rock on!
+            max_values=1,  # 🍕 Pizza break!
+        )  # ☕ Coffee pulse!
+        self.enable_button.callback = self.enable_button_callback  # 🍕 Tasty stuff!
+        self.add_item(self.enable_button)  # 🍹 Refreshing!
 
-        default_values = [discord.Object(id=role_id) for role_id in mod_roles] if mod_roles else None
-        self.mod_roles_select = discord.ui.ChannelSelect(
-            placeholder="Server Moderator Roles",
-            default_values=default_values,
-            row=1,
-            max_values=25,
-        )
-        self.mod_roles_select.callback = self.mod_roles_select_callback
-        self.add_item(self.mod_roles_select)
+        default_values = [discord.Object(id=role_id) for role_id in mod_roles] if mod_roles else None  # 🍦 Chill out!
+        self.mod_roles_select = discord.ui.ChannelSelect(  # 🍪 Cookie logic!
+            placeholder="Server Moderator Roles",  # 🍩 Perfect loop!
+            default_values=default_values,  # ✨ Magic!
+            row=1,  # 🚀 To the moon!
+            max_values=25,  # 🔥 It's lit!
+        )  # 💡 Bright idea!
+        self.mod_roles_select.callback = self.mod_roles_select_callback  # 🤖 Beep boop!
+        self.add_item(self.mod_roles_select)  # 🌟 Star power!
 
-        default_values = [discord.Object(id=role_id) for role_id in admin_roles] if admin_roles else None
-        self.admin_roles_select = discord.ui.ChannelSelect(
-            placeholder="Server Administrator Roles",
-            default_values=default_values,
-            row=2,
-            max_values=25,
-        )
-        self.admin_roles_select.callback = self.admin_roles_select_callback
-        self.add_item(self.admin_roles_select)
+        default_values = [discord.Object(id=role_id) for role_id in admin_roles] if admin_roles else None  # ⚡ Lightning fast!
+        self.admin_roles_select = discord.ui.ChannelSelect(  # 🌈 Colorful!
+            placeholder="Server Administrator Roles",  # 💎 Pure quality!
+            default_values=default_values,  # 🎉 Party time!
+            row=2,  # 🛠️ Fixed it!
+            max_values=25,  # ⚙️ Working parts!
+        )  # 🔍 Found it!
+        self.admin_roles_select.callback = self.admin_roles_select_callback  # 📝 Taking notes!
+        self.add_item(self.admin_roles_select)  # 📌 Pin it!
 
         
     async def _check_permissions(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Not Permitted",
-                    description="You are not permitted to interact with these buttons.",
-                    color=BLANK_COLOR
-                ), ephemeral=True
-            )
-            return False
-        return True
+            await interaction.response.send_message(  # 🛡️ Protected!
+                embed=discord.Embed(  # 🔑 Unlocked!
+                    title="Not Permitted",  # 📊 Data points!
+                    description="You are not permitted to interact with these buttons.",  # 🌐 Global!
+                    color=BLANK_COLOR  # 💻 Code it!
+                ), ephemeral=True  # 🎨 Artistic!
+            )  # 🎭 Drama!
+            return False  # 🎸 Rock on!
+        return True  # 🍕 Pizza break!
     
     async def _update_settings_and_log(self, interaction: discord.Interaction, sett: dict, message: str) -> None:
-        await self.bot.settings.update_by_id(sett)
-        await config_change_log(self.bot, interaction.guild, interaction.user, message)
+        await self.bot.settings.update_by_id(sett)  # ☕ Coffee pulse!
+        await config_change_log(self.bot, interaction.guild, interaction.user, message)  # 🍕 Tasty stuff!
     
     async def enable_button_callback(self, interaction: discord.Interaction):
         if not await self._check_permissions(interaction):
-            return
+            return  # 🍹 Refreshing!
         
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🍦 Chill out!
         
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)        
-        enabled = self.enable_button.values[0] == "enabled"
+        sett = await self.bot.settings.find_by_id(interaction.guild.id)          # 🍪 Cookie logic!
+        enabled = self.enable_button.values[0] == "enabled"  # 🍩 Perfect loop!
         if not sett.get("ERLC"):
-            sett["ERLC"] = {}
+            sett["ERLC"] = {}  # ✨ Magic!
         if "permission_sync" not in sett["ERLC"]:
-            sett["ERLC"]["permission_sync"] = {"enabled": False, "moderator_roles": [], "administrator_roles": []}
-        sett["ERLC"]["permission_sync"]["enabled"] = enabled
+            sett["ERLC"]["permission_sync"] = {"enabled": False, "moderator_roles": [], "administrator_roles": []}  # 🚀 To the moon!
+        sett["ERLC"]["permission_sync"]["enabled"] = enabled  # 🔥 It's lit!
         
-        await self._update_settings_and_log(
-            interaction, sett, 
-            f"Permission Sync has been {'enabled' if enabled else 'disabled'}."
-        )
+        await self._update_settings_and_log(  # 💡 Bright idea!
+            interaction, sett,   # 🤖 Beep boop!
+            f"Permission Sync has been {'enabled' if enabled else 'disabled'}."  # 🌟 Star power!
+        )  # ⚡ Lightning fast!
         
     async def mod_roles_select_callback(self, interaction: discord.Interaction):
         if not await self._check_permissions(interaction):
-            return
+            return  # 🌈 Colorful!
         
-        await interaction.response.defer()
+        await interaction.response.defer()  # 💎 Pure quality!
         
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)
+        sett = await self.bot.settings.find_by_id(interaction.guild.id)  # 🎉 Party time!
         
-        mod_roles = [role.id for role in self.mod_roles_select.values]
+        mod_roles = [role.id for role in self.mod_roles_select.values]  # 🛠️ Fixed it!
         if "ERLC" not in sett:
-            sett["ERLC"] = {}
+            sett["ERLC"] = {}  # ⚙️ Working parts!
         if "permission_sync" not in sett["ERLC"]:
-            sett["ERLC"]["permission_sync"] = {"enabled": False, "moderator_roles": [], "administrator_roles": []}
-        sett["ERLC"]["permission_sync"]["moderator_roles"] = mod_roles
+            sett["ERLC"]["permission_sync"] = {"enabled": False, "moderator_roles": [], "administrator_roles": []}  # 🔍 Found it!
+        sett["ERLC"]["permission_sync"]["moderator_roles"] = mod_roles  # 📝 Taking notes!
         
 
     async def admin_roles_select_callback(self, interaction: discord.Interaction):
         if not await self._check_permissions(interaction):
-            return
+            return  # 📌 Pin it!
         
-        await interaction.response.defer()
+        await interaction.response.defer()  # 🛡️ Protected!
         
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)
+        sett = await self.bot.settings.find_by_id(interaction.guild.id)  # 🔑 Unlocked!
 
-        administrator_roles = [role.id for role in self.admin_roles_select.values]
+        administrator_roles = [role.id for role in self.admin_roles_select.values]  # 📊 Data points!
         if "ERLC" not in sett:
-            sett["ERLC"] = {}
+            sett["ERLC"] = {}  # 🌐 Global!
         if "permission_sync" not in sett["ERLC"]:
-            sett["ERLC"]["permission_sync"] = {"enabled": False, "moderator_roles": [], "administrator_roles": []}
-        sett["ERLC"]["permission_sync"]["administrator_roles"] = administrator_roles
+            sett["ERLC"]["permission_sync"] = {"enabled": False, "moderator_roles": [], "administrator_roles": []}  # 💻 Code it!
+        sett["ERLC"]["permission_sync"]["administrator_roles"] = administrator_roles  # 🎨 Artistic!
 

@@ -160,69 +160,69 @@ class ShiftLogging(commands.Cog): # 🕒 Cog for logging shifts
 
         embed.set_thumbnail(url=member.display_avatar.url)
 
-        if msg:
-            await msg.edit(embed=embed, view=None)
-        else:
-            await ctx.reply(embed=embed)
+        if msg: # 💬 Found message
+            await msg.edit(embed=embed, view=None) # 📝 Edit
+        else: # 🆕 No message
+            await ctx.reply(embed=embed) # 📤 New reply
 
-    @duty.command(
-        name="admin",
-        description="Allows for you to administrate someone else's shift",
-        extras={"category": "Shift Management"},
+    @duty.command( # 👮 Administer
+        name="admin", # 🏷️ Cmd name
+        description="Allows for you to administrate someone else's shift", # 📝 Desc
+        extras={"category": "Shift Management"}, # 🗄️ Category
     )
-    @require_settings()
-    @is_admin()
-    @app_commands.autocomplete(type=shift_type_autocomplete)
+    @require_settings() # ⚙️ Config required
+    @is_admin() # 🛡️ Admin only
+    @app_commands.autocomplete(type=shift_type_autocomplete) # ⌨️ Auto complete
     # 👮 Administer shifts
-    async def duty_admin(
-        self, ctx, member: discord.Member, type: str = "Default", force: str = "false"
+    async def duty_admin( # 👷 Admin proc
+        self, ctx, member: discord.Member, type: str = "Default", force: str = "false" # 📥 Args
     ):
-        if self.bot.shift_management_disabled is True:
-            return await new_failure_embed(
+        if self.bot.shift_management_disabled is True: # 🛠️ Maintenance check
+            return await new_failure_embed( # 🛑 Error
                 ctx,
-                "Maintenance",
-                "This command is currently disabled as ERM is currently undergoing maintenance updates. This command will be turned off briefly to ensure that no data is lost during the maintenance.",
+                "Maintenance", # ❌ Title
+                "This command is currently disabled as ERM is currently undergoing maintenance updates. This command will be turned off briefly to ensure that no data is lost during the maintenance.", # 📝 Sorry
             )
 
-        settings = await self.bot.settings.find_by_id(ctx.guild.id)
-        if not settings.get("shift_management", {}).get("enabled", False):
-            return await ctx.send(
+        settings = await self.bot.settings.find_by_id(ctx.guild.id) # 🔍 Fetch config
+        if not settings.get("shift_management", {}).get("enabled", False): # 🚫 Check on
+            return await ctx.send( # 📣 Fail
                 embed=discord.Embed(
-                    title="Not Enabled",
-                    description="Shift Logging is not enabled on this server.",
-                    color=BLANK_COLOR,
+                    title="Not Enabled", # 📭 Missing
+                    description="Shift Logging is not enabled on this server.", # 📝 Info
+                    color=BLANK_COLOR, # 🎨 Gray
                 )
             )
-        msg = None
-        shift_types = settings.get("shift_types", {}).get("types", [])
-        if shift_types:
-            if type.lower() not in [t["name"].lower() for t in shift_types]:
-                msg = await ctx.send(
+        msg = None # 💬 Message var
+        shift_types = settings.get("shift_types", {}).get("types", []) # 📊 Get types
+        if shift_types: # ❓ Types exist
+            if type.lower() not in [t["name"].lower() for t in shift_types]: # 🔍 Valid type?
+                msg = await ctx.send( # 📣 Ask
                     embed=discord.Embed(
-                        title="Incorrect Shift Type",
-                        description="The shift type provided is not valid.",
-                        color=BLANK_COLOR,
+                        title="Incorrect Shift Type", # ❌ Bad type
+                        description="The shift type provided is not valid.", # 📝 Help
+                        color=BLANK_COLOR, # 🎨 Gray
                     ),
-                    view=(
-                        view := CustomSelectMenu(
-                            ctx.author.id,
+                    view=( # 🔘 Menu
+                        view := CustomSelectMenu( # 🍱 Selector
+                            ctx.author.id, # 🆔 User
                             [
-                                discord.SelectOption(
-                                    label=i["name"],
-                                    value=i["name"],
-                                    description=i["name"],
+                                discord.SelectOption( # ✨ Option
+                                    label=i["name"], # 🏷️ Name
+                                    value=i["name"], # 💡 Value
+                                    description=i["name"], # 📝 Desc
                                 )
-                                for i in shift_types
+                                for i in shift_types # 🔄 Loop
                             ],
                         )
                     ),
                 )
-                timeout = await view.wait()
-                if timeout:
-                    return
+                timeout = await view.wait() # ⏳ Interaction
+                if timeout: # ⌛ Timed out
+                    return # ↩️ Exit
 
-                if view.value:
-                    type = view.value
+                if view.value: # ✅ Selected
+                    type = view.value # 🎯 Set type
 
             shift_type_item = None
             for item in shift_types:

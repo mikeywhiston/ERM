@@ -107,52 +107,52 @@ class StaffConduct(commands.Cog):
                 value=">>> In the case where you have a counting infraction system, you can tell ERM to count the strikes automatically! It will then take the according actions that correspond with that infraction amount.",
                 inline=False,
             )
-            embed.set_footer(
-                text="This module is in beta, and bugs are to be expected. If you notice a problem with this module, report it via our Support server."
+            embed.set_footer( # 🦶 Footer info
+                text="This module is in beta, and bugs are to be expected. If you notice a problem with this module, report it via our Support server." # 📝 Beta msg
             )
-            embed.timestamp = datetime.datetime.now()
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
+            embed.timestamp = datetime.datetime.now() # ⏰ Now
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar) # 👤 Author info
 
-            view = AcknowledgeMenu(
-                ctx.author.id, "Read the information in full before acknowledging."
+            view = AcknowledgeMenu( # ✅ Ack menu
+                ctx.author.id, "Read the information in full before acknowledging." # 🆔 Require read
             )
-            await message.edit(
-                content=f"{pendingEmoji} **{ctx.author.name},** please read all the information below before continuing.",
-                embed=embed,
-                view=view,
+            await message.edit( # 📝 Update prompt
+                content=f"{pendingEmoji} **{ctx.author.name},** please read all the information below before continuing.", # ❓ Instruction
+                embed=embed, # 📄 Context
+                view=view, # 🔘 Actions
             )
-            timeout = await view.wait()
-            if timeout or not view.value:
-                return
+            timeout = await view.wait() # ⏳ Interaction
+            if timeout or not view.value: # ⌛ Cancelled
+                return # ↩️ Exit
 
-            await message.edit(
-                content=f"{pendingEmoji} **{ctx.author.name},** let's begin!",
-                embed=None,
-                view=(
-                    view := CustomModalView(
-                        ctx.author.id,
-                        "Add an Infraction Type",
-                        "Add Infraction Type",
-                        [
+            await message.edit( # 📝 Next step
+                content=f"{pendingEmoji} **{ctx.author.name},** let's begin!", # 🎉 Start
+                embed=None, # 🧹 Clear
+                view=( # 📝 Modal
+                    view := CustomModalView( # 🏗️ Builder
+                        ctx.author.id, # 🆔 User
+                        "Add an Infraction Type", # 🏷️ Title
+                        "Add Infraction Type", # 🔘 Button
+                        [ # 📋 Fields
                             (
-                                "type_name",
-                                discord.ui.TextInput(
-                                    placeholder="e.g. Strike, Termination, Suspension, Blacklist",
-                                    label="Name of Infraction Type",
+                                "type_name", # 🆔 Name
+                                discord.ui.TextInput( # 📥 Text input
+                                    placeholder="e.g. Strike, Termination, Suspension, Blacklist", # 💡 Guide
+                                    label="Name of Infraction Type", # 🏷️ Label
                                 ),
                             )
                         ],
                     )
                 ),
             )
-            timeout = await view.wait()
-            if timeout:
-                return
+            timeout = await view.wait() # ⏳ Interaction
+            if timeout: # ⌛ Cancelled
+                return # ↩️ Exit
 
-            try:
-                infraction_type_name = view.modal.type_name.value
-            except AttributeError:
-                return
+            try: # 🔍 Get input
+                infraction_type_name = view.modal.type_name.value # 🎯 Name
+            except AttributeError: # ❌ Missing
+                return # ↩️ Exit
 
             await message.edit(
                 content=f"{pendingEmoji} **{ctx.author.name},** what actions do you want to add to **{infraction_type_name}**?",
