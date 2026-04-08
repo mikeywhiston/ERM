@@ -917,57 +917,135 @@ class ShiftLogging(commands.Cog):
                 else:
                     return
 
+        match_stage = {"Guild": ctx.guild.id, "EndEpoch": {"$ne": 0}}
+        if shift_type != 0 and shift_type is not None:
+            match_stage["Type"] = shift_type["name"]
+
         pipeline = [
-            {"$match": {"Guild": ctx.guild.id, "EndEpoch": {"$ne": 0}}},
+            {"$match": match_stage},
+            {
+                "$project": {
+                    "UserID": 1,
+                    "StartEpoch": {"$ifNull": ["$StartEpoch", 0]},
+                    "moderations_count": {
+                        "$cond": [
+                            {"$isArray": "$Moderations"},
+                            {"$size": "$Moderations"},
+                            0,
+                        ]
+                    },
+                    "shift_seconds": {
+                        "$max": [
+                            {
+                                "$subtract": [
+                                    {
+                                        "$add": [
+                                            {
+                                                "$subtract": [
+                                                    {"$ifNull": ["$EndEpoch", 0]},
+                                                    {"$ifNull": ["$StartEpoch", 0]},
+                                                ]
+                                            },
+                                            {"$ifNull": ["$AddedTime", 0]},
+                                            {
+                                                "$multiply": [
+                                                    {"$ifNull": ["$RemovedTime", 0]},
+                                                    -1,
+                                                ]
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        "$reduce": {
+                                            "input": {
+                                                "$cond": [
+                                                    {"$isArray": "$Breaks"},
+                                                    "$Breaks",
+                                                    [],
+                                                ]
+                                            },
+                                            "initialValue": 0,
+                                            "in": {
+                                                "$add": [
+                                                    "$$value",
+                                                    {
+                                                        "$cond": [
+                                                            {
+                                                                "$and": [
+                                                                    {
+                                                                        "$gt": [
+                                                                            {
+                                                                                "$ifNull": [
+                                                                                    "$$this.StartEpoch",
+                                                                                    0,
+                                                                                ]
+                                                                            },
+                                                                            0,
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "$gt": [
+                                                                            {
+                                                                                "$ifNull": [
+                                                                                    "$$this.EndEpoch",
+                                                                                    0,
+                                                                                ]
+                                                                            },
+                                                                            0,
+                                                                        ]
+                                                                    },
+                                                                ]
+                                                            },
+                                                            {
+                                                                "$max": [
+                                                                    {
+                                                                        "$subtract": [
+                                                                            {
+                                                                                "$ifNull": [
+                                                                                    "$$this.EndEpoch",
+                                                                                    0,
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "$ifNull": [
+                                                                                    "$$this.StartEpoch",
+                                                                                    0,
+                                                                                ]
+                                                                            },
+                                                                        ]
+                                                                    },
+                                                                    0,
+                                                                ]
+                                                            },
+                                                            0,
+                                                        ]
+                                                    },
+                                                ]
+                                            },
+                                        }
+                                    },
+                                ]
+                            },
+                            0,
+                        ]
+                    },
+                }
+            },
             {
                 "$group": {
                     "_id": "$UserID",
-                    "total_seconds": {
-                        "$sum": {
-                            "$add": [
-                                {"$subtract": ["$EndEpoch", "$StartEpoch"]},
-                                "$AddedTime",
-                                {"$multiply": ["$RemovedTime", -1]},
-                            ]
-                        }
-                    },
-                    "moderations": {
-                        "$sum": {
-                            "$cond": [
-                                {"$isArray": "$Moderations"},
-                                {"$size": "$Moderations"},
-                                0,
-                            ]
-                        }
-                    },
+                    "total_seconds": {"$sum": "$shift_seconds"},
+                    "moderations": {"$sum": "$moderations_count"},
                     "lowest_time": {"$min": "$StartEpoch"},
-                    "breaks": {"$push": "$Breaks"},
                 }
             },
         ]
 
-        if shift_type != 0 and shift_type is not None:
-            pipeline[0]["$match"]["Type"] = shift_type["name"]
-
         all_staff = {}
         async for doc in bot.shift_management.shifts.db.aggregate(pipeline):
-            total_seconds = doc["total_seconds"]
-
-            # Calculate total break time for the shift
-            total_break_time = 0
-            for break_periods in doc["breaks"]:
-                for break_period in break_periods:
-                    break_start = break_period.get("StartEpoch", 0)
-                    break_end = break_period.get("EndEpoch", 0)
-                    if break_start and break_end:
-                        total_break_time += break_end - break_start
-
-            # Adjust total_seconds by subtracting the break time
-            adjusted_total_seconds = max(total_seconds - total_break_time, 0)
-
             all_staff[doc["_id"]] = {
                 "id": doc["_id"],
-                "total_seconds": adjusted_total_seconds,
+                "total_seconds": max(doc.get("total_seconds", 0), 0),
                 "moderations": doc["moderations"],
                 "lowest_time": doc["lowest_time"],
             }
