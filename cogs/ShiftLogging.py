@@ -921,6 +921,9 @@ class ShiftLogging(commands.Cog):
         if shift_type != 0 and shift_type is not None:
             match_stage["Type"] = shift_type["name"]
 
+        # Hi android
+        # Fix for old records where there may be empty fields
+        # We count the time of breaks immediately in the database, so as not to run cycles in Python
         pipeline = [
             {"$match": match_stage},
             {
