@@ -13,160 +13,147 @@ from decouple import config
 
 from utils.utils import has_whitelabel
 
+ALLOWED_MENTIONS = discord.AllowedMentions(
+    replied_user=True,
+    everyone=True,
+    roles=True,
+    users=True,
+)
 
-async def iterate_reminder(bot, guildObj): # TODO: do a refactor of this.. this is abundantly terrible programming.
-    if await has_whitelabel(bot, guildObj["_id"]):
+
+async def run_erlc_integration(bot, guild_id, integration):
+    """Execute an ER:LC integration command for a reminder."""
+    command_map = {"Hint": "h", "Message": "m"}
+    command = command_map.get(integration["type"])
+    if not command:
         return
 
-    for item in guildObj["reminders"].copy():
+    content = integration["content"]
+    full_command = f":{command} {content}"
+
+    has_key = await bot.server_keys.db.count_documents({"_id": guild_id}) != 0
+    if not has_key:
+        return
+
+    try:
+        await bot.prc_api.get_server_status(guild_id)
+    except prc_api.ResponseFailure:
+        logging.info(f"Cancelled execution of reminder for {guild_id}")
+        return
+
+    resp = await bot.prc_api.run_command(guild_id, full_command)
+    if resp[0] != 200:
+        logging.warning(f"Failed reaching PRC due to {resp[0]} status code")
+    else:
+        logging.info("Integration success with 200 status code")
+
+
+async def notify_panel(guild_id, message):
+    """Notify the panel API that a reminder was triggered."""
+    try:
+        panel_url = config("PANEL_API_URL", default="")
+        if not panel_url:
+            return
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{panel_url}/Internal/{guild_id}/TriggerReminder",
+                headers={
+                    "Authorization": config("INTERNAL_API_AUTH", default=""),
+                    "Content-Type": "application/json",
+                },
+                json={"message": message},
+                timeout=aiohttp.ClientTimeout(total=10),
+            ):
+                pass
+    except Exception as e:
+        logging.warning(f"Failed to trigger panel reminder: {e}")
+
+
+async def process_reminder(bot, guild, item, guild_obj):
+    """Process a single reminder item."""
+    channel = guild.get_channel(int(item["channel"]))
+    if not channel:
+        try:
+            channel = await guild.fetch_channel(int(item["channel"]))
+        except discord.HTTPException:
+            return
+
+    # Build role mentions
+    roles = []
+    for role_id in item.get("role") or []:
+        role_obj = guild.get_role(int(role_id))
+        if role_obj:
+            roles.append(role_obj.mention)
+
+    # Build view
+    view = CompleteReminder(bot) if item.get("completion_ability") is True else None
+
+    # Build embed
+    embed = discord.Embed(
+        title="Notification",
+        description=item["message"],
+        color=BLANK_COLOR,
+    )
+
+    # Update last triggered time
+    item["lastTriggered"] = datetime.datetime.now(tz=pytz.UTC).timestamp()
+    await bot.reminders.update_by_id(guild_obj)
+
+    # Run ER:LC integration if configured
+    if isinstance(item.get("integration"), dict):
+        await run_erlc_integration(bot, guild.id, item["integration"])
+
+    # Send the reminder
+    await channel.send(
+        " ".join(roles),
+        embed=embed,
+        view=view,
+        allowed_mentions=ALLOWED_MENTIONS,
+    )
+
+    # Notify panel
+    await notify_panel(guild.id, item["message"])
+
+
+async def iterate_reminder(bot, guild_obj):
+    """Iterate through all reminders for a guild and process any that are due."""
+    if await has_whitelabel(bot, guild_obj["_id"]):
+        return
+
+    guild = bot.get_guild(int(guild_obj["_id"]))
+    if not guild:
+        return
+
+    current_timestamp = datetime.datetime.now(tz=pytz.UTC).timestamp()
+
+    for item in guild_obj["reminders"].copy():
         if item.get("paused") is True:
             continue
 
-        current_time = datetime.datetime.now(tz=pytz.UTC)
-        interval = item["interval"]
+        if current_timestamp - item["lastTriggered"] < item["interval"]:
+            continue
 
-        if current_time.timestamp() - item["lastTriggered"] >= interval:
-            guild = bot.get_guild(int(guildObj["_id"]))
-            if not guild:
-                continue
-            channel = guild.get_channel(int(item["channel"]))
-            if not channel:
-                continue
-
-            roles = []
-            try:
-                for role in item["role"]:
-                    role_obj = guild.get_role(int(role))
-                    if role_obj is not None:
-                        roles.append(role_obj.mention)
-            except TypeError:
-                roles = [""]
-
-            if (
-                    item.get("completion_ability")
-                    and item.get("completion_ability") is True
-            ):
-                view = CompleteReminder(bot)
-            else:
-                view = None
-            embed = discord.Embed(
-                title="Notification",
-                description=f"{item['message']}",
-                color=BLANK_COLOR,
-            )
-
-            lastTriggered = next_time.timestamp()
-            item["lastTriggered"] = lastTriggered
-            await bot.reminders.update_by_id(guildObj)
-
-            if isinstance(item.get("integration"), dict):
-                # This has the ERLC integration enabled
-                command = (
-                    "h"
-                    if item["integration"]["type"] == "Hint"
-                    else (
-                        "m"
-                        if item["integration"]["type"] == "Message"
-                        else None
-                    )
-                )
-                content = item["integration"]["content"]
-                total = ":" + command + " " + content
-                if (
-                        await bot.server_keys.db.count_documents(
-                            {"_id": channel.guild.id}
-                        )
-                        != 0
-                ):
-                    do_not_complete = False
-                    try:
-                        status = await bot.prc_api.get_server_status(
-                            channel.guild.id
-                        )
-                    except prc_api.ResponseFailure:
-                        do_not_complete = True
-
-                    if not do_not_complete:
-                        resp = await bot.prc_api.run_command(
-                            channel.guild.id, total
-                        )
-                        if resp[0] != 200:
-                            logging.info(
-                                "Failed reaching PRC due to {} status code".format(
-                                    resp
-                                )
-                            )
-                        else:
-                            logging.info(
-                                "Integration success with 200 status code"
-                            )
-                    else:
-                        logging.info(
-                            f"Cancelled execution of reminder for {channel.guild.id}"
-                        )
-
-            if not view:
-                await channel.send(
-                    " ".join(roles),
-                    embed=embed,
-                    allowed_mentions=discord.AllowedMentions(
-                        replied_user=True,
-                        everyone=True,
-                        roles=True,
-                        users=True,
-                    ),
-                )
-            else:
-                await channel.send(
-                    " ".join(roles),
-                    embed=embed,
-                    view=view,
-                    allowed_mentions=discord.AllowedMentions(
-                        replied_user=True,
-                        everyone=True,
-                        roles=True,
-                        users=True,
-                    ),
-                )
-
-            try:
-                panel_url_var = config("PANEL_API_URL")
-                if panel_url_var not in ["", None]:
-                    async with aiohttp.ClientSession() as session:
-                        async with session.post(
-                                f"{panel_url_var}/Internal/{channel.guild.id}/TriggerReminder",
-                                headers={
-                                    "Authorization": config(
-                                        "INTERNAL_API_AUTH"
-                                    ),
-                                    "Content-Type": "application/json",
-                                },
-                                json={"message": item["message"]},
-                        ):
-                            pass
-            except Exception as e:
-                logging.warning(f"Failed to trigger reminder: {e}")
-
+        try:
+            await process_reminder(bot, guild, item, guild_obj)
+        except Exception as e:
+            logging.warning(f"Reminder '{item.get('name', 'unknown')}' failed in guild {guild_obj['_id']}: {e}")
 
 
 @tasks.loop(minutes=1)
 async def check_reminders(bot):
+    query = {}
+    if bot.environment != "PRODUCTION":
+        try:
+            query = {"_id": int(config("CUSTOM_GUILD_ID"))}
+        except Exception as e:
+            logging.warning(f"Reminder task failed: {e}")
+            return
 
-    if bot.environment == "PRODUCTION":
-        try:
-            async for guildObj in bot.reminders.db.find({}):
-                try:
-                    await iterate_reminder(bot, guildObj)
-                except Exception as e:
-                    logging.warning(f"Reminder failed: {e}")
-        except Exception as e:
-            logging.warning(f"Reminder task failed: {e}")
-    else:
-        try:
-            async for guildObj in bot.reminders.db.find({"_id": int(config("CUSTOM_GUILD_ID"))}):
-                try:
-                    await iterate_reminder(bot, guildObj)
-                except Exception as e:
-                    logging.warning(f"Reminder failed: {e}")
-        except Exception as e:
-            logging.warning(f"Reminder task failed: {e}")
+    try:
+        for guild_obj in await bot.reminders.db.find(query).to_list(None):
+            try:
+                await iterate_reminder(bot, guild_obj)
+            except Exception as e:
+                logging.warning(f"Reminder task failed for guild {guild_obj.get('_id')}: {e}")
+    except Exception as e:
+        logging.warning(f"Reminder task failed: {e}")

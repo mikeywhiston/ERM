@@ -20,10 +20,10 @@ from utils.prc_api import ServerLinkNotFound, ResponseFailure
 class OnCommandError(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
+    
     @commands.Cog.listener("on_command_error")
     async def on_command_error(self, ctx, error):
-        ctx.bot.internal_command_storage.pop(ctx, None)
+        ctx.bot.internal_command_storage.pop(ctx.message.id, None)
         do_not_send = getattr(ctx, "dnr", False)
         bot = self.bot
         error_id = error_gen()
@@ -302,9 +302,8 @@ class OnCommandError(commands.Cog):
                     {
                         "_id": error_id,
                         "error": str(error),
-                        "time": datetime.datetime.now(tz=pytz.UTC).strftime(
-                            "%m/%d/%Y, %H:%M:%S"
-                        ),
+                        "type": type(error).__name__,
+                        "time": int(datetime.datetime.now(tz=pytz.UTC).timestamp()),
                         "channel": ctx.channel.id,
                         "guild": ctx.guild.id,
                     }

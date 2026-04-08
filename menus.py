@@ -943,14 +943,10 @@ class LOAMenu(discord.ui.View):
                 item.label = "Accepted"
             else:
                 self.remove_item(item)
-        s_loa = None
-
-        for loa in await self.bot.loas.get_all():
-            if (
-                loa["message_id"] == interaction.message.id
-                and loa["guild_id"] == interaction.guild.id
-            ):
-                s_loa = loa
+        s_loa = await self.bot.loas.db.find_one({
+            "message_id": interaction.message.id,
+            "guild_id": interaction.guild.id
+        })
 
         s_loa["accepted"] = True
         guild = self.bot.get_guild(s_loa["guild_id"])
@@ -3335,11 +3331,15 @@ class GoogleSpreadsheetModification(discord.ui.View):
 
         email = modal.email.value
 
-        client = gspread.service_account_from_dict(self.config)
-        sheet = client.open_by_url(self.url)
-        client.insert_permission(sheet.id, value=email, perm_type="user", role="writer")
-        permission_id = (sheet.list_permissions())[0]["id"]
-        sheet.transfer_ownership(permission_id)
+        def run_gspread_transfer():
+            client = gspread.service_account_from_dict(self.config)
+            sheet = client.open_by_url(self.url)
+            client.insert_permission(sheet.id, value=email, perm_type="user", role="writer")
+            permission_id = (sheet.list_permissions())[0]["id"]
+            sheet.transfer_ownership(permission_id)
+            
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, run_gspread_transfer)
 
         self.remove_item(button)
 
@@ -3498,12 +3498,10 @@ class ConditionCreationToolkit(discord.ui.View):
             select.options = list(filter(set_default, select.options))
 
             if select.values[0] in condition_options.values():
-                print("op")
                 condition_data["Operation"] = select.values[0]
                 continue
 
             if select.values[0] in ["and", "or"]:
-                print("logic")
                 condition_data["LogicGate"] = select.values[0]
                 continue
 
@@ -3516,7 +3514,6 @@ class ConditionCreationToolkit(discord.ui.View):
                         select.values[0] + f" {self.select_data.get(select)}"
                     )
                     continue
-                print("var")
                 condition_data["Variable"] = select.values[0]
                 continue
             else:
@@ -3528,7 +3525,6 @@ class ConditionCreationToolkit(discord.ui.View):
                             select.values[0] + f" {self.select_data.get(select)}"
                         )
                         continue
-                    print("val")
                     condition_data["Value"] = select.values[0]
                     continue
 
@@ -4264,48 +4260,60 @@ class RequestGoogleSpreadsheet(discord.ui.View):
             )
         )
 
-        client = gspread.service_account_from_dict(self.config)
+        guild_name = interaction.guild.name
+        guild_icon_url = interaction.guild.icon.url if interaction.guild.icon else None
 
-        sheet: gspread.Spreadsheet = client.copy(
-            self.template, interaction.guild.name, copy_permissions=True
-        )
-        new_sheet = sheet.get_worksheet(0)
-        try:
-            new_sheet.update_cell(4, 2, f'=IMAGE("{interaction.guild.icon.url}")')
-        except AttributeError:
-            pass
+        def generate_worksheet():
+            client = gspread.service_account_from_dict(self.config)
 
-        if self.type == "lb":
-            cell_list = new_sheet.range("D13:H999")
-        elif self.type == "ar":
-            cell_list = new_sheet.range("D13:I999")
-
-        try:
-            new_sheet.update_cell(
-                12, 1, td_format(datetime.timedelta(seconds=self.total_seconds))
+            sheet: gspread.Spreadsheet = client.copy(
+                self.template, guild_name, copy_permissions=True
             )
-        except OverflowError:
-            pass
-
-        for c, n_v in zip(cell_list, self.data):
-            c.value = str(n_v)
-
-        new_sheet.update_cells(cell_list, "USER_ENTERED")
-        if self.type == "ar":
-            LoAs = sheet.get_worksheet(1)
-            LoAs.update_cell(4, 2, f'=IMAGE("{interaction.guild.icon.url}")')
-            cell_list = LoAs.range("D13:H999")
-
-            for cell, new_value in zip(cell_list, self.additional_data):
-                if isinstance(new_value, int):
-                    cell.value = f"=({new_value}/ 86400 + DATE(1970, 1, 1))"
+            new_sheet = sheet.get_worksheet(0)
+            try:
+                if guild_icon_url:
+                    new_sheet.update_cell(4, 2, f'=IMAGE("{guild_icon_url}")')
                 else:
-                    cell.value = str(new_value)
-            LoAs.update_cells(cell_list, "USER_ENTERED")
+                    new_sheet.update_cell(4, 2, "No server icon available.")
+            except AttributeError:
+                pass
 
-        client.insert_permission(
-            sheet.id, value=None, perm_type="anyone", role="writer"
-        )
+            if self.type == "lb":
+                cell_list = new_sheet.range("D13:H999")
+            elif self.type == "ar":
+                cell_list = new_sheet.range("D13:I999")
+
+            try:
+                new_sheet.update_cell(
+                    12, 1, td_format(datetime.timedelta(seconds=self.total_seconds))
+                )
+            except OverflowError:
+                pass
+
+            for c, n_v in zip(cell_list, self.data):
+                c.value = str(n_v)
+
+            new_sheet.update_cells(cell_list, "USER_ENTERED")
+            if self.type == "ar":
+                LoAs = sheet.get_worksheet(1)
+                if guild_icon_url:
+                    LoAs.update_cell(4, 2, f'=IMAGE("{guild_icon_url}")')
+                cell_list = LoAs.range("D13:H999")
+
+                for cell, new_value in zip(cell_list, self.additional_data):
+                    if isinstance(new_value, int):
+                        cell.value = f"=({new_value}/ 86400 + DATE(1970, 1, 1))"
+                    else:
+                        cell.value = str(new_value)
+                LoAs.update_cells(cell_list, "USER_ENTERED")
+
+            client.insert_permission(
+                sheet.id, value=None, perm_type="anyone", role="writer"
+            )
+            return sheet
+
+        loop = asyncio.get_running_loop()
+        sheet = await loop.run_in_executor(None, generate_worksheet)
 
         view = GoogleSpreadsheetModification(
             self.bot, self.config, self.scopes, "Open Google Spreadsheet", sheet.url
@@ -7336,11 +7344,9 @@ class GameSecurityActions(discord.ui.View):
         affected_players = [
             i.strip() for i in field1.value.split("]:**")[1].split("\n")[0].split(", ")
         ]
-        print(affected_players)
         users = [
             await bot.roblox.get_user_by_username(item) for item in affected_players
         ]
-        print(users)
         for item in users:
             if item is not None:
                 users_ids.append(str(item.id))
@@ -8089,7 +8095,6 @@ class RemoteCommandConfiguration(discord.ui.View):
             self.auto_data["webhook_channel"] = None
         else:
             self.auto_data["webhook_channel"] = select.values[0].id
-        print(self.auto_data)
         embed = discord.Embed(
             title="Remote Commands", description="", color=BLANK_COLOR
         )
@@ -11654,7 +11659,7 @@ class ShiftLoggingManagement(discord.ui.View):
                     )
                 )
             except discord.Forbidden:
-                print(f"Could not send DM to {member.name}")
+                logging.warning(f"Could not send DM to {member.name}")
 
     @discord.ui.button(
         label="Erase Past Shifts", style=discord.ButtonStyle.danger, row=1
@@ -12161,7 +12166,7 @@ class AccountLinkingMenu(discord.ui.View):
         self.add_item(
             discord.ui.Button(
                 label="Link Roblox",
-                url=f"https://authorize.roblox.com/?client_id=5489705006553717980&response_type=code&redirect_uri=https://verify.ermbot.xyz/auth&scope=openid+profile&state={self.user.id}",
+                url=f"https://authorize.roblox.com/?client_id=6127131307610842685&response_type=code&redirect_uri=https://verify.ermbot.xyz/auth&scope=openid+profile&state={self.user.id}",
             )
         )
 
@@ -12826,7 +12831,7 @@ class ERLCPermissionSync(discord.ui.View):
         self.add_item(self.enable_button)
 
         default_values = [discord.Object(id=role_id) for role_id in mod_roles] if mod_roles else None
-        self.mod_roles_select = discord.ui.ChannelSelect(
+        self.mod_roles_select = discord.ui.RoleSelect(
             placeholder="Server Moderator Roles",
             default_values=default_values,
             row=1,
@@ -12836,7 +12841,7 @@ class ERLCPermissionSync(discord.ui.View):
         self.add_item(self.mod_roles_select)
 
         default_values = [discord.Object(id=role_id) for role_id in admin_roles] if admin_roles else None
-        self.admin_roles_select = discord.ui.ChannelSelect(
+        self.admin_roles_select = discord.ui.RoleSelect(
             placeholder="Server Administrator Roles",
             default_values=default_values,
             row=2,

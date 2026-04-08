@@ -8,33 +8,7 @@ from utils.prc_api import ResponseFailure
 
 # Open-Meteo WMO weather code -> ERLC :weather command value
 # https://open-meteo.com/en/docs (WMO Weather interpretation codes)
-WMO_TO_ERLC = {
-    0:  "Clear",        # Clear sky
-    1:  "Clear",        # Mainly clear
-    2:  "Clouds",       # Partly cloudy
-    3:  "Clouds",       # Overcast
-    45: "Fog",          # Foggy
-    48: "Fog",          # Icy fog
-    51: "Drizzle",      # Light drizzle
-    53: "Drizzle",      # Moderate drizzle
-    55: "Drizzle",      # Dense drizzle
-    61: "Rain",         # Slight rain
-    63: "Rain",         # Moderate rain
-    65: "Rain",         # Heavy rain
-    71: "Snow",         # Slight snow
-    73: "Snow",         # Moderate snow
-    75: "Snow",         # Heavy snow
-    77: "Snow",         # Snow grains
-    80: "Rain",         # Slight rain showers
-    81: "Rain",         # Moderate rain showers
-    82: "Rain",         # Violent rain showers
-    85: "Snow",         # Slight snow showers
-    86: "Snow",         # Heavy snow showers
-    95: "Thunderstorm", # Thunderstorm
-    96: "Thunderstorm", # Thunderstorm with hail
-    99: "Thunderstorm", # Thunderstorm with heavy hail
-}
-
+from utils.constants import WMO_TO_ERLC
 # Open-Meteo hour (0-23) -> ERLC :time command value
 def hour_to_erlc_time(hour: int) -> str:
     if 5 <= hour < 7:
@@ -163,7 +137,7 @@ async def sync_weather(bot):
 
         processed = 0
         async with aiohttp.ClientSession() as session:
-            async for guild_data in bot.settings.db.aggregate(pipeline):
+            async for guild_data in await bot.settings.db.aggregate(pipeline):
                 processed += 1
                 guild_id = guild_data["_id"]
 

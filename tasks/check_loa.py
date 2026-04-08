@@ -96,7 +96,7 @@ async def check_loa(bot):
                         await asyncio.sleep(1)
 
             except Exception as e:
-                print(f"Error processing guild {guild_id}: {e}")
+                logging.warning(f"Error processing guild {guild_id}: {e}")
 
     except ValueError:
         pass
@@ -152,4 +152,4 @@ async def process_loa(bot, guild, loaObject, settings, roles):
             pass
 
     except Exception as e:
-        print(f"Error processing LOA {loaObject.get('_id')}: {e}")
+        logging.warning(f"Error processing LOA {loaObject.get('_id')}: {e}")

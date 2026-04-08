@@ -48,8 +48,8 @@ count_aggregate = global_aggregate + [{"$count": "total"}]
 
 async def iterate_prc_logs_global(bot):
     try:
-        server_count = await bot.settings.db.aggregate(count_aggregate).to_list(1)
-        server_count = server_count[0]["total"] if server_count else 0
+        server_count_list = await (await bot.settings.db.aggregate(count_aggregate)).to_list(length=None)
+        server_count = server_count_list[0]["total"] if server_count_list else 0
 
         logging.warning(f"[ITERATE] Starting iteration for {server_count} servers")
         processed = 0
@@ -61,7 +61,7 @@ async def iterate_prc_logs_global(bot):
         tasks = []
 
 
-        async for items in bot.settings.db.aggregate(pipeline):
+        async for items in await bot.settings.db.aggregate(pipeline):
             tasks.append(process_guild(bot, items, semaphore))
             processed += 1
             if processed % 10 == 0:
@@ -93,6 +93,8 @@ async def unprimitive_guild_process(items, bot):
     guild = bot.get_guild(items["_id"]) or await bot.fetch_guild(
         items["_id"]
     )
+    if not guild:
+        return
     settings = await bot.settings.find_by_id(guild.id)
     erlc_settings = settings.get("ERLC", {})
 
@@ -336,6 +338,8 @@ async def process_player_logs(bot, settings, guild_id, player_logs, last_timesta
                         continue
 
                     guild = bot.get_guild(guild_id) or await bot.fetch_guild(guild_id)
+                    if not guild:
+                        continue
                     channel = await fetch_get_channel(guild, channel_id)
                     if not channel:
                         continue
@@ -460,6 +464,8 @@ async def process_player_logs(bot, settings, guild_id, player_logs, last_timesta
                                     guild = bot.get_guild(
                                         guild_id
                                     ) or await bot.fetch_guild(guild_id)
+                                    if not guild:
+                                        continue
                                     channel = await fetch_get_channel(guild, channel_id)
                                     if channel:
                                         try:
@@ -579,6 +585,9 @@ async def check_automatic_shifts(bot, settings, guild_id, join_logs, ts: int) ->
     try:
         guild = bot.get_guild(guild_id) or await bot.fetch_guild(guild_id)
     except:
+        return sorted(join_logs, key=lambda x: x.timestamp, reverse=True)[0].timestamp
+
+    if not guild:
         return sorted(join_logs, key=lambda x: x.timestamp, reverse=True)[0].timestamp
 
     if automatic_shifts in [{}, None]:
@@ -729,6 +738,8 @@ async def check_team_restrictions(bot, settings, guild_id, players):
         return
 
     guild = bot.get_guild(guild_id) or await bot.fetch_guild(guild_id)
+    if not guild:
+        return
     all_roles = await guild.fetch_roles()
     for team_name, plrs in teams.items():
         if team_restrictions.get(team_name) is not None:

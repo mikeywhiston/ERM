@@ -103,7 +103,6 @@ async def get_roblox_by_username(user: str, bot, ctx: commands.Context):
             )
             if member_converted:
                 bl_user_data = await bot.bloxlink.find_roblox(member_converted.id)
-                # print(bl_user_data)
                 roblox_user = await bot.bloxlink.get_roblox_info(
                     bl_user_data["robloxID"]
                 )
@@ -326,13 +325,8 @@ async def sub_vars(bot, ctx: commands.Context, channel, string, **kwargs):
         string = string.replace("{channel}", channel.mention)
         string = string.replace("{prefix}", list(await get_prefix(bot, ctx))[-1])
 
-        onduty: int = len(
-            [
-                i
-                async for i in bot.shift_management.shifts.db.find(
-                    {"Guild": ctx.guild.id, "EndEpoch": 0}
-                )
-            ]
+        onduty: int = await bot.shift_management.shifts.db.count_documents(
+            {"Guild": ctx.guild.id, "EndEpoch": 0}
         )
 
         string = string.replace("{onduty}", str(onduty))

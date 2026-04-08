@@ -12,3 +12,4 @@ package.json
 package_lock.json
 venv/
 .venv/
+.vscode

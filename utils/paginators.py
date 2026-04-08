@@ -226,3 +226,16 @@ class SelectPagination(discord.ui.View):
             )
         await interaction.response.defer()
         await self._paginate(interaction, 1, "increment")
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id == self.user_id:
+            return True
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Not Permitted",
+                description="You are not permitted to interact with these buttons.",
+                color=blank_color,
+            ),
+            ephemeral=True,
+        )
+        return False
