@@ -926,8 +926,10 @@ class ShiftLogging(commands.Cog):
         if shift_type != 0 and shift_type is not None:
             match_stage["Type"] = shift_type["name"]
 
+        # I did a debug logging to see if there was an error in the database
+        # I use info because there's a lot of logs in the debug, then I'll delete it
         logger.info(
-            "Shift DB: guild_id=%s shift_type=%s match_stage=%s",
+            "guild_id=%s shift_type=%s match_stage=%s",
             ctx.guild.id,
             shift_type["name"] if isinstance(shift_type, dict) else shift_type,
             match_stage,
@@ -1057,14 +1059,14 @@ class ShiftLogging(commands.Cog):
         ]
 
         logger.info(
-            "Shift DB: running shifts aggregate for guild_id=%s pipeline=%s",
+            "shifts aggregate for guild_id=%s pipeline=%s",
             ctx.guild.id,
             pipeline,
         )
         all_staff = {}
         async for doc in await bot.shift_management.shifts.db.aggregate(pipeline):
             logger.info(
-                "Shift DB: shifts aggregate doc guild_id=%s doc=%s",
+                "shifts aggregate doc guild_id=%s doc=%s",
                 ctx.guild.id,
                 doc,
             )
@@ -1076,7 +1078,7 @@ class ShiftLogging(commands.Cog):
             }
 
         logger.info(
-            "Shift DB: shifts aggregate complete guild_id=%s staff_count=%s staff_ids=%s",
+            "shifts aggregate complete guild_id=%s staff_count=%s staff_ids=%s",
             ctx.guild.id,
             len(all_staff),
             list(all_staff.keys()),
@@ -1087,7 +1089,7 @@ class ShiftLogging(commands.Cog):
             staff["id"] for staff in all_staff.values() if staff["moderations"] == 0
         ]
         logger.info(
-            "Shift DB: guild_id=%s moderation fallback ids=%s",
+            "guild_id=%s moderation fallback ids=%s",
             ctx.guild.id,
             mod_ids,
         )
@@ -1097,13 +1099,13 @@ class ShiftLogging(commands.Cog):
                 {"$group": {"_id": "$ModeratorID", "mod_count": {"$sum": 1}}},
             ]
             logger.info(
-                "Shift DB: running punishments aggregate for guild_id=%s pipeline=%s",
+                "running punishments aggregate for guild_id=%s pipeline=%s",
                 ctx.guild.id,
                 mod_pipeline,
             )
             async for doc in await bot.punishments.db.aggregate(mod_pipeline):
                 logger.info(
-                    "Shift DB: punishments aggregate doc guild_id=%s doc=%s",
+                    "punishments aggregate doc guild_id=%s doc=%s",
                     ctx.guild.id,
                     doc,
                 )
@@ -1111,7 +1113,7 @@ class ShiftLogging(commands.Cog):
                     all_staff[doc["_id"]]["moderations"] = doc["mod_count"]
 
             logger.info(
-                "Shift DB: punishments aggregate complete guild_id=%s updated_staff=%s",
+                "punishments aggregate complete guild_id=%s updated_staff=%s",
                 ctx.guild.id,
                 [
                     staff_id
@@ -1182,8 +1184,16 @@ class ShiftLogging(commands.Cog):
                     )
 
         my_data = None
-        member_list = await ctx.guild.chunk()
-        members = {m.id: m for m in member_list}  # Cache guild members
+        # Okay, I think that somewhere the bot is already caching the members, so if there is a error with the database, show me the logs
+        # I did a check here, if the guild cache already exists, then we take members from the cache, and do not do a chunk
+        if ctx.guild.chunked:
+            member_list = ctx.guild.members
+            logging.info(f"Using existing cache for {ctx.guild.name}") # for debug
+        else:
+            logging.info(f"Don't have cache, chunking...") # for debug yes
+            member_list = await ctx.guild.chunk()
+
+        members = {m.id: m for m in member_list}
         total_seconds = 0
 
         for index, i in enumerate(sorted_staff):
