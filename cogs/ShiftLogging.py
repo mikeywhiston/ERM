@@ -36,6 +36,8 @@ from utils.utils import (
     log_command_usage,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class ShiftLogging(commands.Cog):
     def __init__(self, bot):
@@ -924,6 +926,13 @@ class ShiftLogging(commands.Cog):
         if shift_type != 0 and shift_type is not None:
             match_stage["Type"] = shift_type["name"]
 
+        logger.info(
+            "Shift DB: guild_id=%s shift_type=%s match_stage=%s",
+            ctx.guild.id,
+            shift_type["name"] if isinstance(shift_type, dict) else shift_type,
+            match_stage,
+        )
+
         # Hi android
         # Fix for old records where there may be empty fields
         # We count the time of breaks immediately in the database, so as not to run cycles in Python
@@ -1047,8 +1056,18 @@ class ShiftLogging(commands.Cog):
             },
         ]
 
+        logger.info(
+            "Shift DB: running shifts aggregate for guild_id=%s pipeline=%s",
+            ctx.guild.id,
+            pipeline,
+        )
         all_staff = {}
         async for doc in await bot.shift_management.shifts.db.aggregate(pipeline):
+            logger.info(
+                "Shift DB: shifts aggregate doc guild_id=%s doc=%s",
+                ctx.guild.id,
+                doc,
+            )
             all_staff[doc["_id"]] = {
                 "id": doc["_id"],
                 "total_seconds": max(doc.get("total_seconds", 0), 0),
@@ -1056,18 +1075,50 @@ class ShiftLogging(commands.Cog):
                 "lowest_time": doc["lowest_time"],
             }
 
+        logger.info(
+            "Shift DB: shifts aggregate complete guild_id=%s staff_count=%s staff_ids=%s",
+            ctx.guild.id,
+            len(all_staff),
+            list(all_staff.keys()),
+        )
+
         # Fetch additional moderation data in bulk
         mod_ids = [
             staff["id"] for staff in all_staff.values() if staff["moderations"] == 0
         ]
+        logger.info(
+            "Shift DB: guild_id=%s moderation fallback ids=%s",
+            ctx.guild.id,
+            mod_ids,
+        )
         if mod_ids:
             mod_pipeline = [
                 {"$match": {"ModeratorID": {"$in": mod_ids}, "Guild": ctx.guild.id}},
                 {"$group": {"_id": "$ModeratorID", "mod_count": {"$sum": 1}}},
             ]
+            logger.info(
+                "Shift DB: running punishments aggregate for guild_id=%s pipeline=%s",
+                ctx.guild.id,
+                mod_pipeline,
+            )
             async for doc in await bot.punishments.db.aggregate(mod_pipeline):
+                logger.info(
+                    "Shift DB: punishments aggregate doc guild_id=%s doc=%s",
+                    ctx.guild.id,
+                    doc,
+                )
                 if doc["_id"] in all_staff:
                     all_staff[doc["_id"]]["moderations"] = doc["mod_count"]
+
+            logger.info(
+                "Shift DB: punishments aggregate complete guild_id=%s updated_staff=%s",
+                ctx.guild.id,
+                [
+                    staff_id
+                    for staff_id, staff_data in all_staff.items()
+                    if staff_data["moderations"] > 0
+                ],
+            )
 
         if len(all_staff) == 0:
             return await ctx.send(
