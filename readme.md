@@ -8,7 +8,7 @@
 <p align="center">Emergency Response Management (ERM for short) is a bot designed for servers within the Roblox roleplay community. This repository contains all necessary information and resources for the bot. </p>
 
 ## Essential Links
-- [Bot Invitation](https://canary.discord.com/api/oauth2/authorize?client_id=978662093408591912&permissions=8&scope=applications.commands%20bot)
+- [Bot Invitation](https://discord.com/api/oauth2/authorize?client_id=978662093408591912&permissions=8&scope=applications.commands%20bot)
 - [Support Server](https://discord.gg/FAC629TzBy)
 - [Official Website](https://ermbot.xyz/)
 - [Desktop Download](https://ermbot.xyz/download)
